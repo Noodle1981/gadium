@@ -34,6 +34,42 @@ Transformar la gestión empresarial de Gaudium desde archivos Excel desconectado
 4. **Automatice cálculos** de KPIs y alertas de calidad
 5. **Centralice visualización** en dashboards de Grafana
 
+## Requerimientos Visuales y de Diseño
+
+### Paleta de Colores Principal
+
+Basada en el sitio web de Grupo Gaudium (https://grupogaudium.com.ar/):
+
+- **Color Principal**: `#E8491B` (Naranja corporativo)
+- **Fondo General**: `#FFFFFF` (Blanco)
+- **Color de Texto**: `#000000` (Negro)
+- **Combinaciones**: Usar color principal con fondo general para iconos y elementos destacados
+
+### Requisitos de Diseño
+
+1. **Diseño Moderno y Funcional**
+   - Interfaz limpia y profesional
+   - Enfoque en usabilidad para entorno industrial
+   - Componentes reutilizables con Livewire 3
+
+2. **Multi-tenancy Visual**
+   - Sistema debe ser fácilmente personalizable para otros clientes
+   - Colores corporativos configurables por tenant
+   - Logo y branding adaptable
+
+3. **Modo Oscuro y Claro**
+   - ✅ Implementar toggle de tema (dark/light mode)
+   - Usuario puede seleccionar su preferencia
+   - Persistir preferencia en sesión/base de datos
+   - Usar Tailwind CSS para facilitar implementación
+
+### Implementación Técnica
+
+- **Tailwind CSS**: Usar variables CSS para temas
+- **Configuración**: `tailwind.config.js` con colores personalizados
+- **Componentes**: Livewire con soporte de temas
+- **Persistencia**: Guardar preferencia de tema por usuario
+
 ## Arquitectura del Sistema
 
 ### Modelo de Datos Relacional
