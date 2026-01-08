@@ -94,6 +94,27 @@ Transformar la gestión empresarial de Gaudium desde archivos Excel desconectado
 - Autenticación con tokens
 - Tablas de resumen optimizadas
 
+## Estructura de Documentación
+
+### Ubicación de Documentación de Épicas
+
+**Directorio principal**: `d:\Gadium\doc\`
+
+- **Épicas en desarrollo**: `doc/Epica{N}/`
+  - Cada épica tiene su propia carpeta mientras está en desarrollo
+  - Contiene: EPICA N.MD, bitacora_epica_N.md, auditoria_epica_N.md
+  
+- **Épicas finalizadas**: `doc/Epicas_finalizadas/`
+  - Una vez completada y mergeada una épica, su documentación se mueve aquí
+  - Mantiene el historial completo del proyecto
+
+### Estructura por Épica
+
+Cada carpeta de épica contiene:
+1. `EPICA N.MD` - Documentación completa de la épica
+2. `bitacora_epica_N.md` - Cronología, tiempos y problemas encontrados
+3. `auditoria_epica_N.md` - Checklist de verificación pre-merge
+
 ## Reglas de Trabajo
 
 ### Gestión de Épicas
@@ -105,6 +126,8 @@ Transformar la gestión empresarial de Gaudium desde archivos Excel desconectado
 6. Armar **sprints** por épica
 7. **Cronometrar** épicas (fecha/hora inicio y fin)
 8. Mantener **bitácora** de la épica (demoras, errores, mejoras)
+9. **Documentar en `doc/Epica{N}/`** durante desarrollo
+10. **Mover a `doc/Epicas_finalizadas/`** después del merge
 
 ### Testing y Validación
 1. Probar implementación de la épica

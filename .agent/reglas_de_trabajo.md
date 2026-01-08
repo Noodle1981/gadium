@@ -27,3 +27,4 @@
     2.5 Mantener la documentación de la los testings actualizados
     2.6 Mantener la documentación del readme.md actualizada
 
+en /doc estan todas las carpetas de las epicas, y en cada una de ellas se encuentra la documentación de la epica, la bitacora de la epica, la auditoria de la epica y la epica en si.
