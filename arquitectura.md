@@ -8,7 +8,7 @@ Para garantizar compatibilidad con Hostinger y maximizar la velocidad de desarro
 Core: Laravel 12 (PHP 8.2+).
 Frontend Interactivo: Livewire 3 (Gestión de estado sin complejidad de React/Vue separados).
 UI Framework: Tailwind CSS (Diseño utility-first para rapidez).
-Base de Datos: MySQL 8.0 (Motor InnoDB).
+Base de Datos: MySQL 8.0 (Motor InnoDB), pero se va a empezar con SQLite hasta que este en produccion y reican usar MySQL.
 Infraestructura: Hostinger VPS (Recomendado sobre Shared para soportar Workers de cola y Docker si fuera necesario) o Shared "Cloud Startup" como mínimo.
 Visualización: Grafana (Instancia externa o local) conectada vía API REST JSON (Infinity Plugin) para no exponer el puerto 3306 de MySQL directamente a internet.
 2. Fase A: Auditoría de Datos e Ingeniería Inversa
