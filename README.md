@@ -1,313 +1,66 @@
-# Gadium - Sistema de Gestión Empresarial Industrial
-
-[![Laravel](https://img.shields.io/badge/Laravel-12-FF2D20?style=flat&logo=laravel)](https://laravel.com)
-[![Livewire](https://img.shields.io/badge/Livewire-3-4E56A6?style=flat&logo=livewire)](https://livewire.laravel.com)
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind-3-38B2AC?style=flat&logo=tailwind-css)](https://tailwindcss.com)
-[![SQLite](https://img.shields.io/badge/SQLite-Dev-003B57?style=flat&logo=sqlite)](https://www.sqlite.org)
-
-## 📋 Descripción
-
-Gadium es un sistema SaaS de gestión empresarial diseñado específicamente para transformar la operación de Gaudium, una empresa industrial que actualmente gestiona sus procesos mediante archivos Excel desconectados.
-
-El sistema centraliza la gestión de:
-- 📊 **Ventas y Facturación**
-- 👥 **Capital Humano** (Horas ponderadas)
-- 🏭 **Producción y Calidad**
-- 📈 **KPIs e Inteligencia de Negocios**
-- 🔐 **Control de Accesos** (RBAC Dinámico)
-
-## 🎯 Objetivos del Proyecto
-
-| Métrica | Actual | Objetivo |
-|---------|--------|----------|
-| Tiempo de reportes | 5 días | Tiempo real |
-| Duplicidad de datos | Alta | 0% |
-| Errores de carga | ~95% | ~5% |
-| Tiempo de carga | Variable | < 5s (2000 filas) |
-
-## 🛠️ Stack Tecnológico
-
-### Backend
-- **Framework**: Laravel 12 (PHP 8.2+)
-- **Base de Datos**: 
-  - SQLite (Desarrollo)
-  - MySQL 8.0 (Producción)
-- **Autenticación**: Laravel Fortify/Breeze
-- **Permisos**: Spatie Laravel Permission
-
-### Frontend
-- **Framework**: Livewire 3 (TALL Stack)
-- **UI**: Tailwind CSS
-- **JavaScript**: Alpine.js
-
-### Infraestructura
-- **Desarrollo**: Local
-- **Producción**: Hostinger VPS/Cloud Startup
-- **Visualización**: Grafana (API REST JSON)
-
-## 📁 Estructura del Proyecto
-
-```
-Gadium/
-├── .agent/                    # Configuración del agente IA
-│   ├── contex.md             # Contexto del proyecto
-│   └── reglas_de_trabajo.md  # Reglas de desarrollo
-├── Epica1/                   # ÉPICA 01: Gestión de Accesos
-├── Epica2/                   # ÉPICA 02: Motor de Ingesta
-├── Epica3/                   # ÉPICA 03: Producción y Calidad
-├── Epica4/                   # ÉPICA 04: Capital Humano
-├── Epica5/                   # ÉPICA 05: Inteligencia de Negocios
-├── Epica6/                   # ÉPICA 06: Integración Grafana
-├── arquitectura.md           # Documento de arquitectura
-└── README.md                 # Este archivo
-```
-
-## 🚀 Instalación
-
-### Prerrequisitos
-
-- PHP 8.2 o superior
-- Composer
-- Node.js 18+ y NPM
-- SQLite (para desarrollo)
-- MySQL 8.0 (para producción)
-
-### Pasos de Instalación
-
-1. **Clonar el repositorio**
-```bash
-git clone https://github.com/Noodle1981/gadium.git
-cd gadium
-```
-
-2. **Instalar dependencias de PHP**
-```bash
-composer install
-```
-
-3. **Instalar dependencias de Node**
-```bash
-npm install
-```
-
-4. **Configurar variables de entorno**
-```bash
-cp .env.example .env
-php artisan key:generate
-```
-
-5. **Configurar base de datos**
-
-Para desarrollo (SQLite):
-```env
-DB_CONNECTION=sqlite
-DB_DATABASE=/absolute/path/to/database.sqlite
-```
-
-Para producción (MySQL):
-```env
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=gadium
-DB_USERNAME=root
-DB_PASSWORD=
-```
-
-6. **Crear base de datos SQLite**
-```bash
-touch database/database.sqlite
-```
-
-7. **Ejecutar migraciones**
-```bash
-php artisan migrate
-```
-
-8. **Ejecutar seeders**
-```bash
-php artisan db:seed
-```
-
-9. **Compilar assets**
-```bash
-npm run dev
-```
-
-10. **Iniciar servidor de desarrollo**
-```bash
-php artisan serve
-```
-
-El sistema estará disponible en: `http://localhost:8000`
-
-## 👥 Roles del Sistema
-
-| Rol | Descripción | Permisos |
-|-----|-------------|----------|
-| **Super Admin** | Acceso total al sistema | Gestión de roles, permisos y configuración |
-| **Tenant Admin** | Administrador de empresa | Configuración de KPIs y usuarios |
-| **Manager** | Gerente operativo | Carga de archivos y validación |
-| **Viewer** | Visualizador | Solo lectura de dashboards |
-
-## 📊 Épicas del Proyecto
-
-### ✅ ÉPICA 00: Instalación y Configuración
-- Instalación de Laravel 12
-- Configuración de SQLite
-- Instalación de Livewire 3 y Tailwind CSS
-- Configuración de Spatie Permission
-
-### 🔐 ÉPICA 01: Gestión de Accesos y Gobierno de Datos
-- Sistema de autenticación seguro
-- CRUD de usuarios con autogestión
-- Gestor dinámico de roles y permisos
-
-### 📥 ÉPICA 02: Motor de Ingesta y Normalización
-- Importador de archivos CSV/Excel
-- Validación de esquema y datos
-- Normalización de clientes (Fuzzy Matching)
-- Prevención de duplicados (Hash SHA-256)
-
-### 🏭 ÉPICA 03: Producción y Calidad
-- Registro de producción por proyecto
-- Cálculo automático de tasas de error
-- Sistema de alertas críticas (> 20% defectos)
-
-### 👷 ÉPICA 04: Capital Humano
-- Gestión de factores de ponderación
-- Procesamiento automático de horas
-- Cálculo de horas ponderadas
-
-### 📈 ÉPICA 05: Inteligencia de Negocios
-- Algoritmo de Pareto (80/20)
-- Análisis de diversificación de ventas
-- KPIs estratégicos
-
-### 📊 ÉPICA 06: Integración con Grafana
-- API REST para métricas
-- Autenticación con tokens
-- Tablas de resumen optimizadas
-
-## 🔧 Características Técnicas Clave
-
-### Prevención de Duplicados
-- Hash SHA-256 de campos clave
-- Verificación antes de inserción
-- Reporte detallado de duplicados
-
-### Normalización de Clientes
-- Algoritmo Levenshtein (similitud > 85%)
-- Resolución interactiva
-- Sistema de aliases con aprendizaje
-
-### Performance Optimizado
-- Índices en columnas críticas
-- Chunking de 1000 filas
-- Jobs en colas para importaciones
-- Tablas de resumen pre-calculadas
-
-### Sistema de Alertas
-- Cálculo automático de métricas
-- Umbrales configurables
-- Notificaciones en dashboard + email
-
-## 🧪 Testing
-
-### Ejecutar todos los tests
-```bash
-php artisan test
-```
-
-### Ejecutar tests específicos
-```bash
-php artisan test --filter=NombreDelTest
-```
-
-### Tests por épica
-```bash
-php artisan test tests/Feature/Epica1
-```
-
-## 📝 Workflow de Desarrollo
-
-### Reglas de Trabajo
-
-1. **Una sesión = Una épica**
-2. **Feature branches**: `feature/epica-{nombre}`
-3. **SQLite en desarrollo**, MySQL en producción
-4. **Cronometrar épicas** (inicio/fin)
-5. **Crear auditoría** antes de merge
-6. **Testing obligatorio** (Unit + Feature)
-
-### Proceso de Desarrollo
-
-```bash
-# 1. Crear rama de épica
-git checkout -b feature/epica-nombre
-
-# 2. Desarrollar funcionalidad
-# ... código ...
-
-# 3. Ejecutar tests
-php artisan test
-
-# 4. Crear auditoría
-# Crear archivo: auditoria_nombre_epica.md
-
-# 5. Commit y push
-git add .
-git commit -m "feat: descripción de la épica"
-git push origin feature/epica-nombre
-
-# 6. Esperar aprobación para merge
-```
-
-## 📚 Documentación
-
-- **Arquitectura**: [`arquitectura.md`](./arquitectura.md)
-- **Contexto**: [`.agent/contex.md`](./.agent/contex.md)
-- **Reglas**: [`.agent/reglas_de_trabajo.md`](./.agent/reglas_de_trabajo.md)
-- **Épicas**: Carpetas `Epica{1-6}/`
-
-## 🔒 Seguridad
-
-- Autenticación con Laravel Fortify/Breeze
-- Contraseñas encriptadas (Bcrypt/Argon2)
-- RBAC dinámico con Spatie Permission
-- Sesiones con timeout de 1 día
-- Validación estricta de inputs
-- Protección CSRF
-- Sanitización de datos
-
-## 🚧 Roadmap
-
-- [x] Configuración inicial del repositorio
-- [x] Documentación de arquitectura
-- [x] Definición de épicas
-- [ ] **Sprint 0: Instalación** ⬅️ Siguiente
-- [ ] Sprint 1: ÉPICA 01 - Autenticación
-- [ ] Sprint 2: ÉPICA 02 - Importador
-- [ ] Sprint 3: ÉPICA 03 - Producción
-- [ ] Sprint 4: ÉPICA 04 - RRHH
-- [ ] Sprint 5: ÉPICA 05 - BI
-- [ ] Sprint 6: ÉPICA 06 - Grafana
-
-## 🤝 Contribución
-
-Este es un proyecto privado para Gaudium. El desarrollo sigue las reglas establecidas en `.agent/reglas_de_trabajo.md`.
-
-## 📄 Licencia
-
-Propietario - Gaudium © 2026
-
-## 📞 Contacto
-
-- **Repositorio**: https://github.com/Noodle1981/gadium.git
-- **Documentación**: Ver carpeta `.agent/`
-
----
-
-**Versión**: 1.0  
-**Estado**: En Desarrollo  
-**Última actualización**: 2026-01-08
+<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+
+<p align="center">
+<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+</p>
+
+## About Laravel
+
+Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+
+- [Simple, fast routing engine](https://laravel.com/docs/routing).
+- [Powerful dependency injection container](https://laravel.com/docs/container).
+- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
+- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
+- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
+- [Robust background job processing](https://laravel.com/docs/queues).
+- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+
+Laravel is accessible, powerful, and provides tools required for large, robust applications.
+
+## Learning Laravel
+
+Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+
+You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+
+If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+
+## Laravel Sponsors
+
+We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+
+### Premium Partners
+
+- **[Vehikl](https://vehikl.com/)**
+- **[Tighten Co.](https://tighten.co)**
+- **[WebReinvent](https://webreinvent.com/)**
+- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
+- **[64 Robots](https://64robots.com)**
+- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
+- **[Cyber-Duck](https://cyber-duck.co.uk)**
+- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
+- **[Jump24](https://jump24.co.uk)**
+- **[Redberry](https://redberry.international/laravel/)**
+- **[Active Logic](https://activelogic.com)**
+- **[byte5](https://byte5.de)**
+- **[OP.GG](https://op.gg)**
+
+## Contributing
+
+Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+
+## Code of Conduct
+
+In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+
+## Security Vulnerabilities
+
+If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+
+## License
+
+The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
