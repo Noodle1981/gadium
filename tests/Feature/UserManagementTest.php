@@ -76,9 +76,10 @@ class UserManagementTest extends TestCase
 
     public function test_super_admin_cannot_be_deleted(): void
     {
-        $admin = User::where('email', 'admin@gaudium.com')->first();
         $superAdmin = User::where('email', 'admin@gaudium.com')->first();
+        $admin = User::where('email', 'administrador@gaudium.com')->first();
 
+        // Intentar que Admin elimine al Super Admin (debería fallar)
         $response = $this->actingAs($admin)->delete("/users/{$superAdmin->id}");
 
         $response->assertRedirect(route('users.index'));
