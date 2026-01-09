@@ -3,8 +3,8 @@
 ## Información General
 - **Épica**: ÉPICA 01 - Gestión de Accesos y Gobierno de Datos
 - **Fecha de Inicio**: 2026-01-08 20:09:00
-- **Fecha de Finalización**: 2026-01-08 20:45:00
-- **Tiempo Total Invertido**: ~36 minutos
+- **Fecha de Finalización**: 2026-01-09 12:20:00
+- **Tiempo Total Invertido**: ~37 minutos (2 sesiones)
 - **Rama**: `feature/epica-1-gestion-accesos`
 
 ## Cronología de Actividades
@@ -68,11 +68,29 @@
 - ✅ Creado `bitacora_epica_1.md` (este archivo)
 - ✅ Actualizado `task.md` con progreso
 
-### 20:45 - Finalización
-- ✅ Commits realizados (3 commits)
+### 20:45 - Finalización Sesión 1
+- ✅ Commits realizados (4 commits)
 - ✅ Push a GitHub completado
 - ✅ Documentación completa
-- ✅ Épica lista para merge
+- ⏳ Fase 6 pendiente para próxima sesión
+
+---
+
+## Sesión 2: 2026-01-09
+
+### 12:13-12:20 - Sistema de Invitaciones (7 min)
+- ✅ Creado `UserInvitation` notification con URL firmada
+- ✅ Creado `PasswordSetupController` con validación
+- ✅ Creada vista `setup-password.blade.php`
+- ✅ Agregadas rutas firmadas en `web.php`
+- ✅ Actualizado `UserController` para enviar invitación
+- ✅ Configurado Laravel Mail con driver `log`
+
+### 12:20 - Finalización ÉPICA 01
+- ✅ Commits realizados (2 commits adicionales)
+- ✅ Push a GitHub completado
+- ✅ Fase 6 completada
+- ✅ Épica 01 lista para merge
 
 ## Problemas Encontrados
 
@@ -90,8 +108,9 @@ La implementación fue fluida sin errores significativos. Todos los componentes 
 | Seeders y datos | 5 min | 5 min | 0 min ✅ |
 | CRUD usuarios | 8 min | 5 min | -3 min ✅ |
 | CRUD roles | 8 min | 4 min | -4 min ✅ |
+| Sistema invitaciones | 10 min | 7 min | -3 min ✅ |
 | Documentación | 5 min | 3 min | -2 min ✅ |
-| **TOTAL** | **39 min** | **30 min** | **-9 min** ✅ |
+| **TOTAL** | **49 min** | **37 min** | **-12 min** ✅ |
 
 ## Análisis de Eficiencia
 
@@ -162,5 +181,5 @@ La implementación fue fluida sin errores significativos. Todos los componentes 
 ---
 
 **Responsable**: Equipo de Desarrollo Gadium  
-**Última actualización**: 2026-01-08 20:45:00  
+**Última actualización**: 2026-01-09 12:20:00  
 **Estado**: ✅ Completada - Lista para Merge
