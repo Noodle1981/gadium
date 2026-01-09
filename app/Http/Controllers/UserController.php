@@ -37,20 +37,21 @@ class UserController extends Controller
             'role' => 'required|exists:roles,name',
         ]);
 
-        // Crear usuario con contraseña temporal
+        // Crear usuario sin contraseña (la configurará después)
         $user = User::create([
             'name' => $validated['name'],
             'email' => $validated['email'],
-            'password' => Hash::make('temporal123'), // Contraseña temporal
+            'password' => Hash::make(str()->random(32)), // Contraseña temporal aleatoria
         ]);
 
         // Asignar rol
         $user->assignRole($validated['role']);
 
-        // TODO: Enviar email de invitación (HU-01.1 - Fase 6)
+        // Enviar email de invitación
+        $user->notify(new \App\Notifications\UserInvitation());
         
         return redirect()->route('users.index')
-            ->with('success', 'Usuario creado exitosamente. Se ha enviado un email de invitación.');
+            ->with('success', 'Usuario creado exitosamente. Se ha enviado un email de invitación a ' . $user->email);
     }
 
     /**
