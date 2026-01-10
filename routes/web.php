@@ -27,6 +27,7 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
             Route::resource('users', UserController::class);
             Volt::route('sales/import', 'pages.sales.import-wizard')->name('admin.sales.import');
             Volt::route('clients/resolve', 'pages.clients.resolution')->name('admin.clients.resolve');
+            Volt::route('manufacturing/production-log', 'pages.manufacturing.production-log')->name('admin.manufacturing.production.log');
         });
 
         // Solo Super Admin
@@ -44,6 +45,7 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
         Volt::route('dashboard', 'pages.manager.dashboard')->name('manager.dashboard');
         Volt::route('sales/import', 'pages.sales.import-wizard')->name('manager.sales.import');
         Volt::route('clients/resolve', 'pages.clients.resolution')->name('manager.clients.resolve');
+        Volt::route('manufacturing/production-log', 'pages.manufacturing.production-log')->name('manager.manufacturing.production.log');
     });
 
     // --- VISOR (Viewer) ---
@@ -54,6 +56,7 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
     // --- PUNTOS DE ENTRADA GENÉRICOS (Redirigidos por RoleRedirect) ---
     Route::get('sales/import', function() { return redirect()->route('dashboard'); })->name('sales.import');
     Route::get('clients/resolve', function() { return redirect()->route('dashboard'); })->name('clients.resolve');
+    Route::get('manufacturing/production-log', function() { return redirect()->route('dashboard'); })->name('manufacturing.production.log');
 });
 
 require __DIR__.'/auth.php';

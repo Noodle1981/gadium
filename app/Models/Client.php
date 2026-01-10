@@ -13,6 +13,14 @@ class Client extends Model
     ];
 
     /**
+     * Relación con proyectos
+     */
+    public function projects(): HasMany
+    {
+        return $this->hasMany(Project::class);
+    }
+
+    /**
      * Relación con ventas
      */
     public function sales(): HasMany
