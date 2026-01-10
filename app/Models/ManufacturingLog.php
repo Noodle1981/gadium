@@ -14,11 +14,15 @@ class ManufacturingLog extends Model
         'user_id',
         'units_produced',
         'correction_documents',
+        'hours_clock',
+        'hours_weighted',
         'recorded_at',
     ];
 
     protected $casts = [
         'recorded_at' => 'datetime',
+        'hours_clock' => 'decimal:2',
+        'hours_weighted' => 'decimal:2',
     ];
 
     public function project()

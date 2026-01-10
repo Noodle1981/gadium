@@ -14,6 +14,7 @@ state([
     'clientId' => '',
     'unitsProduced' => '',
     'correctionDocuments' => 0,
+    'hoursClock' => 0,
     'recordedAt' => now()->format('Y-m-d'),
     'showCreateProject' => false,
     'search' => '',
@@ -61,17 +62,29 @@ $saveLog = function () {
     $this->validate([
         'projectId' => 'required|exists:projects,id',
         'unitsProduced' => 'required|integer|min:1',
+        'hoursClock' => 'required|numeric|min:0',
         'correctionDocuments' => 'required|integer|min:0|lte:unitsProduced',
         'recordedAt' => 'required|date',
     ], [
         'correctionDocuments.lte' => 'Los documentos de corrección no pueden ser mayores a las unidades producidas.',
     ]);
 
+    // Obtener factor de ponderación vigente para el usuario actual
+    $user = Auth::user();
+    $roleName = $user->getRoleNames()->first() ?: 'Viewer';
+    
+    $factor = \App\Models\WeightingFactor::vigente($roleName, $this->recordedAt)->first();
+    $factorValue = $factor ? $factor->value : 1.0;
+    
+    $hoursWeighted = $this->hoursClock * $factorValue;
+
     $log = ManufacturingLog::create([
         'project_id' => $this->projectId,
         'user_id' => Auth::id(),
         'units_produced' => $this->unitsProduced,
         'correction_documents' => $this->correctionDocuments,
+        'hours_clock' => $this->hoursClock,
+        'hours_weighted' => $hoursWeighted,
         'recorded_at' => $this->recordedAt,
     ]);
 
@@ -147,7 +160,7 @@ $saveLog = function () {
                             <x-input-error :messages="$errors->get('projectId')" class="mt-2" />
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <!-- Unidades Producidas -->
                             <div>
                                 <x-input-label for="unitsProduced" :value="__('Unidades Producidas')" />
@@ -155,12 +168,18 @@ $saveLog = function () {
                                 <x-input-error :messages="$errors->get('unitsProduced')" class="mt-2" />
                             </div>
 
+                            <!-- Horas Reloj -->
+                            <div>
+                                <x-input-label for="hoursClock" :value="__('Horas Reloj (Simples)')" />
+                                <x-text-input id="hoursClock" type="number" step="0.25" class="mt-1 block w-full" wire:model="hoursClock" required min="0" />
+                                <x-input-error :messages="$errors->get('hoursClock')" class="mt-2" />
+                            </div>
+
                             <!-- Documentos de Corrección -->
                             <div>
                                 <x-input-label for="correctionDocuments" :value="__('Documentos de Corrección')" />
                                 <x-text-input id="correctionDocuments" type="number" class="mt-1 block w-full" wire:model="correctionDocuments" required min="0" />
                                 <x-input-error :messages="$errors->get('correctionDocuments')" class="mt-2" />
-                                <p class="text-xs text-gray-500 mt-1 italic">Nota: No puede ser mayor a las unidades producidas.</p>
                             </div>
                         </div>
 

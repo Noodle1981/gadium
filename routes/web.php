@@ -28,6 +28,7 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
             Volt::route('sales/import', 'pages.sales.import-wizard')->name('admin.sales.import');
             Volt::route('clients/resolve', 'pages.clients.resolution')->name('admin.clients.resolve');
             Volt::route('manufacturing/production-log', 'pages.manufacturing.production-log')->name('admin.manufacturing.production.log');
+            Volt::route('hr/factors', 'pages.hr.factor-manager')->name('admin.hr.factors');
         });
 
         // Solo Super Admin
