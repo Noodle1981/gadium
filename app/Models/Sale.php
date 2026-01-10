@@ -12,6 +12,7 @@ class Sale extends Model
         'client_id',
         'cliente_nombre',
         'monto',
+        'moneda',
         'comprobante',
         'hash',
     ];
