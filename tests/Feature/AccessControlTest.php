@@ -58,10 +58,10 @@ class AccessControlTest extends TestCase
 
     public function test_unauthenticated_user_cannot_access_protected_routes(): void
     {
-        $response = $this->get('/users');
+        $response = $this->get('/admin/users');
         $response->assertRedirect('/login');
 
-        $response = $this->get('/roles');
+        $response = $this->get('/admin/roles');
         $response->assertRedirect('/login');
 
         $response = $this->get('/dashboard');

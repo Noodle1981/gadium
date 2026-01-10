@@ -23,7 +23,7 @@ class RoleManagementTest extends TestCase
     {
         $superAdmin = User::where('email', 'admin@gaudium.com')->first();
 
-        $response = $this->actingAs($superAdmin)->get('/roles');
+        $response = $this->actingAs($superAdmin)->get('/admin/roles');
 
         $response->assertStatus(200);
     }
@@ -32,7 +32,7 @@ class RoleManagementTest extends TestCase
     {
         $superAdmin = User::where('email', 'admin@gaudium.com')->first();
 
-        $response = $this->actingAs($superAdmin)->post('/roles', [
+        $response = $this->actingAs($superAdmin)->post('/admin/roles', [
             'name' => 'Operario',
         ]);
 
@@ -47,7 +47,7 @@ class RoleManagementTest extends TestCase
         $superAdmin = User::where('email', 'admin@gaudium.com')->first();
         $role = Role::where('name', 'Viewer')->first();
 
-        $response = $this->actingAs($superAdmin)->post("/roles/{$role->id}/permissions", [
+        $response = $this->actingAs($superAdmin)->post("/admin/roles/{$role->id}/permissions", [
             'permissions' => ['view_users', 'view_sales'],
         ]);
 
@@ -60,7 +60,7 @@ class RoleManagementTest extends TestCase
         $superAdmin = User::where('email', 'admin@gaudium.com')->first();
         $superAdminRole = Role::where('name', 'Super Admin')->first();
 
-        $response = $this->actingAs($superAdmin)->delete("/roles/{$superAdminRole->id}");
+        $response = $this->actingAs($superAdmin)->delete("/admin/roles/{$superAdminRole->id}");
 
         $response->assertRedirect(route('roles.index'));
         $this->assertDatabaseHas('roles', [
@@ -72,7 +72,7 @@ class RoleManagementTest extends TestCase
     {
         $admin = User::where('email', 'administrador@gaudium.com')->first();
 
-        $response = $this->actingAs($admin)->get('/roles');
+        $response = $this->actingAs($admin)->get('/admin/roles');
 
         $response->assertStatus(403);
     }

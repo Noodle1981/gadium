@@ -18,6 +18,7 @@ class UserSeeder extends Seeder
             'name' => 'Super Administrador',
             'email' => 'admin@gaudium.com',
             'password' => Hash::make('password'),
+            'email_verified_at' => now(),
         ]);
         $superAdmin->assignRole('Super Admin');
 
@@ -26,6 +27,7 @@ class UserSeeder extends Seeder
             'name' => 'Administrador',
             'email' => 'administrador@gaudium.com',
             'password' => Hash::make('password'),
+            'email_verified_at' => now(),
         ]);
         $admin->assignRole('Admin');
 
@@ -34,6 +36,7 @@ class UserSeeder extends Seeder
             'name' => 'Gerente',
             'email' => 'gerente@gaudium.com',
             'password' => Hash::make('password'),
+            'email_verified_at' => now(),
         ]);
         $manager->assignRole('Manager');
 
@@ -42,6 +45,7 @@ class UserSeeder extends Seeder
             'name' => 'Visualizador',
             'email' => 'viewer@gaudium.com',
             'password' => Hash::make('password'),
+            'email_verified_at' => now(),
         ]);
         $viewer->assignRole('Viewer');
     }

@@ -22,7 +22,7 @@ class UserManagementTest extends TestCase
     {
         $admin = User::where('email', 'admin@gaudium.com')->first();
 
-        $response = $this->actingAs($admin)->get('/users');
+        $response = $this->actingAs($admin)->get('/admin/users');
 
         $response->assertStatus(200);
     }
@@ -31,7 +31,7 @@ class UserManagementTest extends TestCase
     {
         $admin = User::where('email', 'admin@gaudium.com')->first();
 
-        $response = $this->actingAs($admin)->post('/users', [
+        $response = $this->actingAs($admin)->post('/admin/users', [
             'name' => 'Test User',
             'email' => 'test@gaudium.com',
             'role' => 'Viewer',
@@ -48,7 +48,7 @@ class UserManagementTest extends TestCase
         $admin = User::where('email', 'admin@gaudium.com')->first();
         $user = User::where('email', 'viewer@gaudium.com')->first();
 
-        $response = $this->actingAs($admin)->put("/users/{$user->id}", [
+        $response = $this->actingAs($admin)->put("/admin/users/{$user->id}", [
             'name' => 'Updated Name',
             'email' => $user->email,
             'role' => 'Manager',
@@ -66,7 +66,7 @@ class UserManagementTest extends TestCase
         $admin = User::where('email', 'admin@gaudium.com')->first();
         $user = User::where('email', 'viewer@gaudium.com')->first();
 
-        $response = $this->actingAs($admin)->delete("/users/{$user->id}");
+        $response = $this->actingAs($admin)->delete("/admin/users/{$user->id}");
 
         $response->assertRedirect(route('users.index'));
         $this->assertSoftDeleted('users', [
@@ -80,7 +80,7 @@ class UserManagementTest extends TestCase
         $admin = User::where('email', 'administrador@gaudium.com')->first();
 
         // Intentar que Admin elimine al Super Admin (debería fallar)
-        $response = $this->actingAs($admin)->delete("/users/{$superAdmin->id}");
+        $response = $this->actingAs($admin)->delete("/admin/users/{$superAdmin->id}");
 
         $response->assertRedirect(route('users.index'));
         $this->assertDatabaseHas('users', [
@@ -93,7 +93,7 @@ class UserManagementTest extends TestCase
     {
         $viewer = User::where('email', 'viewer@gaudium.com')->first();
 
-        $response = $this->actingAs($viewer)->get('/users');
+        $response = $this->actingAs($viewer)->get('/admin/users');
 
         $response->assertStatus(403);
     }
