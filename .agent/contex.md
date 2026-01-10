@@ -231,7 +231,7 @@ Cada carpeta de épica contiene:
 - ✅ Conectado a GitHub: `https://github.com/Noodle1981/gadium.git`
 - ✅ Documentación de arquitectura completa
 - ✅ 6 Épicas definidas con Historias de Usuario
-- 🔄 **Siguiente paso**: Sprint de Instalación (Épica 0)
+- 🔄 **Siguiente paso**: Ejecución de Épica 6 (Integración Grafana y UX)
 
 ## Referencias
 

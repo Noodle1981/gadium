@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\DailyMetricsAggregate;
 use App\Services\ParetoAnalysisService;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
@@ -24,13 +25,31 @@ class MetricsController extends Controller
             $startDate = $request->input('from') ? Carbon::parse($request->input('from')) : now()->startOfMonth();
             $endDate = $request->input('to') ? Carbon::parse($request->input('to')) : now()->endOfMonth();
 
+            // Intentar buscar en agregados primero (especialmente si es una fecha específica)
+            // Para Pareto, usualmente queremos el acumulado del mes hasta hoy
+            $aggregate = DailyMetricsAggregate::where('metric_type', 'sales_concentration')
+                ->where('metric_date', $endDate->toDateString())
+                ->first();
+
+            if ($aggregate) {
+                return response()->json([
+                    'status' => 'success',
+                    'meta' => [
+                        'generated_at' => $aggregate->created_at->toIso8601String(),
+                        'source' => 'Gadium Aggregated Store'
+                    ],
+                    'data' => $aggregate->metric_data
+                ]);
+            }
+
+            // Fallback: Cálculo en tiempo real
             $data = $this->paretoService->calculateConcentration($startDate, $endDate);
 
             return response()->json([
                 'status' => 'success',
                 'meta' => [
                     'generated_at' => now()->toIso8601String(),
-                    'source' => 'Gadium BI Engine'
+                    'source' => 'Gadium Realtime Engine (Fallback)'
                 ],
                 'data' => $data
             ]);
@@ -50,13 +69,32 @@ class MetricsController extends Controller
      */
     public function productionEfficiency(Request $request)
     {
-        // Simulación de datos mensuales
+        $startDate = $request->input('from') ? Carbon::parse($request->input('from')) : now()->startOfYear();
+        $endDate = $request->input('to') ? Carbon::parse($request->input('to')) : now();
+
+        // Intentar obtener datos reales (agregados)
+        $aggregates = DailyMetricsAggregate::where('metric_type', 'production_efficiency')
+            ->whereBetween('metric_date', [$startDate->toDateString(), $endDate->toDateString()])
+            ->orderBy('metric_date', 'asc')
+            ->get();
+
+        if ($aggregates->isNotEmpty()) {
+            return response()->json([
+                'status' => 'success',
+                'meta' => [
+                    'generated_at' => now()->toIso8601String(),
+                    'source' => 'Gadium Production Engine'
+                ],
+                'data' => $aggregates->map(fn($a) => array_merge(['date' => $a->metric_date->toDateString()], $a->metric_data))
+            ]);
+        }
+
+        // Simulación de datos mensuales (Mock legacy)
         $months = [];
-        $currentMonth = now()->startOfYear();
+        $currentMonth = $startDate->copy()->startOfMonth();
         
-        for ($i = 0; $i < 12; $i++) {
-            // Simular una tendencia estacional: más baja en verano, alta a mitad de año
-            $baseEfficiency = 70 + (sin($i / 2) * 20); // Oscila entre 50 y 90
+        while ($currentMonth->lte($endDate)) {
+            $baseEfficiency = 70 + (sin($currentMonth->month / 2) * 20);
             $randomVar = rand(-5, 5);
             
             $months[] = [

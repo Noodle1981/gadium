@@ -19,33 +19,33 @@
     2.7 Arreglar y actualizar los arregloes de auditoria_nombre_de_la_epica.md
     2.8 subir trabajo a la rama de la epica. y esperar instrucciones de mi parte para merge.
 
-2. Respetar y mantener Documentaciones
-    2.1 Mantener la documentación de la epica actualizada
-    2.2 Mantener la documentación de la arquitectura actualizada
-    2.3 Mantener la documentación de la base de datos actualizada
-    2.4 Mantener la documentación de la seguridad actualizada
-    2.5 Mantener la documentación de la los testings actualizados
-    2.6 Mantener la documentación del readme.md actualizada
+3. Respetar y mantener Documentaciones
+    3.1 Mantener la documentación de la epica actualizada
+    3.2 Mantener la documentación de la arquitectura actualizada
+    3.3 Mantener la documentación de la base de datos actualizada
+    3.4 Mantener la documentación de la seguridad actualizada
+    3.5 Mantener la documentación de la los testings actualizados
+    3.6 Mantener la documentación del readme.md actualizada
 
-3. Respertar la arquitectura planeada para el proyecto, por ejemplo crear vistas con componentes livewire, el diseño debe ser responsive, y debe ser similar a los demas componentes. y la visual de visual.md, mantenter la estructura de rutas /rol/vista, para tener separado las vistas por rol. por ejemplo /admin/clientes y /user/clientes
+4. Respetar la arquitectura planeada para el proyecto, por ejemplo crear vistas con componentes livewire, el diseño debe ser responsive, y debe ser similar a los demas componentes. y la visual de visual.md, mantenter la estructura de rutas /rol/vista, para tener separado las vistas por rol. por ejemplo /admin/clientes y /user/clientes
 
-4. Estándares de Livewire y Volt
-    4.1 Un componente Volt de página debe tener un único elemento raíz (usualmente un `<div>` o `<nav>`).
-    4.2 Los componentes de página deben definir el layout explícitamente usando el atributo `#[Layout('layouts.app')]` o similar para asegurar el renderizado correcto.
-    4.3 Usar siempre `wire:navigate` en los enlaces de navegación interna para mantener la experiencia de Single Page Application (SPA).
-    4.4 Evitar el uso de `dump()` o `dd()` fuera de los bloques `@php` en las vistas Blade de Livewire, ya que pueden romper la estructura DOM esperada por el motor.
+5. Estándares de Livewire y Volt
+    5.1 Un componente Volt de página debe tener un único elemento raíz (usualmente un `<div>` o `<nav>`).
+    5.2 Los componentes de página deben definir el layout explícitamente usando el atributo `#[Layout('layouts.app')]` o similar para asegurar el renderizado correcto.
+    5.3 Usar siempre `wire:navigate` en los enlaces de navegación interna para mantener la experiencia de Single Page Application (SPA).
+    5.4 Evitar el uso de `dump()` o `dd()` fuera de los bloques `@php` en las vistas Blade de Livewire, ya que pueden romper la estructura DOM esperada por el motor.
 
-5. Arquitectura de Seguridad y Redirecciones
-    5.1 Centralización: Prohibido realizar redirecciones manuales o lógica de acceso compleja dentro de `routes/web.php`.
-    5.2 Middleware de Redirección: Toda lógica de deriva basada en roles tras la autenticación debe residir en middlewares dedicados (ej: `RoleRedirect.php`).
-    5.3 Robustez: Los middlewares de seguridad deben contemplar fallbacks para usuarios sin roles asignados para evitar excepciones en entornos de testing.
-    5.4 Nombres de Rutas: Usar siempre rutas nombradas (`route('admin.dashboard')`) en lugar de rutas estáticas para facilitar el mantenimiento y la consistencia en los tests.
+6. Arquitectura de Seguridad y Redirecciones
+    6.1 Centralización: Prohibido realizar redirecciones manuales o lógica de acceso compleja dentro de `routes/web.php`.
+    6.2 Middleware de Redirección: Toda lógica de deriva basada en roles tras la autenticación debe residir en middlewares dedicados (ej: `RoleRedirect.php`).
+    6.3 Robustez: Los middlewares de seguridad deben contemplar fallbacks para usuarios sin roles asignados para evitar excepciones en entornos de testing.
+    6.4 Nombres de Rutas: Usar siempre rutas nombradas (`route('admin.dashboard')`) en lugar de rutas estáticas para facilitar el mantenimiento y la consistencia en los tests.
 
-6. Testing de Seguridad y Rutas
-    6.1 Cada nueva ruta protegida debe contar con un test de Feature que verifique:
+7. Testing de Seguridad y Rutas
+    7.1 Cada nueva ruta protegida debe contar con un test de Feature que verifique:
         a) Acceso autorizado para el rol correspondiente (200 OK/Redirect esperado).
         b) Acceso denegado (403 Forbidden) para roles no autorizados.
-    6.2 Mantener actualizado el seeder de permisos (`PermissionSeeder`) y roles (`RoleSeeder`) para que los tests siempre cuenten con el estado de seguridad real.
+    7.2 Mantener actualizado el seeder de permisos (`PermissionSeeder`) y roles (`RoleSeeder`) para que los tests siempre cuenten con el estado de seguridad real.
 
 
 en /doc estan todas las carpetas de las epicas, y en cada una de ellas se encuentra la documentación de la epica, la bitacora de la epica, la auditoria de la epica y la epica en si.

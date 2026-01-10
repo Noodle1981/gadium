@@ -1,25 +1,73 @@
-ÉPICA 05: Motor de Inteligencia de Negocios (Algoritmos Estratégicos)
-Justificación Estratégica:
-Esta épica implementa la "lógica de negocio profunda". Se centra en el algoritmo de Pareto para la diversificación de ventas. Como se extrajo de Objetivos.csv, la empresa necesita saber si depende peligrosamente de pocos clientes.
-HU-09: Implementación del Algoritmo de Pareto (Diversificación de Ventas)
-Prioridad: Crítica
-Estimación: 13 Puntos de Historia
-Dependencias: HU-04 (Clientes Normalizados)
-Narrativa de Usuario:
-Como Gerente General,
-Quiero visualizar en tiempo real el indicador de concentración de ventas (Regla 80/20),
-Para tomar decisiones estratégicas sobre la expansión de la cartera de clientes y mitigar el riesgo financiero de dependencia excesiva.
-Contexto Técnico:
-El algoritmo debe ser preciso. 1 detalla los pasos: Ranking, Corte del 20%, Suma Acumulada.
-Criterios de Aceptación (Lógica Matemática):
-Normalización Monetaria:
-Antes de calcular, el sistema debe convertir todas las ventas en USD a ARS (o viceversa) usando la tasa de cambio de la fecha de la factura. No se pueden sumar peras con manzanas.
-Ejecución del Algoritmo:
-Calcular VentaTotal del periodo.
-Ordenar clientes (normalizados) de mayor a menor venta.
-Determinar el número de clientes que constituyen el 20% superior (TopN).
-Sumar las ventas de esos TopN clientes.
-Calcular el porcentaje que representan sobre la VentaTotal.
-Visualización Semafórica:
-Si el % resultante > 80%: Mostrar indicador ROJO (Riesgo Alto).
-Si el % resultante <= 80%: Mostrar indicador VERDE (Objetivo Cumplido).
+# ÉPICA 06: Integración con Grafana y Experiencia Unificada
+
+## Contexto y Alcance
+Esta épica consolida la infraestructura de inteligencia de negocios iniciada en la Épica 5 y unifica la experiencia de usuario. Se basa en los requisitos de `contex.md` ("Integración con Grafana") y la necesidad de cohesión del producto.
+
+**Estado Inicial (Post-Épica 5):**
+- API REST para métricas: **Implementado** (parcialmente).
+- Autenticación: **Implementado** (Sanctum/Tokens).
+- Tablas de Resumen: **Pendiente**.
+- Integración Visual: **Pendiente**.
+
+---
+
+## HU-11: Integración Visual de tableros Grafana
+**Prioridad**: Alta
+**Estimación**: 5 Puntos
+**Narrativa**:
+Como **Gerente General**, quiero acceder a los tableros de Grafana directamente desde el menú principal de la aplicación, para consultar KPIs sin gestionar accesos externos.
+
+**Criterios de Aceptación**:
+- [ ] Sección "Inteligencia" o "Dashboards" en el menú lateral.
+- [ ] Embedding o enlace directo seguro a los dashboards (Ventas, Producción).
+- [ ]Mecanismo de autenticación transparente (SSO simplificado o Token passing si aplica, o simplemente enlace seguro).
+
+---
+
+## HU-12: Sidebar Global Dinámico (Navegación por Roles)
+**Prioridad**: Alta
+**Estimación**: 8 Puntos
+**Narrativa**:
+Como **Usuario**, quiero un menú lateral que muestre solo las opciones de mi rol, para simplificar la navegación y evitar errores de acceso.
+
+**Criterios de Aceptación**:
+- [ ] Componente `Sidebar` implementado con Tailwind.
+- [ ] Filtro de ítems basado en Permisos/Roles (Spatie).
+    - **Admin**: Configuración, Usuarios, Importación.
+    - **Manager**: Producción, Reportes Operativos.
+    - **Viewer**: Dashboards Grafana.
+- [ ] Responsive y colapsable.
+
+---
+
+## HU-13: Unificación de Módulos (Wiring)
+**Prioridad**: Media
+**Estimación**: 5 Puntos
+**Narrativa**:
+Como **Usuario**, quiero poder navegar a todos los módulos funcionales (Ventas, Producción, RRHH) desde el sistema central, asegurando que nada quede aislado.
+
+**Criterios de Aceptación**:
+- [ ] Revisión y conexión de rutas de Épicas 1-5.
+- [ ] Limpieza de enlaces de debug o temporales.
+- [ ] Estandarización de headers y layouts en todas las vistas conectadas.
+
+---
+
+## HU-14: Optimización de Datos (Tablas de Resumen)
+**Prioridad**: Media
+**Estimación**: 5 Puntos
+**Narrativa**:
+Como **Sistema**, quiero mantener tablas de resumen (`daily_metrics_aggregates`, etc.) actualizadas automáticamente, para que las consultas de la API de Grafana sean rápidas y no saturen la base de datos transaccional.
+
+**Criterios de Aceptación**:
+- [ ] Existencia de tablas de resumen en la BD.
+- [ ] Jobs o Comandos (Scheduler) para poblar/actualizar estas tablas periódicamente (ej. cada hora o noche).
+- [ ] Endpoints de API (MetricsController) consumiendo de estas tablas cuando sea posible.
+
+---
+
+## Definición de Hecho (DoD)
+- Todas las HUs aprobadas.
+- Tests (Feature) para nuevas rutas y el Sidebar.
+- Auditoría completada.
+- Documentación técnica actualizada.

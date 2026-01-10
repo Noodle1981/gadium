@@ -28,6 +28,17 @@ Duration: 0.78s
 - [x] El campo `moneda` se persiste correctamente como 'ARS' por defecto.
 - [x] La conversión de moneda funciona lógicamente (se asume tasa fija 850 para esta versión).
 - [x] Los endpoints siguen la convención JSON API estándar (`status`, `meta`, `data`).
+- [x] Verificación manual de endpoints desde PowerShell con Token de Viewer: `success_mock` recibido.
+
+## Evidencia de Verificación Manual (PowerShell)
+```powershell
+$headers = @{ "Authorization" = "Bearer 1|IWUuRUTrTR6j0b4sKTK5YR1TXMHZu2q78Dvjb9b1121ffd87"; "Accept" = "application/json" }
+Invoke-RestMethod -Uri "http://localhost:8000/api/v1/metrics/production-efficiency" -Method Get -Headers $headers
+
+status       meta
+------       ----
+success_mock @{note=MOCK DATA for Dashboard Design Phase; ...
+```
 
 ---
 **Responsable de QA**: Antigravity AI  

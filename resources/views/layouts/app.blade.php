@@ -14,23 +14,33 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans antialiased">
-        <div class="min-h-screen bg-gray-100">
-            <livewire:layout.navigation />
+    <body class="font-sans antialiased text-gray-900 bg-gray-50">
+        <div class="flex flex-col lg:flex-row min-h-screen">
+            <!-- Sidebar -->
+            <livewire:layout.sidebar />
 
-            <!-- Page Heading -->
-            @if (isset($header))
-                <header class="bg-white shadow">
-                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                        {{ $header }}
-                    </div>
-                </header>
-            @endif
+            <!-- Main Content Area -->
+            <div class="flex-1 flex flex-col lg:pl-64">
+                
+                <!-- Page Heading (Optional, can be used for extra info) -->
+                @if (isset($header))
+                    <header class="bg-white/80 backdrop-blur-md sticky top-0 z-20 border-b border-gray-200 lg:h-20 flex items-center mt-16 lg:mt-0">
+                        <div class="w-full max-w-7xl mx-auto py-4 px-6 sm:px-8">
+                            {{ $header }}
+                        </div>
+                    </header>
+                @endif
 
-            <!-- Page Content -->
-            <main>
-                {{ $slot }}
-            </main>
+                <!-- Page Content -->
+                <main class="flex-1 p-6 lg:p-8 mt-16 lg:mt-0">
+                    {{ $slot }}
+                </main>
+
+                <!-- Footer (Optional) -->
+                <footer class="py-6 px-8 text-center text-xs text-gray-400">
+                    &copy; {{ date('Y') }} Gadium Industrial SaaS. Todos los derechos reservados.
+                </footer>
+            </div>
         </div>
     </body>
 </html>

@@ -14,6 +14,7 @@ La Épica 5 implementa el cerebro analítico del sistema: el Algoritmo de Pareto
   - `MetricsController`: Exposición segura de datos JSON.
   - Mocking: Implementación de respuesta simulada para "Eficiencia de Producción".
 - ✅ **Testing**: Suite `ApiMetricsTest` validando seguridad (401 Unauthorized sin token) y lógica matemática de Pareto.
+- ✅ **Verificación Manual**: Confirmada respuesta exitosa del MOCK `production-efficiency` desde cliente externo (PowerShell).
 
 ## Problemas Resueltos
 1. **Inconsistencia de Modelo**: El modelo `Sale` carecía de información de moneda. Se detectó durante los tests y se resolvió mediante migración y actualización del modelo.
