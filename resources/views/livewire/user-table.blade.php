@@ -20,6 +20,12 @@
                 @endforeach
             </select>
         </div>
+        <div class="flex items-center">
+            <label class="inline-flex items-center cursor-pointer">
+                <input type="checkbox" wire:model.live="showRevoked" class="rounded border-gray-300 text-primary shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50">
+                <span class="ml-2 text-sm text-gray-600 dark:text-gray-400">Ver Revocados</span>
+            </label>
+        </div>
     </div>
 
     <!-- Tabla de usuarios -->
@@ -55,14 +61,14 @@
                                     </div>
                                 </div>
                                 <div class="ml-4">
-                                    <div class="text-sm font-medium text-gray-900 dark:text-gray-100">
+                                    <div class="text-sm font-medium text-gray-800 dark:text-gray-100">
                                         {{ $user->name }}
                                     </div>
                                 </div>
                             </div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm text-gray-900 dark:text-gray-300">{{ $user->email }}</div>
+                            <div class="text-sm text-gray-800 dark:text-gray-300">{{ $user->email }}</div>
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             @foreach($user->roles as $role)
@@ -80,17 +86,26 @@
                             {{ $user->created_at->format('d/m/Y') }}
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                            <a href="{{ route('users.edit', $user) }}" class="text-primary hover:text-primary-700 mr-3">
-                                Editar
-                            </a>
-                            @if(!$user->hasRole('Super Admin'))
-                                <form action="{{ route('users.destroy', $user) }}" method="POST" class="inline" onsubmit="return confirm('¿Está seguro de eliminar este usuario?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
-                                        Eliminar
-                                    </button>
-                                </form>
+                            @if($user->trashed())
+                                <button wire:click="restore({{ $user->id }})" class="text-green-600 hover:text-green-900 dark:text-green-400 dark:hover:text-green-300 font-bold mr-3">
+                                    Restaurar Acceso
+                                </button>
+                                <button wire:confirm="¿Está SEGURO de eliminar definitivamente a este usuario? Esta acción NO se puede deshacer." wire:click="forceDelete({{ $user->id }})" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 font-bold">
+                                    Eliminar Definitivamente
+                                </button>
+                            @else
+                                <a href="{{ route('users.edit', $user) }}" class="text-primary hover:text-primary-700 mr-3">
+                                    Editar
+                                </a>
+                                @if(!$user->hasRole('Super Admin'))
+                                    <form action="{{ route('users.destroy', $user) }}" method="POST" class="inline" onsubmit="return confirm('¿Está seguro de revocar el acceso a este usuario? Esta acción es inmediata.');">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">
+                                            Revocar Acceso
+                                        </button>
+                                    </form>
+                                @endif
                             @endif
                         </td>
                     </tr>

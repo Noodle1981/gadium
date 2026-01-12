@@ -12,6 +12,7 @@ class UserTable extends Component
 
     public $search = '';
     public $roleFilter = '';
+    public $showRevoked = false;
     public $perPage = 10;
 
     protected $queryString = ['search', 'roleFilter'];
@@ -38,6 +39,9 @@ class UserTable extends Component
                     $q->where('name', $this->roleFilter);
                 });
             })
+            ->when($this->showRevoked, function ($query) {
+                $query->onlyTrashed();
+            })
             ->with('roles')
             ->latest()
             ->paginate($this->perPage);
@@ -48,5 +52,24 @@ class UserTable extends Component
             'users' => $users,
             'roles' => $roles,
         ]);
+    }
+    public function restore($id)
+    {
+        $user = User::withTrashed()->find($id);
+        
+        if ($user) {
+            $user->restore();
+            session()->flash('success', 'Acceso restaurado exitosamente para el usuario ' . $user->name);
+        }
+    }
+
+    public function forceDelete($id)
+    {
+        $user = User::withTrashed()->find($id);
+
+        if ($user) {
+            $user->forceDelete();
+            session()->flash('success', 'Usuario eliminado definitivamente: ' . $user->name);
+        }
     }
 }

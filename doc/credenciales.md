@@ -7,8 +7,8 @@ A continuación se detallan las credenciales para los usuarios predeterminados g
 | Rol | Nombre | Email | Contraseña | Acceso Principal |
 | :--- | :--- | :--- | :--- | :--- |
 | **Super Admin** | Super Administrador | `admin@gaudium.com` | `password` | `/admin/dashboard` (Gestión Global) |
-| **Admin** | Administrador | `administrador@gaudium.com` | `password` | `/admin/dashboard` (Operativa Diaria) |
-| **Manager** | Gerente | `gerente@gaudium.com` | `password` | `/manager/dashboard` (KPIs y Análisis) |
+| **Admin** | Administrador | `administrador@gaudium.com` | `password` | `/admin/dashboard` (Gestión Técnica y Global) |
+| **Manager** | Gerente | `gerente@gaudium.com` | `password` | `/manager/dashboard` (Gestión Global y KPIs) |
 | **Viewer** | Visualizador | `viewer@gaudium.com` | `password` | `/viewer/dashboard` (Solo Lectura / Grafana API) |
 
 > **Nota**: La contraseña por defecto para todos los usuarios en desarrollo es `password`.

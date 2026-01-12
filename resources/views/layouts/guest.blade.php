@@ -14,19 +14,14 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans antialiased bg-background-light dark:bg-background-dark text-text-light dark:text-text-dark">
-        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0">
-            <div>
-                <a href="/" wire:navigate>
-                    <div class="flex items-center justify-center">
-                        <span class="text-4xl font-bold text-primary">Gadium</span>
-                    </div>
-                </a>
-            </div>
+    <body class="font-sans antialiased text-slate-900 dark:text-white bg-slate-900 relative">
+        <!-- Fondo Industrial (Patrón o Gradiente sutil) -->
+        <div class="fixed inset-0 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 -z-10"></div>
 
-            <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white dark:bg-gray-800 shadow-md overflow-hidden sm:rounded-lg">
-                {{ $slot }}
-            </div>
+
+        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0">
+            <!-- El logo se moverá dentro de la tarjeta de login para un diseño más integrado -->
+            {{ $slot }}
         </div>
     </body>
 </html>
