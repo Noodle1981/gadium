@@ -84,5 +84,7 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
 
 require __DIR__.'/auth.php';
 
-
-
+// Test routes (can be removed in production)
+if (file_exists(__DIR__.'/test.php')) {
+    require __DIR__.'/test.php';
+}

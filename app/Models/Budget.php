@@ -10,8 +10,10 @@ class Budget extends Model
     protected $fillable = [
         'fecha',
         'client_id',
+        'cliente_nombre',
         'monto',
         'moneda',
+        'comprobante',
         'hash',
     ];
 
@@ -30,15 +32,17 @@ class Budget extends Model
 
     /**
      * Generar hash único para idempotencia
-     * Basado en: fecha + cliente_id + monto + moneda
-     * Nota: Usamos client_id aquí asumiendo que ya se resolvió el cliente.
+     * Basado en: fecha + cliente_nombre + comprobante + monto
      */
-    public static function generateHash(string $fecha, int $clientId, float $monto, string $moneda): string
+    public static function generateHash(string $fecha, string $clienteNombre, string $comprobante, float $monto): string
     {
         // Asegurar formato de fecha YYYY-MM-DD
         $fecha = substr($fecha, 0, 10);
         
-        $data = $fecha . '|' . $clientId . '|' . number_format($monto, 2, '.', '') . '|' . $moneda;
+        // Normalizar nombre de cliente
+        $clienteNormalizado = Client::normalizeClientName($clienteNombre);
+        
+        $data = $fecha . '|' . $clienteNormalizado . '|' . $comprobante . '|' . number_format($monto, 2, '.', '');
         
         return hash('sha256', $data);
     }

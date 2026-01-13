@@ -207,6 +207,11 @@ Cada carpeta de épica contiene:
 - Notificaciones en dashboard + email
 - Estado de proyecto: CRÍTICO cuando excede umbral
 
+### Mantenimiento Automático
+- **Limpieza de Temporales**: Comando `app:cleanup-imports` programado diariamente (00:00).
+- **Objetivo**: Eliminar archivos de `imports` y `livewire-tmp` > 24 horas.
+- **Seguridad**: Previene acumulación de datos sensibles y saturación de disco.
+
 ## Riesgos Identificados
 
 | Riesgo | Mitigación |

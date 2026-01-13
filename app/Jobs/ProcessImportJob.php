@@ -47,8 +47,13 @@ class ProcessImportJob implements ShouldQueue
 
             $handle = fopen($this->filePath, 'r');
             
+            // Detect delimiter
+            $firstLine = fgets($handle);
+            rewind($handle);
+            $delimiter = $this->detectDelimiter($firstLine);
+            
             // Read Header to map columns correctly
-            $fileHeaders = fgetcsv($handle);
+            $fileHeaders = fgetcsv($handle, 1000, $delimiter);
             if (!$fileHeaders) {
                 throw new Exception("Empty file or no headers");
             }
@@ -66,7 +71,7 @@ class ProcessImportJob implements ShouldQueue
             $totalInserted = 0;
             $totalSkipped = 0;
 
-            while (($data = fgetcsv($handle, 1000, ',')) !== false) {
+            while (($data = fgetcsv($handle, 1000, $delimiter)) !== false) {
                 // Skip empty lines
                 if (array_filter($data) && count($data) === count($headers)) {
                     $chunk[] = array_combine($headers, $data);
@@ -102,5 +107,14 @@ class ProcessImportJob implements ShouldQueue
         }
     }
 
-
+    /**
+     * Detecta el delimitador del CSV (coma o punto y coma)
+     */
+    protected function detectDelimiter(string $line): string
+    {
+        $commaCount = substr_count($line, ',');
+        $semicolonCount = substr_count($line, ';');
+        
+        return $semicolonCount > $commaCount ? ';' : ',';
+    }
 }

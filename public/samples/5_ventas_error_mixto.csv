@@ -1,0 +1,10 @@
+Fecha;Cliente;Monto;Comprobante;Moneda
+01/01/2026;Cliente Válido 1;1.500,50;A-0001;USD
+NoEsFecha;Cliente Error Fecha;2.300,00;A-0002;USD
+03/01/2026;Cliente Válido 2;100,00;A-0003;USD
+04/01/2026;Cliente Error Monto;TextoInvalido;A-0004;ARS
+05/01/2026;Cliente Válido 3;5.750,00;A-0005;USD
+32/01/2026;Cliente Error Fecha 2;1.000,00;A-0006;USD
+07/01/2026;Cliente Válido 4;3.200,00;A-0007;USD
+08/01/2026;Cliente Error Monto 2;ABC123;A-0008;USD
+09/01/2026;Cliente Válido 5;8.900,00;A-0009;USD

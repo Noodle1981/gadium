@@ -33,13 +33,8 @@ new class extends Component
     <aside class="hidden lg:flex flex-col w-64 h-screen bg-gray-950 border-r border-gray-800 fixed left-0 top-0 z-40 transition-all duration-300">
         <!-- Header / Logo -->
         <div class="flex items-center justify-center h-20 border-b border-gray-800 px-6">
-            <a href="{{ route($dashboardRoute) }}" class="flex items-center space-x-3 group" wire:navigate>
-                <div class="p-2 bg-orange-600 rounded-lg group-hover:rotate-12 transition-transform duration-300">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                </div>
-                <span class="text-xl font-bold text-white tracking-wider uppercase">Gadium</span>
+            <a href="{{ route($dashboardRoute) }}" class="flex items-center justify-center w-full" wire:navigate>
+                 <img src="{{ asset('img/logo.webp') }}" alt="Gadium" class="h-10 w-auto object-contain hover:scale-105 transition-transform duration-300">
             </a>
         </div>
 

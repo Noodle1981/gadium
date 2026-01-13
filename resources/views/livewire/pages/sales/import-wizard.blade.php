@@ -14,28 +14,48 @@ new class extends Component {
     // State
     public $step = 1;
     public $file;
+    
+    #[\Livewire\Attributes\Locked]
+    public $storedFilePath; // Store path instead of file object
+    
     public $type = 'sale'; // 'sale' or 'budget'
     
-    // Analysis Results
-    public $analysis = [];
+    // Analysis Results - simplified
+    public $totalRows = 0;
+    public $validRows = 0;
+    public $validationErrors = []; // Array of validation error messages
     public $unknownClients = []; // list of names
     public $resolutions = []; // ['unknown_name' => client_id]
     
     // UI Helpers
     public $processing = false;
-    public $importStats = [];
+    public $analyzing = false;
     
     // Dependency
     // Note: Services are injected in methods usually
 
+    public function rules()
+    {
+        return [
+            'file' => 'required|file|mimes:csv,txt|max:10240',
+            'type' => 'required|in:sale,budget',
+        ];
+    }
+
     public function updatedFile()
     {
+        if ($this->analyzing) return;
+        
         $this->validateOnly('file');
         $this->analyzeFile();
     }
 
     public function analyzeFile()
     {
+        if ($this->analyzing) return; // Prevent re-entry
+        
+        $this->analyzing = true;
+        
         $this->validate([
             'file' => 'required|file|mimes:csv,txt|max:10240', // 10MB
             'type' => 'required|in:sale,budget',
@@ -44,41 +64,103 @@ new class extends Component {
         $service = app(CsvImportService::class);
         
         try {
-            $path = $this->file->getRealPath();
-            $this->analysis = $service->validateAndAnalyze($path, $this->type);
+            // Validate file exists
+            if (!$this->file) {
+                throw new \Exception('No se ha seleccionado ningún archivo.');
+            }
             
-            if (!empty($this->analysis['errors'])) {
+            // Generate unique filename
+            $filename = uniqid('import_') . '.csv';
+            
+            // Store file with explicit filename (goes to storage/app/private/imports)
+            $path = $this->file->storeAs('imports', $filename);
+            
+            if (!$path) {
+                throw new \Exception('Error al guardar el archivo. Verifique los permisos del directorio storage/app/private/imports.');
+            }
+            
+            // Build correct path (local disk uses storage/app/private as root)
+            $this->storedFilePath = storage_path('app/private') . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $path);
+            
+            // Verify file was actually saved
+            if (!file_exists($this->storedFilePath)) {
+                // Try to list what's in the directory for debugging
+                $files = @scandir(storage_path('app/imports'));
+                $fileList = $files ? implode(', ', array_slice($files, 2)) : 'no se pudo leer';
+                throw new \Exception("El archivo no se guardó. Archivos en imports: {$fileList}. Ruta esperada: {$this->storedFilePath}");
+            }
+            
+            // Analyze from stored path
+            $analysis = $service->validateAndAnalyze($this->storedFilePath, $this->type);
+            
+            // Store results in simple properties
+            $this->totalRows = $analysis['total_rows'] ?? 0;
+            $this->validRows = $analysis['valid_rows'] ?? 0;
+            $this->validationErrors = $analysis['errors'] ?? [];
+            $this->unknownClients = $analysis['unknown_clients'] ?? [];
+            
+            // Debug logging
+            \Log::info('Analysis completed', [
+                'total_rows' => $this->totalRows,
+                'valid_rows' => $this->validRows,
+                'errors_count' => count($this->validationErrors),
+                'unknown_clients_count' => count($this->unknownClients),
+            ]);
+            
+            // Clear file property to prevent Livewire serialization errors
+            $this->file = null;
+            
+            if (!empty($this->validationErrors)) {
                 // Stay on Step 1, show errors
+                $this->analyzing = false;
                 return;
             }
-
-            $this->unknownClients = $this->analysis['unknown_clients'];
             
             if (!empty($this->unknownClients)) {
                 $this->step = 2; // Go to Resolution
             } else {
                 $this->step = 3; // Go to Confirmation
             }
+            
+            $this->analyzing = false;
 
         } catch (\Exception $e) {
+            $this->analyzing = false;
+            $this->file = null; // Clear file on error too
             $this->addError('file', $e->getMessage());
         }
     }
 
-    public function resolveClient($name, $clientId)
+    public function resolveClient($name, $selection)
     {
-        if (!$clientId) return;
+        if (!$selection) return;
 
-        // Create Alias immediately
+        if ($selection === 'new') {
+            $this->createNewClient($name);
+            return;
+        }
+
+        // Create Alias immediately for existing client
         $service = app(\App\Services\ClientNormalizationService::class);
-        $service->createAlias($clientId, $name);
+        $service->createAlias((int)$selection, $name);
 
         // Update local state
+        $this->markResolved($name, (int)$selection);
+    }
+
+    public function createNewClient($name)
+    {
+        // Create the new client
+        $client = Client::create(['nombre' => $name]);
+        
+        // Mark as resolved
+        $this->markResolved($name, $client->id);
+    }
+
+    protected function markResolved($name, $clientId)
+    {
         unset($this->unknownClients[array_search($name, $this->unknownClients)]);
         $this->resolutions[$name] = $clientId;
-
-        // If all resolved, move to next step automatically? 
-        // Better let user click "Continue" to review.
     }
 
     public function nextStep()
@@ -92,27 +174,96 @@ new class extends Component {
         }
     }
 
+    public $importedCount = 0;
+    public $skippedCount = 0;
+
     public function startImport()
     {
         $this->processing = true;
         
-        // Save file properly to disk for the Job
-        $path = $this->file->store('imports');
-        $fullPath = storage_path('app/' . $path);
+        // Use the already stored file path
+        if (!$this->storedFilePath || !file_exists($this->storedFilePath)) {
+            $this->addError('file', 'Archivo no encontrado. Por favor vuelva a cargar el archivo.');
+            $this->processing = false;
+            return;
+        }
 
-        // Dispatch Job
-        ProcessImportJob::dispatch($fullPath, $this->type, Auth::id());
-
-        // For now, simulate success or redirect, or poll.
-        // Since we don't have real-time broadcasting set up in this plan, 
-        // we show a "Job Dispatched" message.
-        $this->step = 4;
-        $this->processing = false;
+        try {
+            $service = app(CsvImportService::class);
+            
+            // Read and process file
+            $handle = fopen($this->storedFilePath, 'r');
+            
+            // Detect delimiter
+            $firstLine = fgets($handle);
+            rewind($handle);
+            $delimiter = $this->detectDelimiter($firstLine);
+            
+            // Read headers
+            $headers = fgetcsv($handle, 1000, $delimiter);
+            $headers = array_map('trim', $headers);
+            if (isset($headers[0])) {
+                $headers[0] = preg_replace('/[\xEF\xBB\xBF]/', '', $headers[0]);
+            }
+            
+            // Process rows in chunks
+            $chunk = [];
+            $chunkSize = 1000;
+            
+            while (($data = fgetcsv($handle, 1000, $delimiter)) !== false) {
+                if (empty(array_filter($data, function($val) { return $val !== '' && $val !== null; }))) {
+                    continue;
+                }
+                
+                if (count($data) === count($headers)) {
+                    $chunk[] = array_combine($headers, $data);
+                }
+                
+                if (count($chunk) >= $chunkSize) {
+                    $stats = $service->importChunk($chunk, $this->type);
+                    $this->importedCount += $stats['inserted'];
+                    $this->skippedCount += $stats['skipped'];
+                    $chunk = [];
+                }
+            }
+            
+            // Process remaining
+            if (!empty($chunk)) {
+                $stats = $service->importChunk($chunk, $this->type);
+                $this->importedCount += $stats['inserted'];
+                $this->skippedCount += $stats['skipped'];
+            }
+            
+            fclose($handle);
+            
+            // Clean up file
+            @unlink($this->storedFilePath);
+            
+            $this->step = 4;
+            $this->processing = false;
+            
+        } catch (\Exception $e) {
+            $this->processing = false;
+            $this->addError('file', 'Error al importar: ' . $e->getMessage());
+        }
+    }
+    
+    protected function detectDelimiter(string $line): string
+    {
+        $commaCount = substr_count($line, ',');
+        $semicolonCount = substr_count($line, ';');
+        
+        return $semicolonCount > $commaCount ? ';' : ',';
     }
     
     public function resetWizard()
     {
-        $this->reset(['file', 'step', 'analysis', 'unknownClients', 'resolutions', 'processing']);
+        // Clean up stored file if exists
+        if ($this->storedFilePath && file_exists($this->storedFilePath)) {
+            @unlink($this->storedFilePath);
+        }
+        
+        $this->reset(['file', 'storedFilePath', 'step', 'totalRows', 'validRows', 'validationErrors', 'unknownClients', 'resolutions', 'processing', 'analyzing']);
     }
 
     public function suggestClients($name)
@@ -195,7 +346,7 @@ new class extends Component {
 
                 @error('file') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
 
-                @if(!empty($analysis['errors']))
+                @if(!empty($validationErrors))
                     <div class="rounded-md bg-red-50 p-4">
                         <div class="flex">
                             <div class="flex-shrink-0">
@@ -205,11 +356,11 @@ new class extends Component {
                                 <h3 class="text-sm font-medium text-red-800">Se encontraron errores bloqueantes</h3>
                                 <div class="mt-2 text-sm text-red-700">
                                     <ul class="list-disc pl-5 space-y-1">
-                                        @foreach(array_slice($analysis['errors'], 0, 5) as $error)
+                                        @foreach(array_slice($validationErrors, 0, 5) as $error)
                                             <li>{{ $error }}</li>
                                         @endforeach
-                                        @if(count($analysis['errors']) > 5)
-                                            <li>... y {{ count($analysis['errors']) - 5 }} errores más.</li>
+                                        @if(count($validationErrors) > 5)
+                                            <li>... y {{ count($validationErrors) - 5 }} errores más.</li>
                                         @endif
                                     </ul>
                                 </div>
@@ -253,14 +404,17 @@ new class extends Component {
                                                 </td>
                                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                                     <!-- Simple client selector - Could be improved with searchable select -->
-                                                    <select 
+                            <select 
                                                         class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
                                                         wire:change="resolveClient('{{ $name }}', $event.target.value)"
                                                     >
-                                                        <option value="">Seleccionar Cliente...</option>
-                                                        @foreach($clients as $c)
-                                                            <option value="{{ $c->id }}">{{ $c->nombre }}</option>
-                                                        @endforeach
+                                                        <option value="">Seleccionar Acción...</option>
+                                                        <option value="new" class="font-bold text-indigo-600">+ Crear como Nuevo Cliente</option>
+                                                        <optgroup label="Vincular a Existente">
+                                                            @foreach($clients as $c)
+                                                                <option value="{{ $c->id }}">{{ $c->nombre }}</option>
+                                                            @endforeach
+                                                        </optgroup>
                                                     </select>
                                                    
                                                 </td>
@@ -292,8 +446,8 @@ new class extends Component {
                 <div class="mt-2 text-sm text-gray-500">
                     <p>Archivo válidado correctamente.</p>
                     <ul class="mt-4 list-disc list-inside text-left mx-auto max-w-sm">
-                        <li>Filas Totales: <strong>{{ $analysis['total_rows'] }}</strong></li>
-                        <li>Filas Válidas: <strong>{{ $analysis['valid_rows'] }}</strong></li>
+                        <li>Filas Totales: <strong>{{ $totalRows }}</strong></li>
+                        <li>Filas Válidas: <strong>{{ $validRows }}</strong></li>
                     </ul>
                 </div>
                 
@@ -305,16 +459,34 @@ new class extends Component {
             </div>
         @endif
 
-        <!-- Step 4: Finishing -->
+        <!-- Step 4: Results -->
         @if($step === 4)
             <div class="text-center space-y-6">
-                 <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-blue-100">
-                    <svg class="h-6 w-6 text-blue-600 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                 <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
+                    <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                 </div>
-                <h3 class="text-lg leading-6 font-medium text-gray-900">Procesando...</h3>
-                <p class="text-sm text-gray-500">La importación se está ejecutando en segundo plano. Recibirá una notificación al finalizar.</p>
+                <h3 class="text-lg leading-6 font-medium text-gray-900">¡Importación Completada!</h3>
                 
-                <button wire:click="resetWizard" class="text-indigo-600 hover:text-indigo-900">Importar otro archivo</button>
+                <div class="mt-4 bg-gray-50 rounded-lg p-6">
+                    <dl class="grid grid-cols-3 gap-4">
+                        <div class="text-center border-r border-gray-200">
+                            <dt class="text-sm font-medium text-gray-500">Total Procesados</dt>
+                            <dd class="mt-1 text-3xl font-semibold text-gray-900">{{ $importedCount + $skippedCount }}</dd>
+                        </div>
+                        <div class="text-center border-r border-gray-200">
+                            <dt class="text-sm font-medium text-gray-500">Nuevos</dt>
+                            <dd class="mt-1 text-3xl font-semibold text-green-600">{{ $importedCount }}</dd>
+                        </div>
+                        <div class="text-center">
+                            <dt class="text-sm font-medium text-gray-500">Duplicados Omitidos</dt>
+                            <dd class="mt-1 text-3xl font-semibold text-gray-600">{{ $skippedCount }}</dd>
+                        </div>
+                    </dl>
+                </div>
+                
+                <button wire:click="resetWizard" class="mt-6 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none">
+                    Importar otro archivo
+                </button>
             </div>
         @endif
 

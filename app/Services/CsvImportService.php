@@ -29,8 +29,14 @@ class CsvImportService
             throw new Exception("No se pudo abrir el archivo.");
         }
 
+        // Detect delimiter by reading first line
+        $firstLine = fgets($handle);
+        rewind($handle);
+        
+        $delimiter = $this->detectDelimiter($firstLine);
+
         // 1. Validar Cabeceras
-        $headers = fgetcsv($handle, 1000, ',');
+        $headers = fgetcsv($handle, 1000, $delimiter);
         
         // Eliminar BOM si existe
         if (isset($headers[0])) {
@@ -45,7 +51,32 @@ class CsvImportService
         $rowIndex = 2; // 1-based, start after header
 
         // 2. Escanear filas
-        while (($data = fgetcsv($handle, 1000, ',')) !== false) {
+        while (($data = fgetcsv($handle, 1000, $delimiter)) !== false) {
+            // Skip completely empty lines or null data
+            if ($data === null || $data === false || (count($data) === 1 && empty($data[0]))) {
+                $rowIndex++;
+                continue;
+            }
+            
+            // Skip lines with only empty values
+            if (empty(array_filter($data, function($val) { return $val !== '' && $val !== null; }))) {
+                $rowIndex++;
+                continue;
+            }
+            
+            // Validate column count
+            if (count($data) !== count($headers)) {
+                $errors[] = "Fila {$rowIndex}: Número de columnas incorrecto (esperadas: " . count($headers) . ", encontradas: " . count($data) . ")";
+                $rowIndex++;
+                continue;
+            }
+            
+            // Safe array_combine with validation
+            if (count($headers) === 0 || count($data) === 0) {
+                $rowIndex++;
+                continue;
+            }
+            
             $row = array_combine($headers, $data);
             
             // Validación básica de tipos
@@ -79,13 +110,23 @@ class CsvImportService
     }
 
     /**
+     * Detecta el delimitador del CSV (coma o punto y coma)
+     */
+    protected function detectDelimiter(string $line): string
+    {
+        $commaCount = substr_count($line, ',');
+        $semicolonCount = substr_count($line, ';');
+        
+        return $semicolonCount > $commaCount ? ';' : ',';
+    }
+
+    /**
      * Valida que las cabeceras sean exactas.
      */
     protected function validateHeaders(array $headers, string $type): void
     {
-        $required = ($type === 'sale') 
-            ? ['Fecha', 'Cliente', 'Monto', 'Comprobante']
-            : ['Fecha', 'Cliente', 'Monto', 'Moneda']; // Budget
+        // Both sales and budgets require the same 4 columns
+        $required = ['Fecha', 'Cliente', 'Monto', 'Comprobante'];
 
         // Normalizar headers del archivo (trim)
         $headers = array_map('trim', $headers);
@@ -107,12 +148,53 @@ class CsvImportService
              $errors[] = "Fila {$rowIndex}: Fecha inválida ({$row['Fecha']})";
         }
 
-        // Validar Monto
-        if (!is_numeric($row['Monto'])) {
+        // Validar Monto (acepta separadores de miles)
+        $normalizedAmount = $this->normalizeAmount($row['Monto']);
+        if ($normalizedAmount === null) {
             $errors[] = "Fila {$rowIndex}: Monto inválido ({$row['Monto']})";
         }
 
         return $errors;
+    }
+
+    /**
+     * Normaliza un monto en formato EU/LATAM (1.240.000,00)
+     * Rechaza formato US (1,240,000.00) para mantener consistencia
+     * 
+     * @param string $amount
+     * @return float|null
+     */
+    protected function normalizeAmount(string $amount): ?float
+    {
+        // Eliminar espacios
+        $amount = trim($amount);
+        
+        // Detectar si usa formato US (coma como separador de miles, punto como decimal)
+        // Esto lo rechazamos para forzar el estándar EU/LATAM
+        $lastComma = strrpos($amount, ',');
+        $lastDot = strrpos($amount, '.');
+        
+        // Si tiene punto después de coma, es formato US -> RECHAZAR
+        if ($lastDot !== false && $lastComma !== false && $lastDot > $lastComma) {
+            return null; // Formato US no permitido
+        }
+        
+        // Formato EU/LATAM esperado:
+        // - Punto (.) como separador de miles
+        // - Coma (,) como separador decimal
+        
+        // Eliminar puntos (separadores de miles)
+        $amount = str_replace('.', '', $amount);
+        
+        // Convertir coma decimal a punto
+        $amount = str_replace(',', '.', $amount);
+        
+        // Validar que sea numérico después de normalizar
+        if (is_numeric($amount)) {
+            return (float) $amount;
+        }
+        
+        return null;
     }
 
     /**
@@ -134,7 +216,7 @@ class CsvImportService
             }
 
             $fecha = date('Y-m-d', strtotime(str_replace('/', '-', $row['Fecha'])));
-            $monto = (float) $row['Monto'];
+            $monto = $this->normalizeAmount($row['Monto']) ?? 0;
             
             if ($type === 'sale') {
                 $comprobante = $row['Comprobante'];
@@ -156,8 +238,8 @@ class CsvImportService
                 ]);
 
             } elseif ($type === 'budget') { // Budget
-                $moneda = $row['Moneda'] ?? 'USD';
-                $hash = Budget::generateHash($fecha, $client->id, $monto, $moneda);
+                $comprobante = $row['Comprobante'];
+                $hash = Budget::generateHash($fecha, $clientName, $comprobante, $monto);
 
                 if (Budget::where('hash', $hash)->exists()) {
                     $skipped++;
@@ -167,8 +249,10 @@ class CsvImportService
                 Budget::create([
                     'fecha' => $fecha,
                     'client_id' => $client->id,
+                    'cliente_nombre' => $client->nombre,
                     'monto' => $monto,
-                    'moneda' => $moneda,
+                    'moneda' => $row['Moneda'] ?? 'USD',
+                    'comprobante' => $comprobante,
                     'hash' => $hash,
                 ]);
             }
