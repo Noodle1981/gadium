@@ -11,31 +11,40 @@
     <div class="pt-4 text-xs font-semibold text-gray-500 uppercase tracking-widest px-4 mb-2">Operaciones</div>
     
     @can('view_sales')
-        <x-sidebar-link :href="route('module.sales')" :active="request()->routeIs('module.sales')" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>'>
-            Importación
-        </x-sidebar-link>
+        @if(!$isViewer)
+            @php
+                $salesRoute = $isManager ? 'manager.sales.import' : 'admin.sales.import';
+            @endphp
+            <x-sidebar-link :href="route($salesRoute)" :active="request()->routeIs($salesRoute)" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>'>
+                Importación
+            </x-sidebar-link>
+        @endif
     @endcan
 
     @can('view_production')
-        <x-sidebar-link :href="route('module.production')" :active="request()->routeIs('module.production')" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>'>
-            Producción
-        </x-sidebar-link>
+        @if(!$isViewer)
+            @php
+                $prodRoute = $isManager ? 'manager.manufacturing.production.log' : 'admin.manufacturing.production.log';
+            @endphp
+            <x-sidebar-link :href="route($prodRoute)" :active="request()->routeIs($prodRoute)" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>'>
+                Producción
+            </x-sidebar-link>
+        @endif
     @endcan
     
     @can('view_sales')
-        <x-sidebar-link :href="route('module.clients')" :active="request()->routeIs('module.clients')" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>'>
-            Resolución Clientes
-        </x-sidebar-link>
+        @if(!$isViewer)
+            @php
+                $clientsRoute = $isManager ? 'manager.clients.resolve' : 'admin.clients.resolve';
+            @endphp
+            <x-sidebar-link :href="route($clientsRoute)" :active="request()->routeIs($clientsRoute)" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>'>
+                Resolución Clientes
+            </x-sidebar-link>
+        @endif
     @endcan
 @endif
 
-@if($isViewer)
-    <div class="pt-4 text-xs font-semibold text-gray-500 uppercase tracking-widest px-4 mb-2">Inteligencia</div>
 
-    <x-sidebar-link :href="route('viewer.dashboard')" :active="request()->routeIs('viewer.dashboard')" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>'>
-        Grafana
-    </x-sidebar-link>
-@endif
 
 @if(auth()->user()->can('view_users') || auth()->user()->can('view_roles') || auth()->user()->can('view_hr'))
     <div class="pt-4 text-xs font-semibold text-gray-500 uppercase tracking-widest px-4 mb-2">Configuración</div>
@@ -53,8 +62,13 @@
     @endcan
 
     @can('view_hr')
-        <x-sidebar-link :href="route('module.hr')" :active="request()->routeIs('module.hr')" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>'>
-            Factores
-        </x-sidebar-link>
+        @if(!$isViewer)
+            @php
+                $hrRoute = $isManager ? 'manager.hr.factors' : 'admin.hr.factors';
+            @endphp
+            <x-sidebar-link :href="route($hrRoute)" :active="request()->routeIs($hrRoute)" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>'>
+                Factores
+            </x-sidebar-link>
+        @endif
     @endcan
 @endif

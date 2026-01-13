@@ -25,7 +25,7 @@ new class extends Component
     $dashboardRoute = 'dashboard';
     if ($isAdmin) $dashboardRoute = 'admin.dashboard';
     elseif ($isManager) $dashboardRoute = 'manager.dashboard';
-    elseif ($isViewer) $dashboardRoute = 'viewer.dashboard';
+
 @endphp
 
 <div x-data="{ open: false }" class="relative">

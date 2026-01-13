@@ -38,5 +38,7 @@ class RoleSeeder extends Seeder
             'view_hr',
             'view_dashboards',
         ]);
+
+
     }
 }

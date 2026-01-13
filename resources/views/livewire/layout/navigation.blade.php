@@ -35,7 +35,7 @@ new class extends Component
                         $dashboardRoute = 'dashboard';
                         if (auth()->user()->hasAnyRole(['Super Admin', 'Admin'])) $dashboardRoute = 'admin.dashboard';
                         elseif (auth()->user()->hasRole('Manager')) $dashboardRoute = 'manager.dashboard';
-                        elseif (auth()->user()->hasRole('Viewer')) $dashboardRoute = 'viewer.dashboard';
+
                     @endphp
                     <x-nav-link :href="route($dashboardRoute)" :active="request()->routeIs($dashboardRoute)" wire:navigate>
                         {{ __('Dashboard') }}
@@ -92,7 +92,7 @@ new class extends Component
                 $dashboardRoute = 'dashboard';
                 if (auth()->user()->hasAnyRole(['Super Admin', 'Admin'])) $dashboardRoute = 'admin.dashboard';
                 elseif (auth()->user()->hasRole('Manager')) $dashboardRoute = 'manager.dashboard';
-                elseif (auth()->user()->hasRole('Viewer')) $dashboardRoute = 'viewer.dashboard';
+
             @endphp
             <x-responsive-nav-link :href="route($dashboardRoute)" :active="request()->routeIs($dashboardRoute)" wire:navigate>
                 {{ __('Dashboard') }}

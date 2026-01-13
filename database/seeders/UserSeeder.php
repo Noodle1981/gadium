@@ -40,13 +40,6 @@ class UserSeeder extends Seeder
         ]);
         $manager->assignRole('Manager');
 
-        // Usuario Viewer
-        $viewer = User::create([
-            'name' => 'Visualizador',
-            'email' => 'viewer@gaudium.com',
-            'password' => Hash::make('password'),
-            'email_verified_at' => now(),
-        ]);
-        $viewer->assignRole('Viewer');
+
     }
 }
