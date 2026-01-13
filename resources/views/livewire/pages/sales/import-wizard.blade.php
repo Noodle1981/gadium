@@ -2,7 +2,7 @@
 
 use Livewire\Volt\Component;
 use Livewire\WithFileUploads;
-use App\Services\CsvImportService;
+use App\Services\ExcelImportService;
 use App\Models\Client;
 use App\Models\ClientAlias;
 use App\Jobs\ProcessImportJob;
@@ -37,7 +37,7 @@ new class extends Component {
     public function rules()
     {
         return [
-            'file' => 'required|file|mimes:csv,txt|max:10240',
+            'file' => 'required|file|mimes:xlsx,xls|max:10240',
             'type' => 'required|in:sale,budget',
         ];
     }
@@ -57,11 +57,11 @@ new class extends Component {
         $this->analyzing = true;
         
         $this->validate([
-            'file' => 'required|file|mimes:csv,txt|max:10240', // 10MB
+            'file' => 'required|file|mimes:xlsx,xls|max:10240', // 10MB
             'type' => 'required|in:sale,budget',
         ]);
 
-        $service = app(CsvImportService::class);
+        $service = app(ExcelImportService::class);
         
         try {
             // Validate file exists
@@ -70,7 +70,8 @@ new class extends Component {
             }
             
             // Generate unique filename
-            $filename = uniqid('import_') . '.csv';
+            $extension = $this->file->getClientOriginalExtension();
+            $filename = uniqid('import_') . '.' . $extension;
             
             // Store file with explicit filename (goes to storage/app/private/imports)
             $path = $this->file->storeAs('imports', $filename);
@@ -189,35 +190,17 @@ new class extends Component {
         }
 
         try {
-            $service = app(CsvImportService::class);
+            $service = app(ExcelImportService::class);
             
-            // Read and process file
-            $handle = fopen($this->storedFilePath, 'r');
-            
-            // Detect delimiter
-            $firstLine = fgets($handle);
-            rewind($handle);
-            $delimiter = $this->detectDelimiter($firstLine);
-            
-            // Read headers
-            $headers = fgetcsv($handle, 1000, $delimiter);
-            $headers = array_map('trim', $headers);
-            if (isset($headers[0])) {
-                $headers[0] = preg_replace('/[\xEF\xBB\xBF]/', '', $headers[0]);
-            }
+            // Read Excel rows
+            $rows = $service->readExcelRows($this->storedFilePath);
             
             // Process rows in chunks
             $chunk = [];
             $chunkSize = 1000;
             
-            while (($data = fgetcsv($handle, 1000, $delimiter)) !== false) {
-                if (empty(array_filter($data, function($val) { return $val !== '' && $val !== null; }))) {
-                    continue;
-                }
-                
-                if (count($data) === count($headers)) {
-                    $chunk[] = array_combine($headers, $data);
-                }
+            foreach ($rows as $row) {
+                $chunk[] = $row;
                 
                 if (count($chunk) >= $chunkSize) {
                     $stats = $service->importChunk($chunk, $this->type);
@@ -233,8 +216,6 @@ new class extends Component {
                 $this->importedCount += $stats['inserted'];
                 $this->skippedCount += $stats['skipped'];
             }
-            
-            fclose($handle);
             
             // Clean up file
             @unlink($this->storedFilePath);
@@ -326,12 +307,12 @@ new class extends Component {
                         <div class="flex text-sm text-gray-600">
                             <label for="file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500">
                                 <span>Subir un archivo</span>
-                                <input id="file-upload" x-ref="fileInput" wire:model="file" type="file" class="sr-only" accept=".csv">
+                                <input id="file-upload" x-ref="fileInput" wire:model="file" type="file" class="sr-only" accept=".xlsx,.xls">
                             </label>
                             <p class="pl-1">o arrastrar y soltar</p>
                         </div>
                         <p class="text-xs text-gray-500">
-                            CSV hasta 10MB
+                            Excel (.xlsx, .xls) hasta 10MB
                         </p>
                     </div>
 

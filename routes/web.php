@@ -80,6 +80,17 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
     // --- MÓDULOS DE SISTEMA (Rutas Amigables) - ELIMINADOS PARA USAR RUTAS POR ROL
     // Las rutas genéricas han sido reemplazadas por rutas específicas dentro de los grupos Admin y Gerente.
 
+    // --- HISTORIAL (Accesible para roles autenticados) ---
+    Route::get('/historial_ventas', function () {
+        $sales = \App\Models\Sale::with('client')->latest()->take(50)->get();
+        return view('historial-ventas', ['sales' => $sales]);
+    })->name('historial.ventas');
+
+    Route::get('/historial_presupuesto', function () {
+        $budgets = \App\Models\Budget::with('client')->latest()->take(50)->get();
+        return view('historial-presupuesto', ['budgets' => $budgets]);
+    })->name('historial.presupuesto');
+
 });
 
 require __DIR__.'/auth.php';

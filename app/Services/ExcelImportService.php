@@ -1,0 +1,356 @@
+<?php
+
+namespace App\Services;
+
+use App\Models\Budget;
+use App\Models\Client;
+use App\Models\Sale;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Shared\Date;
+use Exception;
+
+class ExcelImportService
+{
+    protected $normalizationService;
+
+    public function __construct(ClientNormalizationService $normalizationService)
+    {
+        $this->normalizationService = $normalizationService;
+    }
+
+    /**
+     * Valida la estructura y contenido del archivo Excel.
+     * Retorna un resumen de la validación.
+     */
+    public function validateAndAnalyze(string $filePath, string $type): array
+    {
+        try {
+            $spreadsheet = IOFactory::load($filePath);
+            $worksheet = $spreadsheet->getActiveSheet();
+            $rows = $worksheet->toArray();
+
+            if (empty($rows)) {
+                throw new Exception("El archivo Excel está vacío.");
+            }
+
+            // 1. Validar Cabeceras
+            $headers = array_shift($rows);
+            $headers = array_map('trim', $headers);
+            
+            $this->validateHeaders($headers, $type);
+
+            $validCount = 0;
+            $errors = [];
+            $unknownClients = [];
+            $rowIndex = 2; // 1-based, start after header
+
+            // 2. Escanear filas
+            foreach ($rows as $data) {
+                // Skip completely empty rows
+                if (empty(array_filter($data, function($val) { return $val !== '' && $val !== null; }))) {
+                    $rowIndex++;
+                    continue;
+                }
+
+                // Validate column count
+                if (count($data) !== count($headers)) {
+                    $errors[] = "Fila {$rowIndex}: Número de columnas incorrecto (esperadas: " . count($headers) . ", encontradas: " . count($data) . ")";
+                    $rowIndex++;
+                    continue;
+                }
+
+                $row = array_combine($headers, $data);
+
+                // Validación básica de tipos
+                $rowErrors = $this->validateRowTypes($row, $rowIndex, $type);
+
+                if (!empty($rowErrors)) {
+                    $errors = array_merge($errors, $rowErrors);
+                } else {
+                    // Verificar Cliente
+                    $clientName = $this->extractClientName($row, $type);
+                    $client = $this->normalizationService->resolveClientByAlias($clientName);
+
+                    if (!$client) {
+                        $unknownClients[$clientName] = true;
+                    }
+
+                    $validCount++;
+                }
+
+                $rowIndex++;
+            }
+
+            return [
+                'total_rows' => count($rows),
+                'valid_rows' => $validCount,
+                'errors' => $errors,
+                'unknown_clients' => array_keys($unknownClients),
+            ];
+
+        } catch (Exception $e) {
+            throw new Exception("Error al procesar Excel: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Valida que las cabeceras contengan las columnas necesarias según el tipo.
+     */
+    protected function validateHeaders(array $headers, string $type): void
+    {
+        if ($type === 'sale') {
+            // Tango format - verificar columnas clave
+            $required = ['RAZON_SOCI', 'FECHA_EMI', 'TOTAL_COMP', 'N_COMP', 'MONEDA'];
+        } else {
+            // Budget format
+            $required = ['Empresa', 'Fecha', 'Monto', 'Orden de Pedido'];
+        }
+
+        foreach ($required as $req) {
+            if (!in_array($req, $headers)) {
+                throw new Exception("Cabecera faltante: {$req}. Estructura requerida: " . implode(', ', $required));
+            }
+        }
+    }
+
+    /**
+     * Extrae el nombre del cliente según el tipo de archivo
+     */
+    protected function extractClientName(array $row, string $type): string
+    {
+        if ($type === 'sale') {
+            return trim($row['RAZON_SOCI'] ?? '');
+        } else {
+            return trim($row['Empresa'] ?? '');
+        }
+    }
+
+    /**
+     * Extrae la fecha según el tipo de archivo
+     */
+    protected function extractDate(array $row, string $type): ?string
+    {
+        $dateValue = $type === 'sale' ? ($row['FECHA_EMI'] ?? null) : ($row['Fecha'] ?? null);
+        
+        if (empty($dateValue)) {
+            return null;
+        }
+
+        // Si es un número (Excel serial date)
+        if (is_numeric($dateValue)) {
+            try {
+                $date = Date::excelToDateTimeObject($dateValue);
+                return $date->format('Y-m-d');
+            } catch (Exception $e) {
+                return null;
+            }
+        }
+
+        // Si es string, intentar parsear
+        $timestamp = strtotime(str_replace('/', '-', $dateValue));
+        return $timestamp ? date('Y-m-d', $timestamp) : null;
+    }
+
+    /**
+     * Extrae el monto según el tipo de archivo
+     */
+    protected function extractAmount(array $row, string $type): ?float
+    {
+        $amountValue = $type === 'sale' ? ($row['TOTAL_COMP'] ?? null) : ($row['Monto'] ?? null);
+        
+        if ($amountValue === null || $amountValue === '') {
+            return null;
+        }
+
+        // Si ya es numérico
+        if (is_numeric($amountValue)) {
+            return (float) $amountValue;
+        }
+
+        // Si es string, normalizar
+        return $this->normalizeAmount($amountValue);
+    }
+
+    /**
+     * Extrae el comprobante según el tipo de archivo
+     */
+    protected function extractComprobante(array $row, string $type): string
+    {
+        if ($type === 'sale') {
+            return trim($row['N_COMP'] ?? '');
+        } else {
+            return trim($row['Orden de Pedido'] ?? '');
+        }
+    }
+
+    /**
+     * Extrae la moneda según el tipo de archivo
+     */
+    protected function extractMoneda(array $row, string $type): string
+    {
+        if ($type === 'sale') {
+            $moneda = trim($row['MONEDA'] ?? 'USD');
+            // Normalizar: CTE -> USD, etc.
+            return $moneda === 'CTE' ? 'USD' : $moneda;
+        } else {
+            // Budget siempre en USD según el formato
+            return 'USD';
+        }
+    }
+
+    protected function validateRowTypes(array $row, int $rowIndex, string $type): array
+    {
+        $errors = [];
+
+        // Validar Fecha
+        $fecha = $this->extractDate($row, $type);
+        if (!$fecha) {
+            $dateField = $type === 'sale' ? 'FECHA_EMI' : 'Fecha';
+            $errors[] = "Fila {$rowIndex}: Fecha inválida ({$row[$dateField]})";
+        }
+
+        // Validar Monto
+        $monto = $this->extractAmount($row, $type);
+        if ($monto === null) {
+            $amountField = $type === 'sale' ? 'TOTAL_COMP' : 'Monto';
+            $errors[] = "Fila {$rowIndex}: Monto inválido ({$row[$amountField]})";
+        }
+
+        // Validar Cliente
+        $clientName = $this->extractClientName($row, $type);
+        if (empty($clientName)) {
+            $clientField = $type === 'sale' ? 'RAZON_SOCI' : 'Empresa';
+            $errors[] = "Fila {$rowIndex}: Cliente vacío";
+        }
+
+        return $errors;
+    }
+
+    /**
+     * Normaliza un monto en formato EU/LATAM (1.240.000,00)
+     */
+    protected function normalizeAmount(string $amount): ?float
+    {
+        $amount = trim($amount);
+        
+        $lastComma = strrpos($amount, ',');
+        $lastDot = strrpos($amount, '.');
+        
+        // Si tiene punto después de coma, es formato US -> RECHAZAR
+        if ($lastDot !== false && $lastComma !== false && $lastDot > $lastComma) {
+            return null;
+        }
+        
+        // Eliminar puntos (separadores de miles)
+        $amount = str_replace('.', '', $amount);
+        
+        // Convertir coma decimal a punto
+        $amount = str_replace(',', '.', $amount);
+        
+        if (is_numeric($amount)) {
+            return (float) $amount;
+        }
+        
+        return null;
+    }
+
+    /**
+     * Procesa un chunk de datos para importar desde Excel.
+     */
+    public function importChunk(array $rows, string $type): array
+    {
+        $inserted = 0;
+        $skipped = 0;
+
+        foreach ($rows as $row) {
+            $clientName = $this->extractClientName($row, $type);
+            $client = $this->normalizationService->resolveClientByAlias($clientName);
+
+            if (!$client) {
+                continue;
+            }
+
+            $fecha = $this->extractDate($row, $type);
+            $monto = $this->extractAmount($row, $type) ?? 0;
+            $comprobante = $this->extractComprobante($row, $type);
+            $moneda = $this->extractMoneda($row, $type);
+
+            if (!$fecha) {
+                continue;
+            }
+
+            if ($type === 'sale') {
+                $hash = Sale::generateHash($fecha, $clientName, $comprobante, $monto);
+
+                if (Sale::existsByHash($hash)) {
+                    $skipped++;
+                    continue;
+                }
+
+                Sale::create([
+                    'fecha' => $fecha,
+                    'client_id' => $client->id,
+                    'cliente_nombre' => $client->nombre,
+                    'monto' => $monto,
+                    'moneda' => $moneda,
+                    'comprobante' => $comprobante,
+                    'hash' => $hash,
+                ]);
+
+            } elseif ($type === 'budget') {
+                $hash = Budget::generateHash($fecha, $clientName, $comprobante, $monto);
+
+                if (Budget::where('hash', $hash)->exists()) {
+                    $skipped++;
+                    continue;
+                }
+
+                Budget::create([
+                    'fecha' => $fecha,
+                    'client_id' => $client->id,
+                    'cliente_nombre' => $client->nombre,
+                    'monto' => $monto,
+                    'moneda' => $moneda,
+                    'comprobante' => $comprobante,
+                    'hash' => $hash,
+                ]);
+            }
+
+            $inserted++;
+        }
+
+        return ['inserted' => $inserted, 'skipped' => $skipped];
+    }
+
+    /**
+     * Lee todas las filas del Excel para procesamiento
+     */
+    public function readExcelRows(string $filePath): array
+    {
+        $spreadsheet = IOFactory::load($filePath);
+        $worksheet = $spreadsheet->getActiveSheet();
+        $rows = $worksheet->toArray();
+
+        if (empty($rows)) {
+            return [];
+        }
+
+        // Primera fila son headers
+        $headers = array_shift($rows);
+        $headers = array_map('trim', $headers);
+
+        $result = [];
+        foreach ($rows as $data) {
+            // Skip empty rows
+            if (empty(array_filter($data, function($val) { return $val !== '' && $val !== null; }))) {
+                continue;
+            }
+
+            if (count($data) === count($headers)) {
+                $result[] = array_combine($headers, $data);
+            }
+        }
+
+        return $result;
+    }
+}
