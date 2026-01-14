@@ -1,3 +1,9 @@
+@php
+    $isManager = auth()->user()->hasRole('Manager');
+    $ventasRoute = $isManager ? 'manager.historial.ventas' : 'admin.historial.ventas';
+    $importRoute = $isManager ? 'manager.sales.import' : 'admin.sales.import';
+@endphp
+
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
@@ -77,13 +83,13 @@
                     </div>
 
                     <div class="mt-6 flex justify-between items-center">
-                        <a href="{{ route('admin.sales.import') }}" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 focus:bg-green-700 active:bg-green-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                        <a href="{{ route($importRoute) }}" class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 focus:bg-green-700 active:bg-green-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
                             </svg>
                             Importar Presupuestos
                         </a>
-                        <a href="{{ route('historial.ventas') }}" class="text-green-600 hover:text-green-900">
+                        <a href="{{ route($ventasRoute) }}" class="text-green-600 hover:text-green-900">
                             Ver Historial de Ventas →
                         </a>
                     </div>
