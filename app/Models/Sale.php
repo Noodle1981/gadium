@@ -15,11 +15,37 @@ class Sale extends Model
         'moneda',
         'comprobante',
         'hash',
+        // Columnas Tango adicionales
+        'cod_cli',
+        'n_remito',
+        't_comp',
+        'cond_vta',
+        'porc_desc',
+        'cotiz',
+        'cod_transp',
+        'nom_transp',
+        'cod_articu',
+        'descripcio',
+        'cod_dep',
+        'um',
+        'cantidad',
+        'precio',
+        'tot_s_imp',
+        'n_comp_rem',
+        'cant_rem',
+        'fecha_rem',
     ];
 
     protected $casts = [
         'fecha' => 'date',
         'monto' => 'decimal:2',
+        'porc_desc' => 'decimal:2',
+        'cotiz' => 'decimal:2',
+        'cantidad' => 'decimal:2',
+        'precio' => 'decimal:2',
+        'tot_s_imp' => 'decimal:2',
+        'cant_rem' => 'decimal:2',
+        'fecha_rem' => 'date',
     ];
 
     /**

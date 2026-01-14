@@ -255,6 +255,30 @@ class ExcelImportService
     }
 
     /**
+     * Helper para parsear fechas de Excel (maneja valores vacíos)
+     */
+    protected function parseExcelDate($dateValue): ?string
+    {
+        if (empty($dateValue)) {
+            return null;
+        }
+
+        // Si es un número (Excel serial date)
+        if (is_numeric($dateValue)) {
+            try {
+                $date = Date::excelToDateTimeObject($dateValue);
+                return $date->format('Y-m-d');
+            } catch (Exception $e) {
+                return null;
+            }
+        }
+
+        // Si es string, intentar parsear
+        $timestamp = strtotime(str_replace('/', '-', $dateValue));
+        return $timestamp ? date('Y-m-d', $timestamp) : null;
+    }
+
+    /**
      * Procesa un chunk de datos para importar desde Excel.
      */
     public function importChunk(array $rows, string $type): array
@@ -295,6 +319,25 @@ class ExcelImportService
                     'moneda' => $moneda,
                     'comprobante' => $comprobante,
                     'hash' => $hash,
+                    // Columnas Tango adicionales
+                    'cod_cli' => trim($row['COD_CLI'] ?? ''),
+                    'n_remito' => trim($row['N_REMITO'] ?? ''),
+                    't_comp' => trim($row['T_COMP'] ?? ''),
+                    'cond_vta' => trim($row['COND_VTA'] ?? ''),
+                    'porc_desc' => $this->normalizeAmount($row['PORC_DESC'] ?? '0'),
+                    'cotiz' => $this->normalizeAmount($row['COTIZ'] ?? '1'),
+                    'cod_transp' => trim($row['COD_TRANSP'] ?? ''),
+                    'nom_transp' => trim($row['NOM_TRANSP'] ?? ''),
+                    'cod_articu' => trim($row['COD_ARTICU'] ?? ''),
+                    'descripcio' => trim($row['DESCRIPCIO'] ?? ''),
+                    'cod_dep' => trim($row['COD_DEP'] ?? ''),
+                    'um' => trim($row['UM'] ?? ''),
+                    'cantidad' => $this->normalizeAmount($row['CANTIDAD'] ?? '0'),
+                    'precio' => $this->normalizeAmount($row['PRECIO'] ?? '0'),
+                    'tot_s_imp' => $this->normalizeAmount($row['TOT_S_IMP'] ?? '0'),
+                    'n_comp_rem' => trim($row['N_COMP_REM'] ?? ''),
+                    'cant_rem' => $this->normalizeAmount($row['CANT_REM'] ?? '0'),
+                    'fecha_rem' => $this->extractDate($row, 'sale') ?: null, // Usar helper para fecha_rem
                 ]);
 
             } elseif ($type === 'budget') {
@@ -313,6 +356,19 @@ class ExcelImportService
                     'moneda' => $moneda,
                     'comprobante' => $comprobante,
                     'hash' => $hash,
+                    // Columnas adicionales de Presupuestos
+                    'centro_costo' => trim($row['Centro de Costo'] ?? ''),
+                    'nombre_proyecto' => trim($row['Nombre Proyecto'] ?? ''),
+                    'fecha_oc' => $this->parseExcelDate($row['Fecha de OC'] ?? null),
+                    'fecha_estimada_culminacion' => $this->parseExcelDate($row['Fecha estimada de culminación'] ?? null),
+                    'estado_proyecto_dias' => is_numeric($row['Estado del proyecto en días'] ?? null) ? (int)$row['Estado del proyecto en días'] : null,
+                    'fecha_culminacion_real' => $this->parseExcelDate($row['Fecha de culminación real'] ?? null),
+                    'estado' => trim($row['Estado'] ?? ''),
+                    'enviado_facturar' => trim($row['Enviado a facturar'] ?? ''),
+                    'nro_factura' => trim($row['Nº de Factura'] ?? ''),
+                    'porc_facturacion' => trim($row['% Facturación'] ?? ''),
+                    'saldo' => $this->normalizeAmount($row['Saldo [$]'] ?? '0'),
+                    'horas_ponderadas' => is_numeric($row['Horas ponderadas'] ?? null) ? (float)$row['Horas ponderadas'] : null,
                 ]);
             }
 

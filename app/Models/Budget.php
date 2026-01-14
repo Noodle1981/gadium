@@ -15,11 +15,30 @@ class Budget extends Model
         'moneda',
         'comprobante',
         'hash',
+        // Columnas adicionales de Presupuestos
+        'centro_costo',
+        'nombre_proyecto',
+        'fecha_oc',
+        'fecha_estimada_culminacion',
+        'estado_proyecto_dias',
+        'fecha_culminacion_real',
+        'estado',
+        'enviado_facturar',
+        'nro_factura',
+        'porc_facturacion',
+        'saldo',
+        'horas_ponderadas',
     ];
 
     protected $casts = [
         'fecha' => 'date',
         'monto' => 'decimal:2',
+        'fecha_oc' => 'date',
+        'fecha_estimada_culminacion' => 'date',
+        'estado_proyecto_dias' => 'integer',
+        'fecha_culminacion_real' => 'date',
+        'saldo' => 'decimal:2',
+        'horas_ponderadas' => 'decimal:2',
     ];
 
     /**

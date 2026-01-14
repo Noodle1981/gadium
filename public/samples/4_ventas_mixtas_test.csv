@@ -1,9 +1,0 @@
-Fecha;Cliente;Monto;Comprobante;Moneda
-01/01/2026;Cliente Ejemplo S.A.;1.500,50;A-0001;USD
-02/01/2026;Nuevo Cliente SRL;2.300,00;A-0002;USD
-03/01/2026;Cliente Ejemplo S.A.;100,00;A-0003;USD
-04/01/2026;Industrias Metalúrgicas del Sur;5.750,00;A-0004;ARS
-05/01/2026;Corporación Minera del Altiplano;450.200,00;FAC-EXP-004;USD
-06/01/2026;Siderurgia Metalmécanica S.A.;1.240.000,00;FAC-INT-882;ARS
-07/01/2026;Cliente Ejemplo S.A.;3.200,00;A-0005;USD
-08/01/2026;Perforaciones y Suministros Litio;85.300,00;FAC-EXP-005;USD
