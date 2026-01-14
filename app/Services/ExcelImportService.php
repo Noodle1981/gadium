@@ -146,8 +146,23 @@ class ExcelImportService
             }
         }
 
-        // Si es string, intentar parsear
-        $timestamp = strtotime(str_replace('/', '-', $dateValue));
+        // Si es string, intentar múltiples formatos
+        $dateString = trim($dateValue);
+        
+        // Formato dd/mm/yyyy o d/m/yyyy (común en Excel latinoamericano)
+        if (preg_match('/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/', $dateString, $matches)) {
+            $day = str_pad($matches[1], 2, '0', STR_PAD_LEFT);
+            $month = str_pad($matches[2], 2, '0', STR_PAD_LEFT);
+            $year = $matches[3];
+            
+            // Validar que sea una fecha válida
+            if (checkdate((int)$month, (int)$day, (int)$year)) {
+                return "{$year}-{$month}-{$day}";
+            }
+        }
+        
+        // Intentar parsear con strtotime (para otros formatos)
+        $timestamp = strtotime(str_replace('/', '-', $dateString));
         return $timestamp ? date('Y-m-d', $timestamp) : null;
     }
 
@@ -273,8 +288,22 @@ class ExcelImportService
             }
         }
 
-        // Si es string, intentar parsear
-        $timestamp = strtotime(str_replace('/', '-', $dateValue));
+        // Si es string, intentar múltiples formatos
+        $dateString = trim($dateValue);
+        
+        // Formato dd/mm/yyyy o d/m/yyyy
+        if (preg_match('/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/', $dateString, $matches)) {
+            $day = str_pad($matches[1], 2, '0', STR_PAD_LEFT);
+            $month = str_pad($matches[2], 2, '0', STR_PAD_LEFT);
+            $year = $matches[3];
+            
+            if (checkdate((int)$month, (int)$day, (int)$year)) {
+                return "{$year}-{$month}-{$day}";
+            }
+        }
+        
+        // Intentar parsear con strtotime
+        $timestamp = strtotime(str_replace('/', '-', $dateString));
         return $timestamp ? date('Y-m-d', $timestamp) : null;
     }
 
