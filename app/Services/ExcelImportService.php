@@ -149,15 +149,47 @@ class ExcelImportService
         // Si es string, intentar múltiples formatos
         $dateString = trim($dateValue);
         
-        // Formato dd/mm/yyyy o d/m/yyyy (común en Excel latinoamericano)
+        // Formato con barras: intentar detectar si es dd/mm/yyyy o mm/dd/yyyy
         if (preg_match('/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/', $dateString, $matches)) {
-            $day = str_pad($matches[1], 2, '0', STR_PAD_LEFT);
-            $month = str_pad($matches[2], 2, '0', STR_PAD_LEFT);
+            $first = (int)$matches[1];
+            $second = (int)$matches[2];
             $year = $matches[3];
             
-            // Validar que sea una fecha válida
-            if (checkdate((int)$month, (int)$day, (int)$year)) {
-                return "{$year}-{$month}-{$day}";
+            // Si el primer número es > 12, definitivamente es dd/mm/yyyy
+            if ($first > 12) {
+                $day = str_pad($first, 2, '0', STR_PAD_LEFT);
+                $month = str_pad($second, 2, '0', STR_PAD_LEFT);
+                
+                if (checkdate((int)$month, (int)$day, (int)$year)) {
+                    return "{$year}-{$month}-{$day}";
+                }
+            }
+            // Si el segundo número es > 12, definitivamente es mm/dd/yyyy
+            elseif ($second > 12) {
+                $month = str_pad($first, 2, '0', STR_PAD_LEFT);
+                $day = str_pad($second, 2, '0', STR_PAD_LEFT);
+                
+                if (checkdate((int)$month, (int)$day, (int)$year)) {
+                    return "{$year}-{$month}-{$day}";
+                }
+            }
+            // Ambos son <= 12, intentar primero formato dd/mm/yyyy (más común en LATAM)
+            else {
+                // Intentar dd/mm/yyyy
+                $day = str_pad($first, 2, '0', STR_PAD_LEFT);
+                $month = str_pad($second, 2, '0', STR_PAD_LEFT);
+                
+                if (checkdate((int)$month, (int)$day, (int)$year)) {
+                    return "{$year}-{$month}-{$day}";
+                }
+                
+                // Si falla, intentar mm/dd/yyyy
+                $month = str_pad($first, 2, '0', STR_PAD_LEFT);
+                $day = str_pad($second, 2, '0', STR_PAD_LEFT);
+                
+                if (checkdate((int)$month, (int)$day, (int)$year)) {
+                    return "{$year}-{$month}-{$day}";
+                }
             }
         }
         
@@ -291,14 +323,46 @@ class ExcelImportService
         // Si es string, intentar múltiples formatos
         $dateString = trim($dateValue);
         
-        // Formato dd/mm/yyyy o d/m/yyyy
+        // Formato con barras: detectar dd/mm/yyyy o mm/dd/yyyy
         if (preg_match('/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/', $dateString, $matches)) {
-            $day = str_pad($matches[1], 2, '0', STR_PAD_LEFT);
-            $month = str_pad($matches[2], 2, '0', STR_PAD_LEFT);
+            $first = (int)$matches[1];
+            $second = (int)$matches[2];
             $year = $matches[3];
             
-            if (checkdate((int)$month, (int)$day, (int)$year)) {
-                return "{$year}-{$month}-{$day}";
+            // Si el primer número es > 12, es dd/mm/yyyy
+            if ($first > 12) {
+                $day = str_pad($first, 2, '0', STR_PAD_LEFT);
+                $month = str_pad($second, 2, '0', STR_PAD_LEFT);
+                
+                if (checkdate((int)$month, (int)$day, (int)$year)) {
+                    return "{$year}-{$month}-{$day}";
+                }
+            }
+            // Si el segundo número es > 12, es mm/dd/yyyy
+            elseif ($second > 12) {
+                $month = str_pad($first, 2, '0', STR_PAD_LEFT);
+                $day = str_pad($second, 2, '0', STR_PAD_LEFT);
+                
+                if (checkdate((int)$month, (int)$day, (int)$year)) {
+                    return "{$year}-{$month}-{$day}";
+                }
+            }
+            // Ambos <= 12, intentar dd/mm/yyyy primero
+            else {
+                $day = str_pad($first, 2, '0', STR_PAD_LEFT);
+                $month = str_pad($second, 2, '0', STR_PAD_LEFT);
+                
+                if (checkdate((int)$month, (int)$day, (int)$year)) {
+                    return "{$year}-{$month}-{$day}";
+                }
+                
+                // Si falla, intentar mm/dd/yyyy
+                $month = str_pad($first, 2, '0', STR_PAD_LEFT);
+                $day = str_pad($second, 2, '0', STR_PAD_LEFT);
+                
+                if (checkdate((int)$month, (int)$day, (int)$year)) {
+                    return "{$year}-{$month}-{$day}";
+                }
             }
         }
         
