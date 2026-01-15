@@ -110,7 +110,7 @@ new class extends Component
                 <span class="text-lg font-bold text-white uppercase tracking-wider">Menú</span>
             </div>
             <div class="flex-1 overflow-y-auto py-6 px-4 space-y-2">
-                <x-sidebar-content :isAdmin="$isAdmin" :isSuperAdmin="$isSuperAdmin" :isManager="$isManager" :isViewer="$isViewer" :dashboardRoute="$dashboardRoute" />
+                <x-sidebar-content :isAdmin="$isAdmin" :isSuperAdmin="$isSuperAdmin" :isManager="$isManager" :isViewer="$isViewer" :isVendedor="$isVendedor" :dashboardRoute="$dashboardRoute" />
                 
                 <hr class="border-gray-800 my-4">
                 
