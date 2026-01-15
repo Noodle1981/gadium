@@ -98,24 +98,16 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
     });
 
     // --- GERENCIA (Manager) ---
-    // Nota: Manager ahora tiene acceso a rutas /admin, pero manteniendo este grupo para dashboards específicos si existen
-    Route::prefix('gerente')->middleware(['role:Manager'])->group(function () { // Changed prefix to 'gerente' as requested? User asked for /gerente/importacion. Existing was prefix('manager'). I should probably keep 'manager' prefix internally but user asked specifically for /gerente/importacion. I will use 'gerente' prefix if existing strictly maps 'manager' prefix to 'gerente' role.
-        // Wait, existing code has Route::prefix('manager'). User asked for /gerente/importacion. 
-        // I will add a specific route group or change prefix if acceptable. 
-        // Let's assume 'manager' prefix was intended to be 'gerente' or just add a new group or alias.
-        // Or simply rename the prefix to 'gerente' if that fits.
-        // However, looking at existing 'manager' prefix, it has dashboard.
-        // I'll change the prefix to 'gerente' to match request perfectly, assuming no other hard links break (routes are named).
+    // Manager tiene acceso a rutas /admin, este grupo mantiene rutas específicas de dashboard y reportes
+    Route::prefix('gerente')->middleware(['role:Manager'])->group(function () {
         
         Volt::route('dashboard', 'pages.manager.dashboard')->name('manager.dashboard');
-        Volt::route('importacion', 'pages.sales.import-wizard')->name('manager.sales.import');
-        Volt::route('clientes', 'pages.clients.resolution')->name('manager.clients.resolve'); // clientes
-        Volt::route('produccion', 'pages.manufacturing.production-log')->name('manager.manufacturing.production.log'); // produccion
+        Volt::route('produccion', 'pages.manufacturing.production-log')->name('manager.manufacturing.production.log');
         
         // Agregar RRHH si tienen permiso
         Volt::route('rrhh', 'pages.hr.factor-manager')->name('manager.hr.factors');
         
-        // Historial de Ventas y Presupuestos
+        // Historial de Ventas y Presupuestos (permanecen en /gerente)
         Route::get('historial-ventas', function () {
             $sales = \App\Models\Sale::with('client')->latest()->take(50)->get();
             return view('historial-ventas', ['sales' => $sales]);
