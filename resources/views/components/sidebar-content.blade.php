@@ -1,9 +1,9 @@
-@props(['isAdmin', 'isSuperAdmin', 'isManager', 'isViewer', 'isVendedor', 'isPresupuestador', 'dashboardRoute'])
+@props(['isAdmin', 'isSuperAdmin', 'isManager', 'isViewer', 'isVendedor', 'isPresupuestador', 'isHours', 'isPurchases', 'isStaffSat', 'isClientSat', 'isBoards', 'isAutomation', 'dashboardRoute'])
 
 <!-- Principal -->
 <div class="text-xs font-semibold text-gray-500 uppercase tracking-widest px-4 mb-2">Principal</div>
 
-@if(!$isVendedor && !$isPresupuestador)
+@if(!$isVendedor && !$isPresupuestador && !$isHours && !$isPurchases && !$isStaffSat && !$isClientSat && !$isBoards && !$isAutomation)
     <x-sidebar-link :href="route($dashboardRoute)" :active="request()->routeIs($dashboardRoute)" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>'>
         Dashboard
     </x-sidebar-link>
@@ -134,4 +134,46 @@
             Historial Importación
         </x-sidebar-link>
     @endcan
+@endif
+
+{{-- Sidebar para Gestor de Horas --}}
+@if(auth()->user()->hasRole('Gestor de Horas'))
+    <x-sidebar-link :href="route('hours.dashboard')" :active="request()->routeIs('hours.dashboard')" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'>
+        Dashboard
+    </x-sidebar-link>
+@endif
+
+{{-- Sidebar para Gestor de Compras --}}
+@if(auth()->user()->hasRole('Gestor de Compras'))
+    <x-sidebar-link :href="route('purchases.dashboard')" :active="request()->routeIs('purchases.dashboard')" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>'>
+        Dashboard
+    </x-sidebar-link>
+@endif
+
+{{-- Sidebar para Safisfacción Personal --}}
+@if(auth()->user()->hasRole('Gestor de Satisfacción Personal'))
+    <x-sidebar-link :href="route('staff-satisfaction.dashboard')" :active="request()->routeIs('staff-satisfaction.dashboard')" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'>
+        Dashboard
+    </x-sidebar-link>
+@endif
+
+{{-- Sidebar para Safisfacción Clientes --}}
+@if(auth()->user()->hasRole('Gestor de Satisfacción Clientes'))
+    <x-sidebar-link :href="route('client-satisfaction.dashboard')" :active="request()->routeIs('client-satisfaction.dashboard')" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>'>
+        Dashboard
+    </x-sidebar-link>
+@endif
+
+{{-- Sidebar para Tableros --}}
+@if(auth()->user()->hasRole('Gestor de Tableros'))
+    <x-sidebar-link :href="route('boards.dashboard')" :active="request()->routeIs('boards.dashboard')" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>'>
+        Dashboard
+    </x-sidebar-link>
+@endif
+
+{{-- Sidebar para Proyectos --}}
+@if(auth()->user()->hasRole('Gestor de Proyectos'))
+    <x-sidebar-link :href="route('automation.dashboard')" :active="request()->routeIs('automation.dashboard')" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.384-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>'>
+        Dashboard
+    </x-sidebar-link>
 @endif

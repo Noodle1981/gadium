@@ -23,18 +23,36 @@ new class extends Component
     $isViewer = $user->hasRole('Viewer');
     $isVendedor = $user->hasRole('Vendedor');
     $isPresupuestador = $user->hasRole('Presupuestador');
+    $isHours = $user->hasRole('Gestor de Horas');
+    $isPurchases = $user->hasRole('Gestor de Compras');
+    $isStaffSat = $user->hasRole('Gestor de Satisfacción Personal');
+    $isClientSat = $user->hasRole('Gestor de Satisfacción Clientes');
+    $isBoards = $user->hasRole('Gestor de Tableros');
+    $isAutomation = $user->hasRole('Gestor de Proyectos');
 
     $dashboardRoute = 'dashboard';
     if ($isAdmin) $dashboardRoute = 'admin.dashboard';
     elseif ($isManager) $dashboardRoute = 'manager.dashboard';
     elseif ($isVendedor) $dashboardRoute = 'sales.dashboard';
     elseif ($isPresupuestador) $dashboardRoute = 'budget.dashboard';
+    elseif ($isHours) $dashboardRoute = 'hours.dashboard';
+    elseif ($isPurchases) $dashboardRoute = 'purchases.dashboard';
+    elseif ($isStaffSat) $dashboardRoute = 'staff-satisfaction.dashboard';
+    elseif ($isClientSat) $dashboardRoute = 'client-satisfaction.dashboard';
+    elseif ($isBoards) $dashboardRoute = 'boards.dashboard';
+    elseif ($isAutomation) $dashboardRoute = 'automation.dashboard';
 
     $profileRoute = 'admin.profile'; // Default
     if ($isManager) $profileRoute = 'manager.profile';
     elseif ($isAdmin) $profileRoute = 'admin.profile';
     elseif ($isVendedor) $profileRoute = 'sales.profile';
     elseif ($isPresupuestador) $profileRoute = 'budget.profile';
+    elseif ($isHours) $profileRoute = 'hours.profile';
+    elseif ($isPurchases) $profileRoute = 'purchases.profile';
+    elseif ($isStaffSat) $profileRoute = 'staff-satisfaction.profile';
+    elseif ($isClientSat) $profileRoute = 'client-satisfaction.profile';
+    elseif ($isBoards) $profileRoute = 'boards.profile';
+    elseif ($isAutomation) $profileRoute = 'automation.profile';
 
 @endphp
 
@@ -113,7 +131,21 @@ new class extends Component
                 <span class="text-lg font-bold text-white uppercase tracking-wider">Menú</span>
             </div>
             <div class="flex-1 overflow-y-auto py-6 px-4 space-y-2">
-                <x-sidebar-content :isAdmin="$isAdmin" :isSuperAdmin="$isSuperAdmin" :isManager="$isManager" :isViewer="$isViewer" :isVendedor="$isVendedor" :isPresupuestador="$isPresupuestador" :dashboardRoute="$dashboardRoute" />
+                <x-sidebar-content 
+                    :isAdmin="$isAdmin" 
+                    :isSuperAdmin="$isSuperAdmin" 
+                    :isManager="$isManager" 
+                    :isViewer="$isViewer" 
+                    :isVendedor="$isVendedor" 
+                    :isPresupuestador="$isPresupuestador"
+                    :isHours="$isHours"
+                    :isPurchases="$isPurchases"
+                    :isStaffSat="$isStaffSat"
+                    :isClientSat="$isClientSat"
+                    :isBoards="$isBoards"
+                    :isAutomation="$isAutomation" 
+                    :dashboardRoute="$dashboardRoute" 
+                />
                 
                 <hr class="border-gray-800 my-4">
                 

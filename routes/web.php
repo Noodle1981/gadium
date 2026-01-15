@@ -195,6 +195,43 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
                 return view('historial-presupuesto', ['budgets' => $budgets]);
             })->name('budget.historial.importacion');
         });
+
+
+    // --- DETALLE DE HORAS (Gestor de Horas) ---
+    Route::prefix('detalle_horas')->middleware(['role:Gestor de Horas'])->group(function () {
+        Volt::route('dashboard', 'pages.hours.dashboard')->name('hours.dashboard');
+        Route::view('perfil', 'profile')->name('hours.profile');
+    });
+
+    // --- COMPRAS (Gestor de Compras) ---
+    Route::prefix('compras')->middleware(['role:Gestor de Compras'])->group(function () {
+        Volt::route('dashboard', 'pages.purchases.dashboard')->name('purchases.dashboard');
+        Route::view('perfil', 'profile')->name('purchases.profile');
+    });
+
+    // --- SATISFACCIÓN PERSONAL (Gestor de Satisfacción Personal) ---
+    Route::prefix('satisfaccion_personal')->middleware(['role:Gestor de Satisfacción Personal'])->group(function () {
+        Volt::route('dashboard', 'pages.staff-satisfaction.dashboard')->name('staff-satisfaction.dashboard');
+        Route::view('perfil', 'profile')->name('staff-satisfaction.profile');
+    });
+
+    // --- SATISFACCIÓN CLIENTES (Gestor de Satisfacción Clientes) ---
+    Route::prefix('satisfaccion_clientes')->middleware(['role:Gestor de Satisfacción Clientes'])->group(function () {
+        Volt::route('dashboard', 'pages.client-satisfaction.dashboard')->name('client-satisfaction.dashboard');
+        Route::view('perfil', 'profile')->name('client-satisfaction.profile');
+    });
+
+    // --- TABLEROS (Gestor de Tableros) ---
+    Route::prefix('tableros')->middleware(['role:Gestor de Tableros'])->group(function () {
+        Volt::route('dashboard', 'pages.boards.dashboard')->name('boards.dashboard');
+        Route::view('perfil', 'profile')->name('boards.profile');
+    });
+
+    // --- PROYECTOS (Gestor de Proyectos) ---
+    Route::prefix('proyectos')->middleware(['role:Gestor de Proyectos'])->group(function () {
+        Volt::route('dashboard', 'pages.automation.dashboard')->name('automation.dashboard');
+        Route::view('perfil', 'profile')->name('automation.profile');
+    });
     });
 
 
