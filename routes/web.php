@@ -107,6 +107,36 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
         // Agregar RRHH si tienen permiso
         Volt::route('rrhh', 'pages.hr.factor-manager')->name('manager.hr.factors');
         
+        // Gestión de Usuarios (Manager tiene acceso completo)
+        Route::middleware(['can:view_users'])->group(function () {
+            Route::resource('users', UserController::class)->names([
+                'index' => 'manager.users.index',
+                'create' => 'manager.users.create',
+                'store' => 'manager.users.store',
+                'show' => 'manager.users.show',
+                'edit' => 'manager.users.edit',
+                'update' => 'manager.users.update',
+                'destroy' => 'manager.users.destroy',
+            ]);
+        });
+
+        // Gestión de Roles (Manager tiene acceso completo)
+        Route::middleware(['can:view_roles'])->group(function () {
+            Route::resource('roles', RoleController::class)->names([
+                'index' => 'manager.roles.index',
+                'create' => 'manager.roles.create',
+                'store' => 'manager.roles.store',
+                'show' => 'manager.roles.show',
+                'edit' => 'manager.roles.edit',
+                'update' => 'manager.roles.update',
+                'destroy' => 'manager.roles.destroy',
+            ]);
+            Route::get('roles/{role}/permissions', [RoleController::class, 'permissions'])
+                ->name('manager.roles.permissions');
+            Route::post('roles/{role}/permissions', [RoleController::class, 'updatePermissions'])
+                ->name('manager.roles.permissions.update');
+        });
+        
         // Historial de Ventas y Presupuestos (permanecen en /gerente)
         Route::get('historial-ventas', function () {
             $sales = \App\Models\Sale::with('client')->latest()->take(50)->get();
