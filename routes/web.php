@@ -170,6 +170,7 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
         Route::middleware(['can:view_sales'])->group(function () {
             Volt::route('importacion', 'pages.sales.import-wizard')->name('sales.import');
             Volt::route('crear', 'pages.sales.manual-create')->name('sales.create');
+            Volt::route('editar/{sale}', 'pages.sales.manual-edit')->name('sales.edit');
             Volt::route('resolucion-clientes', 'pages.clients.resolution')->name('sales.clients.resolve');
             
             // Historial de Ventas

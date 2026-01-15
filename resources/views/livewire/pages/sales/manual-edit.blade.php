@@ -6,6 +6,8 @@ use App\Models\Client;
 use App\Services\ClientNormalizationService;
 
 new class extends Component {
+    public Sale $sale;
+
     // 1. Datos Principales (Obligatorios)
     public $cliente_nombre = '';
     public $fecha = '';
@@ -41,15 +43,42 @@ new class extends Component {
     
     // UI Logic
     public $searchResults = [];
-    public $selectedClientId = null;
     public $showClientSearch = false;
-    
-    // Sections state
-    public $showMoreDetails = false;
+    public $showMoreDetails = true; // Show details by default on edit
 
-    public function mount()
+    public function mount(Sale $sale)
     {
-        $this->fecha = date('Y-m-d'); // Default to today
+        $this->sale = $sale;
+        
+        // Cargar datos principales
+        $this->cliente_nombre = $sale->cliente_nombre;
+        $this->fecha = $sale->fecha ? $sale->fecha->format('Y-m-d') : '';
+        $this->monto = $sale->monto;
+        $this->moneda = $sale->moneda;
+        $this->comprobante = $sale->comprobante;
+        
+        // Cargar opcionales (manejar nulos)
+        $this->cod_cli = $sale->cod_cli ?? '';
+        $this->t_comp = $sale->t_comp ?? '';
+        $this->cond_vta = $sale->cond_vta ?? '';
+        $this->porc_desc = $sale->porc_desc ?? '';
+        $this->cotiz = $sale->cotiz ?? '';
+        $this->tot_s_imp = $sale->tot_s_imp ?? '';
+        $this->cod_dep = $sale->cod_dep ?? '';
+        
+        $this->n_remito = $sale->n_remito ?? '';
+        $this->n_comp_rem = $sale->n_comp_rem ?? '';
+        $this->cant_rem = $sale->cant_rem ?? '';
+        $this->fecha_rem = $sale->fecha_rem ? $sale->fecha_rem->format('Y-m-d') : '';
+        
+        $this->cod_articu = $sale->cod_articu ?? '';
+        $this->descripcio = $sale->descripcio ?? '';
+        $this->um = $sale->um ?? '';
+        $this->cantidad = $sale->cantidad ?? '';
+        $this->precio = $sale->precio ?? '';
+        
+        $this->cod_transp = $sale->cod_transp ?? '';
+        $this->nom_transp = $sale->nom_transp ?? '';
     }
 
     public function rules()
@@ -102,9 +131,8 @@ new class extends Component {
         }
     }
 
-    public function selectClient($clientId, $clientName)
+    public function selectClient($clientName)
     {
-        $this->selectedClientId = $clientId;
         $this->cliente_nombre = $clientName;
         $this->showClientSearch = false;
         $this->searchResults = [];
@@ -127,16 +155,17 @@ new class extends Component {
             $client = Client::create(['nombre' => $this->cliente_nombre]);
         }
 
-        // Generate hash to prevent duplicates
-        $hash = Sale::generateHash($this->fecha, $client->nombre, $this->comprobante, $this->monto);
-
-        if (Sale::existsByHash($hash)) {
-            $this->addError('comprobante', 'Esta venta ya existe en el sistema (duplicado detectado).');
+        // Check if hash changes (if critical fields change)
+        $newHash = Sale::generateHash($this->fecha, $client->nombre, $this->comprobante, $this->monto);
+        
+        // If hash changed, check if it already exists in ANOTHER record
+        if ($newHash !== $this->sale->hash && Sale::where('hash', $newHash)->where('id', '!=', $this->sale->id)->exists()) {
+            $this->addError('comprobante', 'Esta combinación de datos genera un conflicto con otra venta existente.');
             return;
         }
 
-        // Create sale
-        Sale::create([
+        // Update sale
+        $this->sale->update([
             // Principales
             'fecha' => $this->fecha,
             'client_id' => $client->id,
@@ -144,7 +173,7 @@ new class extends Component {
             'monto' => $this->monto,
             'moneda' => $this->moneda,
             'comprobante' => $this->comprobante,
-            'hash' => $hash,
+            'hash' => $newHash,
             
             // Detalles Tango
             'cod_cli' => $this->cod_cli,
@@ -173,27 +202,18 @@ new class extends Component {
             'nom_transp' => $this->nom_transp,
         ]);
 
-        session()->flash('success', '¡Venta creada exitosamente!');
-        
-        // Reset form
-        $this->reset([
-            'cliente_nombre', 'fecha', 'monto', 'comprobante', 'selectedClientId',
-            'cod_cli', 't_comp', 'cond_vta', 'porc_desc', 'cotiz', 'tot_s_imp', 'cod_dep',
-            'n_remito', 'n_comp_rem', 'cant_rem', 'fecha_rem',
-            'cod_articu', 'descripcio', 'um', 'cantidad', 'precio',
-            'cod_transp', 'nom_transp'
-        ]);
-        $this->moneda = 'USD';
-        $this->fecha = date('Y-m-d');
-        $this->showMoreDetails = false;
+        session()->flash('success', '¡Venta actualizada exitosamente!');
     }
 }; ?>
 
 <div>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('Crear Venta Manual') }}
-        </h2>
+        <div class="flex items-center justify-between">
+            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+                {{ __('Editar Venta') }} <span class="text-gray-500 text-sm ml-2">#{{ $sale->id }}</span>
+            </h2>
+            <a href="{{ route('sales.historial.ventas') }}" class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">Volver al Historial</a>
+        </div>
     </x-slot>
 
     <div class="py-12">
@@ -218,8 +238,8 @@ new class extends Component {
                 <form wire:submit="save" class="space-y-8">
                     
                     <!-- 1. CAMPOS PRINCIPALES (OBLIGATORIOS) -->
-                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                        <h3 class="text-lg font-medium leading-6 text-gray-900 mb-4 border-b pb-2">Datos Principales (Obligatorios)</h3>
+                    <div class="bg-indigo-50 p-4 rounded-lg border border-indigo-100">
+                        <h3 class="text-lg font-medium leading-6 text-gray-900 mb-4 border-b border-indigo-200 pb-2">Datos Principales</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             
                             <!-- Cliente -->
@@ -230,16 +250,15 @@ new class extends Component {
                                         wire:model.live.debounce.300ms="cliente_nombre" 
                                         type="text" 
                                         id="cliente_nombre"
-                                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm"
-                                        placeholder="Nombre del cliente"
+                                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                     >
                                     
                                     @if($showClientSearch && !empty($searchResults))
                                         <div class="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
                                             @foreach($searchResults as $result)
                                                 <div 
-                                                    wire:click="selectClient({{ $result['id'] }}, '{{ $result['nombre'] }}')"
-                                                    class="cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-orange-50"
+                                                    wire:click="selectClient('{{ $result['nombre'] }}')"
+                                                    class="cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-indigo-50"
                                                 >
                                                     <span class="block truncate">{{ $result['nombre'] }}</span>
                                                 </div>
@@ -257,7 +276,7 @@ new class extends Component {
                                     wire:model="fecha" 
                                     type="date" 
                                     id="fecha"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                 >
                                 @error('fecha') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
                             </div>
@@ -269,8 +288,7 @@ new class extends Component {
                                     wire:model="comprobante" 
                                     type="text" 
                                     id="comprobante"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm"
-                                    placeholder="Ej: FAC-A-00001"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                 >
                                 @error('comprobante') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
                             </div>
@@ -283,8 +301,7 @@ new class extends Component {
                                     type="number" 
                                     step="0.01"
                                     id="monto"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm font-bold"
-                                    placeholder="0.00"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm font-bold"
                                 >
                                 @error('monto') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
                             </div>
@@ -295,7 +312,7 @@ new class extends Component {
                                 <select 
                                     wire:model="moneda" 
                                     id="moneda"
-                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm"
+                                    class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                                 >
                                     <option value="USD">USD</option>
                                     <option value="ARS">ARS</option>
@@ -308,13 +325,13 @@ new class extends Component {
                     
                     <!-- Botón para mostrar/ocultar detalles -->
                     <div class="flex justify-center">
-                        <button type="button" wire:click="toggleDetails" class="text-sm flex items-center text-gray-500 hover:text-orange-600 focus:outline-none">
+                        <button type="button" wire:click="toggleDetails" class="text-sm flex items-center text-gray-500 hover:text-indigo-600 focus:outline-none">
                             @if($showMoreDetails)
                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
                                 Ocultar Detalles Avanzados
                             @else
                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                                Mostrar Detalles Avanzados (Tango, Remito, Artículos)
+                                Mostrar Detalles Avanzados
                             @endif
                         </button>
                     </div>
@@ -328,31 +345,31 @@ new class extends Component {
                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                                 <div>
                                     <label class="block text-xs font-medium text-gray-500 uppercase">Cód. Cliente</label>
-                                    <input wire:model="cod_cli" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm">
+                                    <input wire:model="cod_cli" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium text-gray-500 uppercase">Tipo Comprobante</label>
-                                    <input wire:model="t_comp" type="text" placeholder="FAC" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm">
+                                    <input wire:model="t_comp" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                 </div>
                                 <div class="col-span-2">
                                     <label class="block text-xs font-medium text-gray-500 uppercase">Condición Venta</label>
-                                    <input wire:model="cond_vta" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm">
+                                    <input wire:model="cond_vta" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium text-gray-500 uppercase">Total S/Imp</label>
-                                    <input wire:model="tot_s_imp" type="number" step="0.01" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm">
+                                    <input wire:model="tot_s_imp" type="number" step="0.01" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium text-gray-500 uppercase">% Descuento</label>
-                                    <input wire:model="porc_desc" type="number" step="0.01" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm">
+                                    <input wire:model="porc_desc" type="number" step="0.01" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium text-gray-500 uppercase">Cotización</label>
-                                    <input wire:model="cotiz" type="number" step="0.0001" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm">
+                                    <input wire:model="cotiz" type="number" step="0.0001" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium text-gray-500 uppercase">Depósito</label>
-                                    <input wire:model="cod_dep" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm">
+                                    <input wire:model="cod_dep" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                 </div>
                             </div>
                         </div>
@@ -363,19 +380,19 @@ new class extends Component {
                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4">
                                 <div class="col-span-1">
                                     <label class="block text-xs font-medium text-gray-500 uppercase">Cód. Artículo</label>
-                                    <input wire:model="cod_articu" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm">
+                                    <input wire:model="cod_articu" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                 </div>
                                 <div class="col-span-3">
                                     <label class="block text-xs font-medium text-gray-500 uppercase">Descripción</label>
-                                    <input wire:model="descripcio" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm">
+                                    <input wire:model="descripcio" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium text-gray-500 uppercase">UM</label>
-                                    <input wire:model="um" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm">
+                                    <input wire:model="um" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium text-gray-500 uppercase">Cantidad</label>
-                                    <input wire:model="cantidad" type="number" step="0.01" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm">
+                                    <input wire:model="cantidad" type="number" step="0.01" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                 </div>
                             </div>
                         </div>
@@ -386,15 +403,15 @@ new class extends Component {
                             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                                 <div>
                                     <label class="block text-xs font-medium text-gray-500 uppercase">Nº Remito</label>
-                                    <input wire:model="n_remito" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm">
+                                    <input wire:model="n_remito" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                 </div>
                                 <div>
                                     <label class="block text-xs font-medium text-gray-500 uppercase">Fecha Remito</label>
-                                    <input wire:model="fecha_rem" type="date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm">
+                                    <input wire:model="fecha_rem" type="date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                 </div>
                                 <div class="col-span-2">
                                     <label class="block text-xs font-medium text-gray-500 uppercase">Transporte</label>
-                                    <input wire:model="nom_transp" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm">
+                                    <input wire:model="nom_transp" type="text" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
                                 </div>
                             </div>
                         </div>
@@ -403,15 +420,15 @@ new class extends Component {
 
                     <!-- Buttons -->
                     <div class="flex justify-end space-x-3 pt-6 border-t">
-                        <a href="{{ route('sales.dashboard') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none">
+                        <a href="{{ route('sales.historial.ventas') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none">
                             Cancelar
                         </a>
                         <button 
                             type="submit" 
-                            class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none"
+                            class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none"
                         >
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
-                            Guardar Venta
+                            Actualizar Registro
                         </button>
                     </div>
                 </form>

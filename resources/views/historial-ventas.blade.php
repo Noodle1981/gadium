@@ -45,6 +45,7 @@
                                     <th class="px-2 py-2 text-left font-medium text-gray-500 uppercase">Cantidad</th>
                                     <th class="px-2 py-2 text-left font-medium text-gray-500 uppercase">Precio</th>
                                     <th class="px-2 py-2 text-left font-medium text-gray-500 uppercase">Tot. S/Imp</th>
+                                    <th class="px-2 py-2 text-left font-medium text-gray-500 uppercase">Acciones</th> {{-- New Header --}}
                                     <th class="px-2 py-2 text-left font-medium text-gray-500 uppercase">N° Comp Rem</th>
                                     <th class="px-2 py-2 text-left font-medium text-gray-500 uppercase">Cant. Rem</th>
                                     <th class="px-2 py-2 text-left font-medium text-gray-500 uppercase">Fecha Rem</th>
@@ -73,6 +74,9 @@
                                     <td class="px-2 py-2">{{ $sale->cantidad }}</td>
                                     <td class="px-2 py-2 font-mono">{{ number_format($sale->precio, 2, ',', '.') }}</td>
                                     <td class="px-2 py-2 font-mono">{{ number_format($sale->tot_s_imp, 2, ',', '.') }}</td>
+                                    <td class="px-2 py-2 whitespace-nowrap">
+                                        <a href="{{ route('sales.edit', $sale) }}" class="text-indigo-600 hover:text-indigo-900 font-medium">Editar</a>
+                                    </td> {{-- New Button --}}
                                     <td class="px-2 py-2">{{ $sale->n_comp_rem }}</td>
                                     <td class="px-2 py-2">{{ $sale->cant_rem }}</td>
                                     <td class="px-2 py-2 whitespace-nowrap">{{ $sale->fecha_rem ? $sale->fecha_rem->format('d/m/Y') : '-' }}</td>
