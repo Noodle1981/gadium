@@ -160,6 +160,25 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
     });
 
 
+    // --- VENTAS (Vendedor) ---
+    Route::prefix('ventas')->middleware(['role:Vendedor'])->group(function () {
+        
+        Volt::route('dashboard', 'pages.sales.dashboard')->name('sales.dashboard');
+        Route::view('perfil', 'profile')->name('sales.profile');
+        
+        // Módulo Ventas
+        Route::middleware(['can:view_sales'])->group(function () {
+            Volt::route('importacion', 'pages.sales.import-wizard')->name('sales.import');
+            Volt::route('resolucion-clientes', 'pages.clients.resolution')->name('sales.clients.resolve');
+            
+            // Historial de Ventas
+            Route::get('historial-ventas', function () {
+                $sales = \App\Models\Sale::with('client')->latest()->take(50)->get();
+                return view('historial-ventas', ['sales' => $sales]);
+            })->name('sales.historial.ventas');
+        });
+    });
+
 
     // --- MÓDULOS DE SISTEMA (Rutas Amigables) - ELIMINADOS PARA USAR RUTAS POR ROL
     // Las rutas genéricas han sido reemplazadas por rutas específicas dentro de los grupos Admin y Gerente.
