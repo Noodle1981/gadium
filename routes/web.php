@@ -192,6 +192,7 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
         Route::middleware(['can:view_budgets'])->group(function () {
             Volt::route('importacion', 'pages.budget.import-wizard')->name('budget.import');
             Volt::route('crear', 'pages.budget.manual-create')->name('budget.create');
+            Volt::route('editar/{budget}', 'pages.budget.manual-edit')->name('budget.edit');
             
             Route::get('historial_importacion', function () {
                 $budgets = \App\Models\Budget::with('client')->latest()->take(50)->get();

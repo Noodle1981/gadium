@@ -37,6 +37,7 @@
                                     <th class="px-2 py-2 text-left font-medium text-gray-500 uppercase">Estado Días</th>
                                     <th class="px-2 py-2 text-left font-medium text-gray-500 uppercase">Fecha Culm. Real</th>
                                     <th class="px-2 py-2 text-left font-medium text-gray-500 uppercase">Estado</th>
+                                    <th class="px-2 py-2 text-left font-medium text-gray-500 uppercase">Acciones</th> {{-- New Header --}}
                                     <th class="px-2 py-2 text-left font-medium text-gray-500 uppercase">Env. Facturar</th>
                                     <th class="px-2 py-2 text-left font-medium text-gray-500 uppercase">Nº Factura</th>
                                     <th class="px-2 py-2 text-left font-medium text-gray-500 uppercase">% Facturación</th>
@@ -58,7 +59,16 @@
                                     <td class="px-2 py-2 whitespace-nowrap">{{ $budget->fecha_estimada_culminacion ? $budget->fecha_estimada_culminacion->format('d/m/Y') : '-' }}</td>
                                     <td class="px-2 py-2">{{ $budget->estado_proyecto_dias ?? '-' }}</td>
                                     <td class="px-2 py-2 whitespace-nowrap">{{ $budget->fecha_culminacion_real ? $budget->fecha_culminacion_real->format('d/m/Y') : '-' }}</td>
-                                    <td class="px-2 py-2">{{ $budget->estado }}</td>
+                                    <td class="px-2 py-2">
+                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                            {{ $budget->estado === 'Finalizado' ? 'bg-green-100 text-green-800' : 
+                                               ($budget->estado === 'Cancelado' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800') }}">
+                                            {{ $budget->estado }}
+                                        </span>
+                                    </td>
+                                    <td class="px-2 py-2 whitespace-nowrap">
+                                        <a href="{{ route('budget.edit', $budget) }}" class="text-indigo-600 hover:text-indigo-900 font-medium">Editar</a>
+                                    </td> {{-- New Button --}}
                                     <td class="px-2 py-2">{{ $budget->enviado_facturar }}</td>
                                     <td class="px-2 py-2">{{ $budget->nro_factura }}</td>
                                     <td class="px-2 py-2">{{ $budget->porc_facturacion }}</td>
@@ -67,7 +77,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="17" class="px-6 py-8 text-center text-gray-400">
+                                    <td colspan="18" class="px-6 py-8 text-center text-gray-400">
                                         <div class="flex flex-col items-center">
                                             <svg class="w-12 h-12 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>

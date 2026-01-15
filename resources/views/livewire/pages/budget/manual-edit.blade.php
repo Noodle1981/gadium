@@ -6,12 +6,14 @@ use App\Models\Client;
 use App\Services\ClientNormalizationService;
 
 new class extends Component {
+    public Budget $budget;
+
     // 1. Datos Principales (Obligatorios)
     public $cliente_nombre = '';
     public $fecha = '';
     public $monto = '';
     public $comprobante = ''; // Orden de Pedido
-    public $moneda = 'USD'; // Fixed to USD as per requirement
+    public $moneda = 'USD'; // Fixed
     
     // 2. Detalles del Proyecto
     public $nombre_proyecto = '';
@@ -31,41 +33,60 @@ new class extends Component {
 
     // UI Logic
     public $searchResults = [];
-    public $selectedClientId = null;
     public $showClientSearch = false;
-    
-    // Sections state
-    public $showMoreDetails = false;
+    public $showMoreDetails = true; // Default to showing details on edit
 
-    public function mount()
+    public function mount(Budget $budget)
     {
-        $this->fecha = date('Y-m-d');
+        $this->budget = $budget;
+        
+        // Cargar datos principales
+        $this->cliente_nombre = $budget->cliente_nombre;
+        $this->fecha = $budget->fecha ? $budget->fecha->format('Y-m-d') : '';
+        $this->monto = $budget->monto;
+        $this->moneda = 'USD';
+        $this->comprobante = $budget->comprobante;
+        
+        // Cargar opcionales (manejar nulos)
+        $this->nombre_proyecto = $budget->nombre_proyecto ?? '';
+        $this->centro_costo = $budget->centro_costo ?? '';
+        $this->fecha_oc = $budget->fecha_oc ? $budget->fecha_oc->format('Y-m-d') : '';
+        $this->fecha_estimada_culminacion = $budget->fecha_estimada_culminacion ? $budget->fecha_estimada_culminacion->format('Y-m-d') : '';
+        $this->fecha_culminacion_real = $budget->fecha_culminacion_real ? $budget->fecha_culminacion_real->format('Y-m-d') : '';
+        $this->estado_proyecto_dias = $budget->estado_proyecto_dias ?? '';
+        $this->estado = $budget->estado ?? '';
+        
+        $this->enviado_facturar = $budget->enviado_facturar ?? '';
+        $this->nro_factura = $budget->nro_factura ?? '';
+        $this->porc_facturacion = $budget->porc_facturacion ?? '';
+        $this->saldo = $budget->saldo ?? '';
+        $this->horas_ponderadas = $budget->horas_ponderadas ?? '';
     }
 
     public function rules()
     {
         return [
-            // Obligatorios
-            'cliente_nombre' => 'required|string|max:255',
-            'fecha' => 'required|date',
-            'monto' => 'required|numeric|min:0',
-            'comprobante' => 'required|string|max:255',
-            
-            // Detalles Proyecto
-            'nombre_proyecto' => 'nullable|string|max:255',
-            'centro_costo' => 'nullable|string|max:50',
-            'fecha_oc' => 'nullable|date',
-            'fecha_estimada_culminacion' => 'nullable|date',
-            'fecha_culminacion_real' => 'nullable|date',
-            'estado_proyecto_dias' => 'nullable|integer',
-            'estado' => 'nullable|string|max:50',
-            
-            // Facturación
-            'enviado_facturar' => 'nullable|string|max:50',
-            'nro_factura' => 'nullable|string|max:50',
-            'porc_facturacion' => 'nullable|string|max:20',
-            'saldo' => 'nullable|numeric',
-            'horas_ponderadas' => 'nullable|numeric',
+             // Obligatorios
+             'cliente_nombre' => 'required|string|max:255',
+             'fecha' => 'required|date',
+             'monto' => 'required|numeric|min:0',
+             'comprobante' => 'required|string|max:255',
+             
+             // Detalles Proyecto
+             'nombre_proyecto' => 'nullable|string|max:255',
+             'centro_costo' => 'nullable|string|max:50',
+             'fecha_oc' => 'nullable|date',
+             'fecha_estimada_culminacion' => 'nullable|date',
+             'fecha_culminacion_real' => 'nullable|date',
+             'estado_proyecto_dias' => 'nullable|integer',
+             'estado' => 'nullable|string|max:50',
+             
+             // Facturación
+             'enviado_facturar' => 'nullable|string|max:50',
+             'nro_factura' => 'nullable|string|max:50',
+             'porc_facturacion' => 'nullable|string|max:20',
+             'saldo' => 'nullable|numeric',
+             'horas_ponderadas' => 'nullable|numeric',
         ];
     }
 
@@ -81,9 +102,8 @@ new class extends Component {
         }
     }
 
-    public function selectClient($clientId, $clientName)
+    public function selectClient($clientName)
     {
-        $this->selectedClientId = $clientId;
         $this->cliente_nombre = $clientName;
         $this->showClientSearch = false;
         $this->searchResults = [];
@@ -106,24 +126,25 @@ new class extends Component {
             $client = Client::create(['nombre' => $this->cliente_nombre]);
         }
 
-        // Generate hash to prevent duplicates
-        $hash = Budget::generateHash($this->fecha, $client->nombre, $this->comprobante, $this->monto);
+        // Check hash
+        $newHash = Budget::generateHash($this->fecha, $client->nombre, $this->comprobante, $this->monto);
 
-        if (Budget::existsByHash($hash)) {
-            $this->addError('comprobante', 'Este presupuesto ya existe en el sistema (duplicado detectado).');
+        // If hash changed, check collision
+        if ($newHash !== $this->budget->hash && Budget::where('hash', $newHash)->where('id', '!=', $this->budget->id)->exists()) {
+            $this->addError('comprobante', 'Esta combinación de datos genera un conflicto con otro presupuesto existente.');
             return;
         }
 
-        // Create budget
-        Budget::create([
+        // Update budget
+        $this->budget->update([
             // Principales
             'fecha' => $this->fecha,
             'client_id' => $client->id,
             'cliente_nombre' => $client->nombre,
             'monto' => $this->monto,
-            'moneda' => 'USD', // Always USD for budgets
+            'moneda' => 'USD', 
             'comprobante' => $this->comprobante,
-            'hash' => $hash,
+            'hash' => $newHash,
             
             // Detalles Proyecto
             'nombre_proyecto' => $this->nombre_proyecto,
@@ -142,25 +163,18 @@ new class extends Component {
             'horas_ponderadas' => $this->horas_ponderadas ?: null,
         ]);
 
-        session()->flash('success', '¡Presupuesto creado exitosamente!');
-        
-        // Reset form
-        $this->reset([
-            'cliente_nombre', 'fecha', 'monto', 'comprobante', 'selectedClientId',
-            'nombre_proyecto', 'centro_costo', 'fecha_oc', 'fecha_estimada_culminacion',
-            'fecha_culminacion_real', 'estado_proyecto_dias', 'estado',
-            'enviado_facturar', 'nro_factura', 'porc_facturacion', 'saldo', 'horas_ponderadas'
-        ]);
-        $this->fecha = date('Y-m-d');
-        $this->showMoreDetails = false;
+        session()->flash('success', '¡Presupuesto actualizado exitosamente!');
     }
 }; ?>
 
 <div>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('Crear Presupuesto Manual') }}
-        </h2>
+        <div class="flex items-center justify-between">
+            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+                {{ __('Editar Presupuesto') }} <span class="text-gray-500 text-sm ml-2">#{{ $budget->id }}</span>
+            </h2>
+            <a href="{{ route('budget.historial.importacion') }}" class="text-green-600 hover:text-green-900 text-sm font-medium">Volver al Historial</a>
+        </div>
     </x-slot>
 
     <div class="py-12">
@@ -185,8 +199,8 @@ new class extends Component {
                 <form wire:submit="save" class="space-y-8">
                     
                     <!-- 1. CAMPOS PRINCIPALES (OBLIGATORIOS) -->
-                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
-                        <h3 class="text-lg font-medium leading-6 text-gray-900 mb-4 border-b pb-2">Datos Principales (Obligatorios)</h3>
+                    <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+                        <h3 class="text-lg font-medium leading-6 text-gray-900 mb-4 border-b border-green-200 pb-2">Datos Principales</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             
                             <!-- Cliente -->
@@ -198,14 +212,13 @@ new class extends Component {
                                         type="text" 
                                         id="cliente_nombre"
                                         class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm"
-                                        placeholder="Nombre del cliente"
                                     >
                                     
                                     @if($showClientSearch && !empty($searchResults))
                                         <div class="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
                                             @foreach($searchResults as $result)
                                                 <div 
-                                                    wire:click="selectClient({{ $result['id'] }}, '{{ $result['nombre'] }}')"
+                                                    wire:click="selectClient('{{ $result['nombre'] }}')"
                                                     class="cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-green-50"
                                                 >
                                                     <span class="block truncate">{{ $result['nombre'] }}</span>
@@ -237,7 +250,6 @@ new class extends Component {
                                     type="text" 
                                     id="comprobante"
                                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm"
-                                    placeholder="Ej: OP-2023-001"
                                 >
                                 @error('comprobante') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
                             </div>
@@ -251,14 +263,8 @@ new class extends Component {
                                     step="0.01"
                                     id="monto"
                                     class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm font-bold"
-                                    placeholder="0.00"
                                 >
                                 @error('monto') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
-                            </div>
-                            
-                            <!-- Moneda (Fija) -->
-                            <div class="hidden">
-                                <input type="hidden" wire:model="moneda" value="USD">
                             </div>
                         </div>
                     </div>
@@ -271,7 +277,7 @@ new class extends Component {
                                 Ocultar Detalles Avanzados
                             @else
                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                                Mostrar Detalles (Proyecto, Fechas, Facturación)
+                                Mostrar Detalles
                             @endif
                         </button>
                     </div>
@@ -351,7 +357,7 @@ new class extends Component {
 
                     <!-- Buttons -->
                     <div class="flex justify-end space-x-3 pt-6 border-t">
-                        <a href="{{ route('budget.dashboard') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none">
+                        <a href="{{ route('budget.historial.importacion') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none">
                             Cancelar
                         </a>
                         <button 
@@ -359,7 +365,7 @@ new class extends Component {
                             class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none"
                         >
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
-                            Guardar Presupuesto
+                            Actualizar Presupuesto
                         </button>
                     </div>
                 </form>
