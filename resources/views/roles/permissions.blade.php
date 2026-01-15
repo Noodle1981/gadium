@@ -54,7 +54,16 @@
                                                     class="rounded border-gray-300 dark:border-gray-600 text-primary shadow-sm focus:ring-primary"
                                                 >
                                                 <span class="text-sm text-gray-700 dark:text-gray-300">
-                                                    {{ ucfirst(str_replace('_', ' ', explode('_', $permission->name)[0])) }}
+                                                    @php
+                                                        $action = explode('_', $permission->name)[0];
+                                                        $translations = [
+                                                            'view' => 'Ver',
+                                                            'create' => 'Crear',
+                                                            'edit' => 'Editar',
+                                                            'delete' => 'Eliminar',
+                                                        ];
+                                                        echo $translations[$action] ?? ucfirst($action);
+                                                    @endphp
                                                 </span>
                                             </label>
                                         @endforeach
