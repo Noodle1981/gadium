@@ -14,15 +14,32 @@ class PurchasesModuleSeeder extends Seeder
     public function run(): void
     {
         DB::transaction(function () {
-            $permission = Permission::firstOrCreate(['name' => 'view_purchases']);
-            $role = Role::firstOrCreate(['name' => 'Gestor de Compras']);
-            if (!$role->hasPermissionTo($permission)) $role->givePermissionTo($permission);
+            // Permissions
+            $permissions = [
+                'view_purchases',
+                'create_purchases',
+                'edit_purchases',
+            ];
 
+            foreach ($permissions as $permName) {
+                Permission::firstOrCreate(['name' => $permName]);
+            }
+
+            // Role
+            $role = Role::firstOrCreate(['name' => 'Gestor de Compras']);
+            
+            // Assign permissions to role
+            $role->syncPermissions($permissions);
+
+            // User
             $user = User::firstOrCreate(
                 ['email' => 'compras@gadium.com'],
                 ['name' => 'Usuario Compras', 'password' => Hash::make('password'), 'email_verified_at' => now()]
             );
-            if (!$user->hasRole('Gestor de Compras')) $user->assignRole($role);
+            
+            if (!$user->hasRole('Gestor de Compras')) {
+                $user->assignRole($role);
+            }
         });
     }
 }

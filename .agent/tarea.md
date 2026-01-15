@@ -1,28 +1,34 @@
-## Modulo Detalle de Horas
-
-Revisar la ruta para detalles de horas, y tiene que llamarse /detalle_horas/dashboard
-
-para este caso necesito que se pueda usar el importar de excel, y que se pueda editar los registros, el mismo que usan ventas y presupuestos.
-
-El excel es el siguiente tiene estos detalles
-
-Dia	Fecha	Año	Mes	Personal	Funcion	Proyecto	Horas ponderadas	Ponderador	Hs	Hs comun	Hs (50%)	Hs (100%)	Hs de viaje	Hs pernoctada	Hs adeudadas	Vianda	Observación	Programación
-JUEVES	2/1/2025	2025	1	Sergio Montañez	Coordinador	3291	15,5512	1,9439	8	8	0	0	0	No	0	1	Normal	Día 1
-VIERNES	3/1/2025	2025	1	Sergio Montañez	Coordinador	404	15,5512	1,9439	8	8	0	0	0	No	0	1	Normal	Día 2
-SÁBADO	4/1/2025	2025	1	Sergio Montañez	Coordinador	404	11,6634	1,9439	6	0	6	0	2	No	0	0	Extra Sat	Guardia
-DOMINGO	5/1/2025	2025	1	Sergio Montañez	Coordinador	404	7,7756	1,9439	4	0	0	4	0	No	0	0	Feriado/Dom	Guardia
-LUNES	6/1/2025	2025	1	Sergio Montañez	Coordinador	1150	15,5512	1,9439	8	8	0	0	1	Sí	0	1	Viaje Obra	Terreno
-MARTES	7/1/2025	2025	1	Sergio Montañez	Coordinador	1150	17,4951	1,9439	9	8	1	0	1	Sí	0	1	Continuidad	Terreno
-MIÉRCOLES	8/1/2025	2025	1	Sergio Montañez	Coordinador	1150	15,5512	1,9439	8	8	0	0	0	No	0	1	Retorno	Oficina
-JUEVES	9/1/2025	2025	1	Sergio Montañez	Coordinador	3291	15,5512	1,9439	8	8	0	0	0	No	0	1	Normal	Oficina
-VIERNES	10/1/2025	2025	1	Sergio Montañez	Coordinador	3291	19,439	1,9439	10	8	2	0	0	No	0	1	Cierre Sem.	Oficina
-SÁBADO	11/1/2025	2025	1	Sergio Montañez	Coordinador	3291	7,7756	1,9439	4	0	4	0	0	No	0	0	Medio día	Guardia
-
-para más información revisar el archivo 
-
-D:\Gadium\doc\tarea_modulo_detalle_de_horas\horas.xlsx
-
-las rutas deben estar protegida, la verdad desconozco el responsable de carga, y esta el tema de trazabilidad por ejemplo Personal, Función, Proyecto, etc. esto se debería consultar. 
 
 
-pero por el momento solo necesito que se pueda usar el importar de forma automatica desde el excel y manualmente, y que se pueda editar los registros, el mismo que usan ventas y presupuestos.
+### Módulo Compras de Materiales
+
+usuario y rutas creadas
+
+- **Email:** `compras@gadium.com`
+- **Password:** `password`
+- **Rol:** Gestor de Compras
+- **Ruta:** `/compras/dashboard`
+
+Para este módulo necesito exactamente las mismas herramientas de importación de excel, osea importacion autimatica y manual, con las misma filosofía pero basado en el excel compras que esta en  
+D:\Gadium\doc\excel pruebas\Compras\compras.xlsx, te muestro el excel para que puedas ver la estructura del excel, de tomdas maneras te lo paso acá tambien.
+
+Moneda	CC	Año	Empresa	Descripción	Materiales presupuestados	Materiales comprados	Resto (Valor)	Resto (%)	% de facturación
+U$D	3184	2024	JUAN MESSINA S.A.	Readecuación Eléctrica	USD 25.116	USD 16.133	USD 8.983	36%	100%
+U$D	3227	2024	SALYCLOR S.A.	Provisión sonda pH	USD 1.441	USD 1.441	USD 0	0%	100%
+U$D	3241	2024	MINETECH	TGCA - Tablero General	USD 2.036	USD 2.667	-USD 631	-31%	100%
+U$D	3255	2024	ELECTRO-OESTE	Motores trifásicos	USD 5.400	USD 4.860	USD 540	10%	100%
+U$D	3268	2024	TECH SOLUTIONS	Cableado estructurado	USD 3.200	USD 3.200	USD 0	0%	100%
+U$D	3280	2024	JUAN MESSINA S.A.	Mantenimiento preventivo	USD 1.850	USD 2.100	-USD 250	-14%	100%
+U$D	3292	2024	POWER-LINK	Baterías para UPS	USD 4.120	USD 3.500	USD 620	15%	100%
+U$D	3305	2024	MINETECH	Repuestos sensores	USD 950	USD 1.050	-USD 100	-11%	100%
+U$D	3318	2024	S-CONTROLS	Programación PLC	USD 6.800	USD 6.800	USD 0	0%	100%
+U$D	3324	2024	HIDRO-MAT	Bombas sumergibles	USD 12.300	USD 10.455	USD 1.845	15%	100%
+U$D	3337	2024	INDU-LIGHT	Luminarias LED Planta	USD 2.600	USD 2.860	-USD 260	-10%	100%
+
+
+
+
+las rutas deben estar protegida,
+
+no generes seeder de usuarios ni de pruebas lo probaremos con los archivos, recordad que necesito que la visual y la forma de que esta implementada en ventas, presupuestos, detalles de horas, debe ser implementada tambien en compras.
+

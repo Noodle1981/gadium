@@ -20,6 +20,34 @@ class ExcelImportService
     }
 
     /**
+     * Parsea montos con formato "USD 1.234" o "-USD 631" a float
+     */
+    protected function parsePurchaseAmount($value): float
+    {
+        if (empty($value)) return 0.0;
+        
+        // Remover "USD" y espacios
+        $value = str_ireplace(['USD', ' '], '', $value);
+        
+        // Manejar negativos si el menos estaba antes del USD "- 1.234"
+        // normalizeAmount maneja puntos de miles y coma decimal (formato EU/LATAM que usa el Excel)
+        return $this->normalizeAmount($value) ?? 0.0;
+    }
+
+    /**
+     * Parsea porcentajes con formato "36%" a float
+     */
+    protected function parsePercentage($value): float
+    {
+        if (empty($value)) return 0.0;
+        
+        // Remover "%" y espacios
+        $value = str_replace(['%', ' '], '', $value);
+        
+        return $this->normalizeAmount($value) ?? 0.0;
+    }
+
+    /**
      * Valida la estructura y contenido del archivo Excel.
      * Retorna un resumen de la validación.
      */
@@ -106,6 +134,9 @@ class ExcelImportService
         } elseif ($type === 'hour_detail') {
             // Hour Detail format
             $required = ['Dia', 'Fecha', 'Año', 'Mes', 'Personal', 'Funcion', 'Proyecto', 'Horas ponderadas', 'Ponderador', 'Hs'];
+        } elseif ($type === 'purchase_detail') {
+            // Purchase Detail format
+            $required = ['Moneda', 'CC', 'Año', 'Empresa', 'Descripción', 'Materiales presupuestados', 'Materiales comprados'];
         } else {
             // Budget format
             $required = ['Empresa', 'Fecha', 'Monto', 'Orden de Pedido'];
@@ -113,7 +144,14 @@ class ExcelImportService
 
         foreach ($required as $req) {
             if (!in_array($req, $headers)) {
-                throw new Exception("Cabecera faltante: {$req}. Estructura requerida: " . implode(', ', $required));
+                // Check for case-insensitive match to give a hint
+                $found = array_filter($headers, function($h) use ($req) {
+                    return strtolower($h) === strtolower($req);
+                });
+                
+                $hint = !empty($found) ? ". Quizás quiso decir: '" . reset($found) . "'?" : "";
+                
+                throw new Exception("Cabecera faltante: '{$req}'" . $hint . ".\nCabeceras encontradas en el archivo: [" . implode(', ', $headers) . "]");
             }
         }
     }
@@ -214,7 +252,7 @@ class ExcelImportService
      */
     protected function extractAmount(array $row, string $type): ?float
     {
-        if ($type === 'hour_detail') {
+        if ($type === 'hour_detail' || $type === 'purchase_detail') {
             return 0.0;
         }
 
@@ -238,7 +276,7 @@ class ExcelImportService
      */
     protected function extractComprobante(array $row, string $type): string
     {
-        if ($type === 'hour_detail') {
+        if ($type === 'hour_detail' || $type === 'purchase_detail') {
             return '';
         }
 
@@ -254,7 +292,7 @@ class ExcelImportService
      */
     protected function extractMoneda(array $row, string $type): string
     {
-        if ($type === 'hour_detail') {
+        if ($type === 'hour_detail' || $type === 'purchase_detail') {
             return '';
         }
 
@@ -274,7 +312,7 @@ class ExcelImportService
 
         // Validar Fecha
         $fecha = $this->extractDate($row, $type);
-        if (!$fecha) {
+        if (!$fecha && $type !== 'purchase_detail') {
             $dateField = $type === 'sale' ? 'FECHA_EMI' : 'Fecha';
             $errors[] = "Fila {$rowIndex}: Fecha inválida ({$row[$dateField]})";
         }
@@ -303,6 +341,14 @@ class ExcelImportService
             }
             if (!isset($row['Hs']) || !is_numeric($row['Hs'])) {
                 $errors[] = "Fila {$rowIndex}: Horas inválidas ({$row['Hs']})";
+            }
+        } elseif ($type === 'purchase_detail') {
+            // Validaciones específicas para Compras
+            if (empty($row['Empresa'])) {
+                $errors[] = "Fila {$rowIndex}: Empresa vacía";
+            }
+            if (empty($row['CC'])) {
+                $errors[] = "Fila {$rowIndex}: CC vacío";
             }
         }
 
@@ -419,7 +465,7 @@ class ExcelImportService
             $clientName = $this->extractClientName($row, $type);
             $client = $this->normalizationService->resolveClientByAlias($clientName);
 
-            if (!$client && $type !== 'hour_detail') {
+            if (!$client && $type !== 'hour_detail' && $type !== 'purchase_detail') {
                 continue;
             }
 
@@ -428,7 +474,7 @@ class ExcelImportService
             $comprobante = $this->extractComprobante($row, $type);
             $moneda = $this->extractMoneda($row, $type);
 
-            if (!$fecha) {
+            if (!$fecha && $type !== 'purchase_detail') {
                 continue;
             }
 
@@ -533,6 +579,34 @@ class ExcelImportService
                     'vianda' => trim($row['Vianda'] ?? '0'),
                     'observacion' => trim($row['Observación'] ?? ''),
                     'programacion' => trim($row['Programación'] ?? ''),
+                    'hash' => $hash,
+                ]);
+            } elseif ($type === 'purchase_detail') {
+                // Importar Detalle de Compras
+                $cc = trim($row['CC'] ?? '');
+                $ano = is_numeric($row['Año'] ?? null) ? (int)$row['Año'] : date('Y');
+                $empresa = trim($row['Empresa'] ?? '');
+                $descripcion = trim($row['Descripción'] ?? '');
+                
+                // Generar hash
+                $hash = \App\Models\PurchaseDetail::generateHash($cc, (string)$ano, $empresa, $descripcion);
+
+                if (\App\Models\PurchaseDetail::existsByHash($hash)) {
+                    $skipped++;
+                    continue;
+                }
+
+                \App\Models\PurchaseDetail::create([
+                    'moneda' => trim($row['Moneda'] ?? 'USD'),
+                    'cc' => $cc,
+                    'ano' => $ano,
+                    'empresa' => $empresa,
+                    'descripcion' => $descripcion,
+                    'materiales_presupuestados' => $this->parsePurchaseAmount($row['Materiales presupuestados'] ?? '0'),
+                    'materiales_comprados' => $this->parsePurchaseAmount($row['Materiales comprados'] ?? '0'),
+                    'resto_valor' => $this->parsePurchaseAmount($row['Resto (Valor)'] ?? '0'),
+                    'resto_porcentaje' => $this->parsePercentage($row['Resto (%)'] ?? '0'),
+                    'porcentaje_facturacion' => $this->parsePercentage($row['% de facturación'] ?? '0'),
                     'hash' => $hash,
                 ]);
             }

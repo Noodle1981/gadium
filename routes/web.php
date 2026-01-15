@@ -82,6 +82,14 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
             // Módulo Compras Materiales
             Route::middleware(['can:view_purchases'])->group(function () {
                 Volt::route('compras-materiales', 'pages.purchases.index')->name('admin.purchases.index');
+                Volt::route('compras-materiales/importacion', 'pages.purchases.import-wizard')->name('admin.purchases.import');
+                Volt::route('compras-materiales/crear', 'pages.purchases.manual-create')->name('admin.purchases.create');
+                Volt::route('compras-materiales/editar/{purchaseDetail}', 'pages.purchases.manual-edit')->name('admin.purchases.edit');
+                
+                Route::get('historial-compras', function () {
+                    $purchases = \App\Models\PurchaseDetail::latest()->take(50)->get();
+                    return view('historial-compras', ['purchases' => $purchases]);
+                })->name('admin.historial.compras');
             });
 
             // Módulo Satisfacción Personal
@@ -169,6 +177,14 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
             return view('historial-horas', ['hours' => $hours]);
         })->name('manager.historial.horas');
         Volt::route('compras-materiales', 'pages.purchases.index')->name('manager.purchases.index');
+        Volt::route('compras-materiales/importacion', 'pages.purchases.import-wizard')->name('manager.purchases.import');
+        Volt::route('compras-materiales/crear', 'pages.purchases.manual-create')->name('manager.purchases.create');
+        Volt::route('compras-materiales/editar/{purchaseDetail}', 'pages.purchases.manual-edit')->name('manager.purchases.edit');
+        
+        Route::get('historial-compras', function () {
+            $purchases = \App\Models\PurchaseDetail::latest()->take(50)->get();
+            return view('historial-compras', ['purchases' => $purchases]);
+        })->name('manager.historial.compras');
         Volt::route('satisfaccion-personal', 'pages.staff-satisfaction.index')->name('manager.staff-satisfaction.index');
         Volt::route('satisfaccion-clientes', 'pages.client-satisfaction.index')->name('manager.client-satisfaction.index');
         Volt::route('tableros', 'pages.boards.index')->name('manager.boards.index');
@@ -239,6 +255,17 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
     Route::prefix('compras')->middleware(['role:Gestor de Compras'])->group(function () {
         Volt::route('dashboard', 'pages.purchases.dashboard')->name('purchases.dashboard');
         Route::view('perfil', 'profile')->name('purchases.profile');
+        
+        Route::middleware(['can:view_purchases'])->group(function () {
+            Volt::route('importacion', 'pages.purchases.import-wizard')->name('purchases.import');
+            Volt::route('crear', 'pages.purchases.manual-create')->name('purchases.create');
+            Volt::route('editar/{purchaseDetail}', 'pages.purchases.manual-edit')->name('purchases.edit');
+            
+            Route::get('historial_importacion', function () {
+                $purchases = \App\Models\PurchaseDetail::latest()->take(50)->get();
+                return view('historial-compras', ['purchases' => $purchases]);
+            })->name('purchases.historial.importacion');
+        });
     });
 
     // --- SATISFACCIÓN PERSONAL (Gestor de Satisfacción Personal) ---
