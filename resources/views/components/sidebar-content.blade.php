@@ -22,7 +22,7 @@
     @endcan
 
     @can('view_production')
-        @if(!$isViewer)
+        @if(!$isViewer && !$isManager)
             @php
                 $prodRoute = $isManager ? 'manager.manufacturing.production.log' : 'admin.manufacturing.production.log';
             @endphp
