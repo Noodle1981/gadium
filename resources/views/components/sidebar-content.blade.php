@@ -57,6 +57,13 @@
             <x-sidebar-link :href="route($presupuestoRoute)" :active="request()->routeIs($presupuestoRoute)" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>'>
                 📑 Historial Presupuestos
             </x-sidebar-link>
+
+            @php
+                $horasRoute = $isManager ? 'manager.historial.horas' : 'admin.historial.horas';
+            @endphp
+            <x-sidebar-link :href="route($horasRoute)" :active="request()->routeIs($horasRoute)" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'>
+                🕒 Historial Horas
+            </x-sidebar-link>
         @endif
     @endcan
 @endif
@@ -144,6 +151,16 @@
 @if(auth()->user()->hasRole('Gestor de Horas'))
     <x-sidebar-link :href="route('hours.dashboard')" :active="request()->routeIs('hours.dashboard')" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'>
         Dashboard
+    </x-sidebar-link>
+
+    <x-sidebar-link :href="route('hours.import')" :active="request()->routeIs('hours.import')" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>'>
+        Importación Automática
+    </x-sidebar-link>
+    <x-sidebar-link :href="route('hours.create')" :active="request()->routeIs('hours.create')" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>'>
+        Importación Manual
+    </x-sidebar-link>
+    <x-sidebar-link :href="route('hours.historial.importacion')" :active="request()->routeIs('hours.historial.importacion')" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>'>
+        Historial Horas
     </x-sidebar-link>
 @endif
 

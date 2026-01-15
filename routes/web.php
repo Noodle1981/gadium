@@ -69,6 +69,14 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
             // Módulo Detalles Horas
             Route::middleware(['can:view_hours'])->group(function () {
                 Volt::route('detalles-horas', 'pages.hours.index')->name('admin.hours.index');
+                Volt::route('detalles-horas/importacion', 'pages.hours.import-wizard')->name('admin.hours.import');
+                Volt::route('detalles-horas/crear', 'pages.hours.manual-create')->name('admin.hours.create');
+                Volt::route('detalles-horas/editar/{hourDetail}', 'pages.hours.manual-edit')->name('admin.hours.edit');
+                
+                Route::get('historial-horas', function () {
+                    $hours = \App\Models\HourDetail::latest()->take(50)->get();
+                    return view('historial-horas', ['hours' => $hours]);
+                })->name('admin.historial.horas');
             });
 
             // Módulo Compras Materiales
@@ -152,6 +160,14 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
 
         // Nuevos Módulos para Manager
         Volt::route('detalles-horas', 'pages.hours.index')->name('manager.hours.index');
+        Volt::route('detalles-horas/importacion', 'pages.hours.import-wizard')->name('manager.hours.import');
+        Volt::route('detalles-horas/crear', 'pages.hours.manual-create')->name('manager.hours.create');
+        Volt::route('detalles-horas/editar/{hourDetail}', 'pages.hours.manual-edit')->name('manager.hours.edit');
+        
+        Route::get('historial-horas', function () {
+            $hours = \App\Models\HourDetail::latest()->take(50)->get();
+            return view('historial-horas', ['hours' => $hours]);
+        })->name('manager.historial.horas');
         Volt::route('compras-materiales', 'pages.purchases.index')->name('manager.purchases.index');
         Volt::route('satisfaccion-personal', 'pages.staff-satisfaction.index')->name('manager.staff-satisfaction.index');
         Volt::route('satisfaccion-clientes', 'pages.client-satisfaction.index')->name('manager.client-satisfaction.index');
@@ -206,6 +222,17 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
     Route::prefix('detalle_horas')->middleware(['role:Gestor de Horas'])->group(function () {
         Volt::route('dashboard', 'pages.hours.dashboard')->name('hours.dashboard');
         Route::view('perfil', 'profile')->name('hours.profile');
+        
+        Route::middleware(['can:view_hours'])->group(function () {
+            Volt::route('importacion', 'pages.hours.import-wizard')->name('hours.import');
+            Volt::route('crear', 'pages.hours.manual-create')->name('hours.create');
+            Volt::route('editar/{hourDetail}', 'pages.hours.manual-edit')->name('hours.edit');
+            
+            Route::get('historial_importacion', function () {
+                $hours = \App\Models\HourDetail::latest()->take(50)->get();
+                return view('historial-horas', ['hours' => $hours]);
+            })->name('hours.historial.importacion');
+        });
     });
 
     // --- COMPRAS (Gestor de Compras) ---

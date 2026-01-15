@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Budget;
 use App\Models\Client;
 use App\Models\Sale;
+use App\Models\HourDetail;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 use Exception;
@@ -98,9 +99,13 @@ class ExcelImportService
      */
     protected function validateHeaders(array $headers, string $type): void
     {
+
         if ($type === 'sale') {
             // Tango format - verificar columnas clave
             $required = ['RAZON_SOCI', 'FECHA_EMI', 'TOTAL_COMP', 'N_COMP', 'MONEDA'];
+        } elseif ($type === 'hour_detail') {
+            // Hour Detail format
+            $required = ['Dia', 'Fecha', 'Año', 'Mes', 'Personal', 'Funcion', 'Proyecto', 'Horas ponderadas', 'Ponderador', 'Hs'];
         } else {
             // Budget format
             $required = ['Empresa', 'Fecha', 'Monto', 'Orden de Pedido'];
@@ -120,6 +125,8 @@ class ExcelImportService
     {
         if ($type === 'sale') {
             return trim($row['RAZON_SOCI'] ?? '');
+        } elseif ($type === 'hour_detail') {
+            return ''; // No client in hour detail
         } else {
             return trim($row['Empresa'] ?? '');
         }
@@ -130,7 +137,11 @@ class ExcelImportService
      */
     protected function extractDate(array $row, string $type): ?string
     {
-        $dateValue = $type === 'sale' ? ($row['FECHA_EMI'] ?? null) : ($row['Fecha'] ?? null);
+        if ($type === 'hour_detail') {
+             $dateValue = $row['Fecha'] ?? null;
+        } else {
+             $dateValue = $type === 'sale' ? ($row['FECHA_EMI'] ?? null) : ($row['Fecha'] ?? null);
+        }
         
         if (empty($dateValue)) {
             return null;
@@ -203,6 +214,10 @@ class ExcelImportService
      */
     protected function extractAmount(array $row, string $type): ?float
     {
+        if ($type === 'hour_detail') {
+            return 0.0;
+        }
+
         $amountValue = $type === 'sale' ? ($row['TOTAL_COMP'] ?? null) : ($row['Monto'] ?? null);
         
         if ($amountValue === null || $amountValue === '') {
@@ -223,6 +238,10 @@ class ExcelImportService
      */
     protected function extractComprobante(array $row, string $type): string
     {
+        if ($type === 'hour_detail') {
+            return '';
+        }
+
         if ($type === 'sale') {
             return trim($row['N_COMP'] ?? '');
         } else {
@@ -235,6 +254,10 @@ class ExcelImportService
      */
     protected function extractMoneda(array $row, string $type): string
     {
+        if ($type === 'hour_detail') {
+            return '';
+        }
+
         if ($type === 'sale') {
             $moneda = trim($row['MONEDA'] ?? 'USD');
             // Normalizar: CTE -> USD, etc.
@@ -265,9 +288,22 @@ class ExcelImportService
 
         // Validar Cliente
         $clientName = $this->extractClientName($row, $type);
-        if (empty($clientName)) {
+        if (empty($clientName) && $type !== 'hour_detail') {
             $clientField = $type === 'sale' ? 'RAZON_SOCI' : 'Empresa';
             $errors[] = "Fila {$rowIndex}: Cliente vacío";
+        }
+
+        if ($type === 'hour_detail') {
+            // Validaciones específicas para Horas
+            if (empty($row['Personal'])) {
+                $errors[] = "Fila {$rowIndex}: Personal vacío";
+            }
+            if (empty($row['Proyecto'])) {
+                $errors[] = "Fila {$rowIndex}: Proyecto vacío";
+            }
+            if (!isset($row['Hs']) || !is_numeric($row['Hs'])) {
+                $errors[] = "Fila {$rowIndex}: Horas inválidas ({$row['Hs']})";
+            }
         }
 
         return $errors;
@@ -383,7 +419,7 @@ class ExcelImportService
             $clientName = $this->extractClientName($row, $type);
             $client = $this->normalizationService->resolveClientByAlias($clientName);
 
-            if (!$client) {
+            if (!$client && $type !== 'hour_detail') {
                 continue;
             }
 
@@ -462,6 +498,42 @@ class ExcelImportService
                     'porc_facturacion' => trim($row['% Facturación'] ?? ''),
                     'saldo' => $this->normalizeAmount($row['Saldo [$]'] ?? '0'),
                     'horas_ponderadas' => is_numeric($row['Horas ponderadas'] ?? null) ? (float)$row['Horas ponderadas'] : null,
+                ]);
+
+            } elseif ($type === 'hour_detail') {
+                // Importar Detalle de Horas
+                $personal = trim($row['Personal'] ?? '');
+                $proyecto = trim($row['Proyecto'] ?? '');
+                $hs = is_numeric($row['Hs'] ?? null) ? (float)$row['Hs'] : 0;
+                
+                $hash = HourDetail::generateHash($fecha, $personal, $proyecto, $hs);
+                
+                if (HourDetail::existsByHash($hash)) {
+                    $skipped++;
+                    continue;
+                }
+                
+                HourDetail::create([
+                    'dia' => trim($row['Dia'] ?? ''),
+                    'fecha' => $fecha,
+                    'ano' => is_numeric($row['Año'] ?? null) ? (int)$row['Año'] : (int)date('Y', strtotime($fecha)),
+                    'mes' => is_numeric($row['Mes'] ?? null) ? (int)$row['Mes'] : (int)date('m', strtotime($fecha)),
+                    'personal' => $personal,
+                    'funcion' => trim($row['Funcion'] ?? ''),
+                    'proyecto' => $proyecto,
+                    'horas_ponderadas' => is_numeric($row['Horas ponderadas'] ?? null) ? (float)$row['Horas ponderadas'] : 0,
+                    'ponderador' => is_numeric($row['Ponderador'] ?? null) ? (float)$row['Ponderador'] : 1,
+                    'hs' => $hs,
+                    'hs_comun' => is_numeric($row['Hs comun'] ?? null) ? (float)$row['Hs comun'] : 0,
+                    'hs_50' => is_numeric($row['Hs (50%)'] ?? null) ? (float)$row['Hs (50%)'] : 0,
+                    'hs_100' => is_numeric($row['Hs (100%)'] ?? null) ? (float)$row['Hs (100%)'] : 0,
+                    'hs_viaje' => is_numeric($row['Hs de viaje'] ?? null) ? (float)$row['Hs de viaje'] : 0,
+                    'hs_pernoctada' => trim($row['Hs pernoctada'] ?? 'No'),
+                    'hs_adeudadas' => is_numeric($row['Hs adeudadas'] ?? null) ? (float)$row['Hs adeudadas'] : 0,
+                    'vianda' => trim($row['Vianda'] ?? '0'),
+                    'observacion' => trim($row['Observación'] ?? ''),
+                    'programacion' => trim($row['Programación'] ?? ''),
+                    'hash' => $hash,
                 ]);
             }
 
