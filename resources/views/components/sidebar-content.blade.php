@@ -41,7 +41,8 @@
                 Resolución Clientes
             </x-sidebar-link>
         @endif
-            
+        
+        @if(!$isViewer)
             @php
                 $ventasRoute = $isManager ? 'manager.historial.ventas' : 'admin.historial.ventas';
                 $presupuestoRoute = $isManager ? 'manager.historial.presupuesto' : 'admin.historial.presupuesto';
