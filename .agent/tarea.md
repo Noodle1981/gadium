@@ -2,25 +2,17 @@
 
 http://127.0.0.1:8000/ventas/dashboard
 
-como usuario que me han dado permiso como rol de vendedor, o el que haya sido autorizado por el gerente para por entrar a esta ruta.
+hay que corregir los enlaces del sidebar
 
-cada enlace interno tiene que estar protegida en la ruta correspondiente que es ventas/dashboard, ventas/importacion, ventas/resolucion_clientes, ventas/historial_ventas, ventas/perfil
+Principal
+Dashboard # repetido
+Operaciones # grupo de enlaces de importacion y resolucion de clientes 
+Importación # apunta a admin/importacion quitar enlace
+Resolución Clientes # apunta a admin/resolucion_clientes quitar enlace
+📊 Historial Ventas # apunta a admin/historial-ventas quitar enlace
+📑 Historial Presupuestos # apunta a admin/historial-presupuestos quitar enlace
+Dashboard # repetido Dejar este
+Importación # está bien
+Resolución Clientes # esta bien
+Historial Ventas # está bien
 
-
-# Dashboard
-
-En esta ruta, tenemos el dashboard de ventas, que es el dashboard de la ruta de ventas, pero veria un grafana, se puede dejar un mensaje
-
-# Importación
-
-En esta ruta, tenemos el importador de ventas, que es el importador de la ruta de ventas.
-
-# Resolución Clientes
-
-En esta ruta, tenemos el resolutor de clientes, que es el resolutor de la ruta de clientes.
-
-# Historial Ventas
-
-En esta ruta, tenemos el historial de ventas, que es el historial de la ruta de ventas.
-
-# Perfil de usuario

@@ -1,4 +1,4 @@
-@props(['isAdmin', 'isSuperAdmin', 'isManager', 'isViewer', 'dashboardRoute'])
+@props(['isAdmin', 'isSuperAdmin', 'isManager', 'isViewer', 'isVendedor', 'dashboardRoute'])
 
 <!-- Principal -->
 <div class="text-xs font-semibold text-gray-500 uppercase tracking-widest px-4 mb-2">Principal</div>
@@ -11,7 +11,7 @@
     <div class="pt-4 text-xs font-semibold text-gray-500 uppercase tracking-widest px-4 mb-2">Operaciones</div>
     
     @can('view_sales')
-        @if(!$isViewer && !$isManager)
+        @if(!$isViewer && !$isManager && !$isVendedor)
             @php
                 $salesRoute = 'admin.sales.import';
             @endphp
@@ -22,7 +22,7 @@
     @endcan
 
     @can('view_production')
-        @if(!$isViewer && !$isManager)
+        @if(!$isViewer && !$isManager && !$isVendedor)
             @php
                 $prodRoute = $isManager ? 'manager.manufacturing.production.log' : 'admin.manufacturing.production.log';
             @endphp
@@ -33,7 +33,7 @@
     @endcan
     
     @can('view_sales')
-        @if(!$isViewer && !$isManager)
+        @if(!$isViewer && !$isManager && !$isVendedor)
             @php
                 $clientsRoute = 'admin.clients.resolve';
             @endphp
@@ -42,7 +42,7 @@
             </x-sidebar-link>
         @endif
         
-        @if(!$isViewer)
+        @if(!$isViewer && !$isVendedor)
             @php
                 $ventasRoute = $isManager ? 'manager.historial.ventas' : 'admin.historial.ventas';
                 $presupuestoRoute = $isManager ? 'manager.historial.presupuesto' : 'admin.historial.presupuesto';
@@ -85,7 +85,7 @@
     @endcan
 
     @can('view_hr')
-        @if(!$isViewer && !$isManager)
+        @if(!$isViewer && !$isManager && !$isVendedor)
             @php
                 $hrRoute = $isManager ? 'manager.hr.factors' : 'admin.hr.factors';
             @endphp
