@@ -13,7 +13,14 @@ class RoleController extends Controller
      */
     public function index()
     {
-        $roles = Role::withCount('users')->get();
+        $roles = Role::withCount('users');
+        
+        // Managers no pueden ver el rol Super Admin
+        if (auth()->user()->hasRole('Manager') && !auth()->user()->hasRole('Super Admin')) {
+            $roles->where('name', '!=', 'Super Admin');
+        }
+        
+        $roles = $roles->get();
         return view('roles.index', compact('roles'));
     }
 

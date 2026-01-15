@@ -16,7 +16,6 @@ Route::post('/setup-password', [PasswordSetupController::class, 'store'])
 
 Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
     Route::view('dashboard', 'dashboard')->name('dashboard');
-    Route::view('profile', 'profile')->name('profile');
     
     // --- ADMINISTRACIÓN ---
     Route::prefix('admin')->group(function () {
@@ -24,6 +23,8 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
         // Super Admin, Admin & Manager (Gestión de Usuarios y Roles)
         Route::middleware(['role:Super Admin|Admin|Manager'])->group(function () {
             Volt::route('dashboard', 'pages.admin.dashboard')->name('admin.dashboard');
+            Route::view('profile', 'profile')->name('admin.profile');
+            
             // Gestión de Usuarios
             Route::middleware(['can:view_users'])->group(function () {
                 Route::resource('users', UserController::class);
@@ -64,28 +65,81 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
             Route::middleware(['can:view_hr'])->group(function () {
                 Volt::route('rrhh', 'pages.hr.factor-manager')->name('admin.hr.factors'); // rrhh
             });
+
+            // Módulo Detalles Horas
+            Route::middleware(['can:view_hours'])->group(function () {
+                Volt::route('detalles-horas', 'pages.hours.index')->name('admin.hours.index');
+            });
+
+            // Módulo Compras Materiales
+            Route::middleware(['can:view_purchases'])->group(function () {
+                Volt::route('compras-materiales', 'pages.purchases.index')->name('admin.purchases.index');
+            });
+
+            // Módulo Satisfacción Personal
+            Route::middleware(['can:view_staff_satisfaction'])->group(function () {
+                Volt::route('satisfaccion-personal', 'pages.staff-satisfaction.index')->name('admin.staff-satisfaction.index');
+            });
+
+            // Módulo Satisfacción Clientes
+            Route::middleware(['can:view_client_satisfaction'])->group(function () {
+                Volt::route('satisfaccion-clientes', 'pages.client-satisfaction.index')->name('admin.client-satisfaction.index');
+            });
+
+            // Módulo Tableros
+            Route::middleware(['can:view_boards'])->group(function () {
+                Volt::route('tableros', 'pages.boards.index')->name('admin.boards.index');
+            });
+
+            // Módulo Proyecto Automatización
+            Route::middleware(['can:view_automation'])->group(function () {
+                Volt::route('proyecto-automatizacion', 'pages.automation.index')->name('admin.automation.index');
+            });
         });
     });
 
     // --- GERENCIA (Manager) ---
-    // Nota: Manager ahora tiene acceso a rutas /admin, pero manteniendo este grupo para dashboards específicos si existen
-    Route::prefix('gerente')->middleware(['role:Manager'])->group(function () { // Changed prefix to 'gerente' as requested? User asked for /gerente/importacion. Existing was prefix('manager'). I should probably keep 'manager' prefix internally but user asked specifically for /gerente/importacion. I will use 'gerente' prefix if existing strictly maps 'manager' prefix to 'gerente' role.
-        // Wait, existing code has Route::prefix('manager'). User asked for /gerente/importacion. 
-        // I will add a specific route group or change prefix if acceptable. 
-        // Let's assume 'manager' prefix was intended to be 'gerente' or just add a new group or alias.
-        // Or simply rename the prefix to 'gerente' if that fits.
-        // However, looking at existing 'manager' prefix, it has dashboard.
-        // I'll change the prefix to 'gerente' to match request perfectly, assuming no other hard links break (routes are named).
+    // Manager tiene acceso a rutas /admin, este grupo mantiene rutas específicas de dashboard y reportes
+    Route::prefix('gerente')->middleware(['role:Manager'])->group(function () {
         
         Volt::route('dashboard', 'pages.manager.dashboard')->name('manager.dashboard');
-        Volt::route('importacion', 'pages.sales.import-wizard')->name('manager.sales.import');
-        Volt::route('clientes', 'pages.clients.resolution')->name('manager.clients.resolve'); // clientes
-        Volt::route('produccion', 'pages.manufacturing.production-log')->name('manager.manufacturing.production.log'); // produccion
+        Route::view('profile', 'profile')->name('manager.profile');
+        Volt::route('produccion', 'pages.manufacturing.production-log')->name('manager.manufacturing.production.log');
         
         // Agregar RRHH si tienen permiso
         Volt::route('rrhh', 'pages.hr.factor-manager')->name('manager.hr.factors');
         
-        // Historial de Ventas y Presupuestos
+        // Gestión de Usuarios (Manager tiene acceso completo)
+        Route::middleware(['can:view_users'])->group(function () {
+            Route::resource('users', UserController::class)->names([
+                'index' => 'manager.users.index',
+                'create' => 'manager.users.create',
+                'store' => 'manager.users.store',
+                'show' => 'manager.users.show',
+                'edit' => 'manager.users.edit',
+                'update' => 'manager.users.update',
+                'destroy' => 'manager.users.destroy',
+            ]);
+        });
+
+        // Gestión de Roles (Manager tiene acceso completo)
+        Route::middleware(['can:view_roles'])->group(function () {
+            Route::resource('roles', RoleController::class)->names([
+                'index' => 'manager.roles.index',
+                'create' => 'manager.roles.create',
+                'store' => 'manager.roles.store',
+                'show' => 'manager.roles.show',
+                'edit' => 'manager.roles.edit',
+                'update' => 'manager.roles.update',
+                'destroy' => 'manager.roles.destroy',
+            ]);
+            Route::get('roles/{role}/permissions', [RoleController::class, 'permissions'])
+                ->name('manager.roles.permissions');
+            Route::post('roles/{role}/permissions', [RoleController::class, 'updatePermissions'])
+                ->name('manager.roles.permissions.update');
+        });
+        
+        // Historial de Ventas y Presupuestos (permanecen en /gerente)
         Route::get('historial-ventas', function () {
             $sales = \App\Models\Sale::with('client')->latest()->take(50)->get();
             return view('historial-ventas', ['sales' => $sales]);
@@ -95,6 +149,14 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
             $budgets = \App\Models\Budget::with('client')->latest()->take(50)->get();
             return view('historial-presupuesto', ['budgets' => $budgets]);
         })->name('manager.historial.presupuesto');
+
+        // Nuevos Módulos para Manager
+        Volt::route('detalles-horas', 'pages.hours.index')->name('manager.hours.index');
+        Volt::route('compras-materiales', 'pages.purchases.index')->name('manager.purchases.index');
+        Volt::route('satisfaccion-personal', 'pages.staff-satisfaction.index')->name('manager.staff-satisfaction.index');
+        Volt::route('satisfaccion-clientes', 'pages.client-satisfaction.index')->name('manager.client-satisfaction.index');
+        Volt::route('tableros', 'pages.boards.index')->name('manager.boards.index');
+        Volt::route('proyecto-automatizacion', 'pages.automation.index')->name('manager.automation.index');
     });
 
 

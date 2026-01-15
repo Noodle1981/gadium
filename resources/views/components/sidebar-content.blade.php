@@ -11,9 +11,9 @@
     <div class="pt-4 text-xs font-semibold text-gray-500 uppercase tracking-widest px-4 mb-2">Operaciones</div>
     
     @can('view_sales')
-        @if(!$isViewer)
+        @if(!$isViewer && !$isManager)
             @php
-                $salesRoute = $isManager ? 'manager.sales.import' : 'admin.sales.import';
+                $salesRoute = 'admin.sales.import';
             @endphp
             <x-sidebar-link :href="route($salesRoute)" :active="request()->routeIs($salesRoute)" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>'>
                 Importación
@@ -22,7 +22,7 @@
     @endcan
 
     @can('view_production')
-        @if(!$isViewer)
+        @if(!$isViewer && !$isManager)
             @php
                 $prodRoute = $isManager ? 'manager.manufacturing.production.log' : 'admin.manufacturing.production.log';
             @endphp
@@ -33,14 +33,16 @@
     @endcan
     
     @can('view_sales')
-        @if(!$isViewer)
+        @if(!$isViewer && !$isManager)
             @php
-                $clientsRoute = $isManager ? 'manager.clients.resolve' : 'admin.clients.resolve';
+                $clientsRoute = 'admin.clients.resolve';
             @endphp
             <x-sidebar-link :href="route($clientsRoute)" :active="request()->routeIs($clientsRoute)" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>'>
                 Resolución Clientes
             </x-sidebar-link>
-            
+        @endif
+        
+        @if(!$isViewer)
             @php
                 $ventasRoute = $isManager ? 'manager.historial.ventas' : 'admin.historial.ventas';
                 $presupuestoRoute = $isManager ? 'manager.historial.presupuesto' : 'admin.historial.presupuesto';
@@ -63,19 +65,27 @@
     <div class="pt-4 text-xs font-semibold text-gray-500 uppercase tracking-widest px-4 mb-2">Configuración</div>
     
     @can('view_users')
-        <x-sidebar-link :href="route('users.index')" :active="request()->routeIs('users.*')" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 15.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>'>
+        @php
+            $usersRoute = $isManager ? 'manager.users.index' : 'users.index';
+            $usersPattern = $isManager ? 'manager.users.*' : 'users.*';
+        @endphp
+        <x-sidebar-link :href="route($usersRoute)" :active="request()->routeIs($usersPattern)" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 15.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>'>
             Usuarios
         </x-sidebar-link>
     @endcan
 
     @can('view_roles')
-        <x-sidebar-link :href="route('roles.index')" :active="request()->routeIs('roles.*')" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>'>
+        @php
+            $rolesRoute = $isManager ? 'manager.roles.index' : 'roles.index';
+            $rolesPattern = $isManager ? 'manager.roles.*' : 'roles.*';
+        @endphp
+        <x-sidebar-link :href="route($rolesRoute)" :active="request()->routeIs($rolesPattern)" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>'>
             Roles
         </x-sidebar-link>
     @endcan
 
     @can('view_hr')
-        @if(!$isViewer)
+        @if(!$isViewer && !$isManager)
             @php
                 $hrRoute = $isManager ? 'manager.hr.factors' : 'admin.hr.factors';
             @endphp
