@@ -195,6 +195,7 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
                 return view('historial-presupuesto', ['budgets' => $budgets]);
             })->name('budget.historial.importacion');
         });
+    });
 
 
     // --- DETALLE DE HORAS (Gestor de Horas) ---
@@ -231,7 +232,6 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
     Route::prefix('proyectos')->middleware(['role:Gestor de Proyectos'])->group(function () {
         Volt::route('dashboard', 'pages.automation.dashboard')->name('automation.dashboard');
         Route::view('perfil', 'profile')->name('automation.profile');
-    });
     });
 
 

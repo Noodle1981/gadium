@@ -286,10 +286,11 @@ new class extends Component {
             <div class="space-y-6">
                 <div>
                     <label class="block text-sm font-medium text-gray-700">Tipo de Importación</label>
-                    <select wire:model.live="type" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md">
-                        <option value="sale">Ventas</option>
-                        <option value="budget">Presupuestos</option>
-                    </select>
+                    <div class="mt-1 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 bg-gray-50 text-gray-500 rounded-md">
+                        Ventas
+                    </div>
+                    {{-- Hidden input to keep logic simple --}}
+                    <input type="hidden" wire:model="type" value="sale">
                 </div>
 
                 <div 
