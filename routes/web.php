@@ -169,6 +169,7 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
         // Módulo Ventas
         Route::middleware(['can:view_sales'])->group(function () {
             Volt::route('importacion', 'pages.sales.import-wizard')->name('sales.import');
+            Volt::route('crear', 'pages.sales.manual-create')->name('sales.create');
             Volt::route('resolucion-clientes', 'pages.clients.resolution')->name('sales.clients.resolve');
             
             // Historial de Ventas
@@ -189,6 +190,7 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
         // Módulo Presupuesto
         Route::middleware(['can:view_budgets'])->group(function () {
             Volt::route('importacion', 'pages.budget.import-wizard')->name('budget.import');
+            Volt::route('crear', 'pages.budget.manual-create')->name('budget.create');
             
             Route::get('historial_importacion', function () {
                 $budgets = \App\Models\Budget::with('client')->latest()->take(50)->get();
