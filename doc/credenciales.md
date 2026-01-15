@@ -46,6 +46,17 @@
   - Historial Ventas: `/gerente/historial-ventas`
   - Historial Presupuestos: `/gerente/historial-presupuestos`
 
+### Vendedor (Usuario de Ventas)
+- **Email:** `ventas@gadium.com`
+- **Password:** `password`
+- **Rol:** Vendedor
+- **Acceso:** Solo módulo de ventas
+- **Rutas principales:**
+  - Importación: `/admin/importacion`
+  - Clientes: `/admin/clientes`
+  - Historial Ventas: `/admin/historial-ventas`
+  - Historial Presupuestos: `/admin/historial-presupuestos`
+
 ---
 
 ## Módulo de Ventas
