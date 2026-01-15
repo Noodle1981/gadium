@@ -52,10 +52,20 @@
 - **Rol:** Vendedor
 - **Acceso:** Solo módulo de ventas
 - **Rutas principales:**
-  - Importación: `/admin/importacion`
-  - Clientes: `/admin/clientes`
-  - Historial Ventas: `/admin/historial-ventas`
-  - Historial Presupuestos: `/admin/historial-presupuestos`
+  - Dashboard: `/ventas/dashboard`
+  - Importación: `/ventas/importacion`
+  - Clientes: `/ventas/resolucion-clientes`
+  - Historial Ventas: `/ventas/historial-ventas`
+
+### Presupuestador (Usuario de Presupuestos)
+- **Email:** `presupuesto@gadium.com`
+- **Password:** `password`
+- **Rol:** Presupuestador
+- **Acceso:** Solo módulo de presupuestos
+- **Rutas principales:**
+  - Dashboard: `/presupuesto/dashboard`
+  - Importación: `/presupuesto/importacion`
+  - Historial Importación: `/presupuesto/historial_importacion`
 
 ---
 
