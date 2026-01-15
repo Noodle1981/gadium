@@ -4,7 +4,10 @@
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 {{ __('Gestión de Roles') }}
             </h2>
-            <a href="{{ route('roles.create') }}" class="inline-flex items-center px-4 py-2 bg-primary border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-600 focus:bg-primary-700 active:bg-primary-900 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
+            @php
+                $createRoleRoute = auth()->user()->hasRole('Manager') ? 'manager.roles.create' : 'roles.create';
+            @endphp
+            <a href="{{ route($createRoleRoute) }}" class="inline-flex items-center px-4 py-2 bg-primary border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-primary-600 focus:bg-primary-700 active:bg-primary-900 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition ease-in-out duration-150">
                 <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                 </svg>
@@ -77,7 +80,7 @@
                 
                 @if($sectorRoles->isEmpty())
                     <div class="bg-white dark:bg-gray-800 rounded-lg p-6 text-center text-gray-500">
-                        No hay roles personalizados aún. <a href="{{ route('roles.create') }}" class="text-primary hover:underline">Crear nuevo rol</a>.
+                        No hay roles personalizados aún. <a href="{{ route($createRoleRoute) }}" class="text-primary hover:underline">Crear nuevo rol</a>.
                     </div>
                 @else
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
