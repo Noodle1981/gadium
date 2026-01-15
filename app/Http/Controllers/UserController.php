@@ -14,6 +14,15 @@ class UserController extends Controller
      */
     public function index()
     {
+        // Managers no pueden ver Super Admins
+        $query = User::query();
+        
+        if (auth()->user()->hasRole('Manager') && !auth()->user()->hasRole('Super Admin')) {
+            $query->whereDoesntHave('roles', function($q) {
+                $q->where('name', 'Super Admin');
+            });
+        }
+        
         return view('users.index');
     }
 
@@ -22,7 +31,14 @@ class UserController extends Controller
      */
     public function create()
     {
-        $roles = Role::all();
+        // Managers no pueden asignar rol Super Admin
+        $roles = Role::query();
+        
+        if (auth()->user()->hasRole('Manager') && !auth()->user()->hasRole('Super Admin')) {
+            $roles->where('name', '!=', 'Super Admin');
+        }
+        
+        $roles = $roles->get();
         return view('users.create', compact('roles'));
     }
 
@@ -36,6 +52,14 @@ class UserController extends Controller
             'email' => 'required|string|email|max:255|unique:users',
             'role' => 'required|exists:roles,name',
         ]);
+
+        // Managers no pueden asignar rol Super Admin
+        if (auth()->user()->hasRole('Manager') && !auth()->user()->hasRole('Super Admin')) {
+            if ($validated['role'] === 'Super Admin') {
+                return redirect()->route('users.create')
+                    ->with('error', 'No tiene permisos para asignar el rol Super Admin.');
+            }
+        }
 
         // Crear usuario sin contraseña (la configurará después)
         $user = User::create([
@@ -67,7 +91,22 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        $roles = Role::all();
+        // Managers no pueden editar Super Admins
+        if (auth()->user()->hasRole('Manager') && !auth()->user()->hasRole('Super Admin')) {
+            if ($user->hasRole('Super Admin')) {
+                return redirect()->route('users.index')
+                    ->with('error', 'No tiene permisos para editar un Super Admin.');
+            }
+        }
+        
+        // Managers no pueden asignar rol Super Admin
+        $roles = Role::query();
+        
+        if (auth()->user()->hasRole('Manager') && !auth()->user()->hasRole('Super Admin')) {
+            $roles->where('name', '!=', 'Super Admin');
+        }
+        
+        $roles = $roles->get();
         return view('users.edit', compact('user', 'roles'));
     }
 
@@ -76,6 +115,20 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
+        // Managers no pueden editar Super Admins
+        if (auth()->user()->hasRole('Manager') && !auth()->user()->hasRole('Super Admin')) {
+            if ($user->hasRole('Super Admin')) {
+                return redirect()->route('users.index')
+                    ->with('error', 'No tiene permisos para editar un Super Admin.');
+            }
+            
+            // Managers no pueden asignar rol Super Admin
+            if ($request->input('role') === 'Super Admin') {
+                return redirect()->route('users.edit', $user)
+                    ->with('error', 'No tiene permisos para asignar el rol Super Admin.');
+            }
+        }
+        
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
