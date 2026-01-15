@@ -69,61 +69,43 @@
 
 ---
 
-## Módulo de Ventas
-
-### Importación de Datos
-- **Ruta Admin:** `/admin/importacion`
-- **Ruta Manager:** Acceso vía `/admin/importacion` (Manager tiene acceso a rutas admin)
-- **Funcionalidad:** Importar ventas y presupuestos desde Excel/CSV
-
-### Resolución de Clientes
-- **Ruta Admin:** `/admin/clientes`
-- **Ruta Manager:** Acceso vía `/admin/clientes`
-- **Funcionalidad:** Resolver duplicados y normalizar nombres de clientes
-
-### Historial de Ventas
-- **Ruta Admin:** `/admin/historial-ventas`
-- **Ruta Manager:** `/gerente/historial-ventas`
-- **Funcionalidad:** Ver últimas 50 ventas registradas (datos de Tango)
-
-### Historial de Presupuestos
-- **Ruta Admin:** `/admin/historial-presupuestos`
-- **Ruta Manager:** `/gerente/historial-presupuestos`
-- **Funcionalidad:** Ver últimos 50 presupuestos registrados
-
----
-
-## Usuarios de Prueba para Módulos Nuevos
+## Módulos Nuevos (Gestores)
 
 ### Detalles de Horas
-- **Email:** `detalleshoras@gadium.com`
+- **Email:** `horas@gadium.com`
 - **Password:** `password`
-- **Rutas:** `/admin/detalles-horas`, `/gerente/detalles-horas`
+- **Rol:** Gestor de Horas
+- **Ruta:** `/detalle_horas/dashboard`
 
 ### Compras de Materiales
-- **Email:** `comprasmateriales@gadium.com`
+- **Email:** `compras@gadium.com`
 - **Password:** `password`
-- **Rutas:** `/admin/compras-materiales`, `/gerente/compras-materiales`
+- **Rol:** Gestor de Compras
+- **Ruta:** `/compras/dashboard`
 
 ### Satisfacción del Personal
-- **Email:** `satisfaccionpersonal@gadium.com`
+- **Email:** `satisfaccion_personal@gadium.com`
 - **Password:** `password`
-- **Rutas:** `/admin/satisfaccion-personal`, `/gerente/satisfaccion-personal`
+- **Rol:** Gestor de Satisfacción Personal
+- **Ruta:** `/satisfaccion_personal/dashboard`
 
 ### Satisfacción de Clientes
-- **Email:** `satisfaccionclientes@gadium.com`
+- **Email:** `satisfaccion_clientes@gadium.com`
 - **Password:** `password`
-- **Rutas:** `/admin/satisfaccion-clientes`, `/gerente/satisfaccion-clientes`
+- **Rol:** Gestor de Satisfacción Clientes
+- **Ruta:** `/satisfaccion_clientes/dashboard`
 
 ### Tableros de Control
 - **Email:** `tableros@gadium.com`
 - **Password:** `password`
-- **Rutas:** `/admin/tableros`, `/gerente/tableros`
+- **Rol:** Gestor de Tableros
+- **Ruta:** `/tableros/dashboard`
 
 ### Proyecto de Automatización
-- **Email:** `automatizacion@gadium.com`
+- **Email:** `proyectos@gadium.com`
 - **Password:** `password`
-- **Rutas:** `/admin/proyecto-automatizacion`, `/gerente/proyecto-automatizacion`
+- **Rol:** Gestor de Proyectos
+- **Ruta:** `/proyectos/dashboard`
 
 ---
 
