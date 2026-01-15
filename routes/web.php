@@ -16,7 +16,6 @@ Route::post('/setup-password', [PasswordSetupController::class, 'store'])
 
 Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
     Route::view('dashboard', 'dashboard')->name('dashboard');
-    Route::view('profile', 'profile')->name('profile');
     
     // --- ADMINISTRACIÓN ---
     Route::prefix('admin')->group(function () {
@@ -24,6 +23,8 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
         // Super Admin, Admin & Manager (Gestión de Usuarios y Roles)
         Route::middleware(['role:Super Admin|Admin|Manager'])->group(function () {
             Volt::route('dashboard', 'pages.admin.dashboard')->name('admin.dashboard');
+            Route::view('profile', 'profile')->name('admin.profile');
+            
             // Gestión de Usuarios
             Route::middleware(['can:view_users'])->group(function () {
                 Route::resource('users', UserController::class);
@@ -102,6 +103,7 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
     Route::prefix('gerente')->middleware(['role:Manager'])->group(function () {
         
         Volt::route('dashboard', 'pages.manager.dashboard')->name('manager.dashboard');
+        Route::view('profile', 'profile')->name('manager.profile');
         Volt::route('produccion', 'pages.manufacturing.production-log')->name('manager.manufacturing.production.log');
         
         // Agregar RRHH si tienen permiso
