@@ -1,7 +1,7 @@
 @php
     $isManager = auth()->user()->hasRole('Manager');
     $presupuestoRoute = $isManager ? 'manager.historial.presupuesto' : 'admin.historial.presupuesto';
-    $importRoute = $isManager ? 'manager.sales.import' : 'admin.sales.import';
+    $importRoute = 'admin.sales.import';
 @endphp
 
 <x-app-layout>
