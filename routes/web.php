@@ -92,6 +92,19 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
                 })->name('admin.historial.compras');
             });
 
+            // Módulo Tableros
+            Route::middleware(['can:view_boards'])->group(function () {
+                Volt::route('tableros', 'pages.boards.index')->name('admin.boards.index');
+                Volt::route('tableros/importacion', 'pages.boards.import-wizard')->name('admin.boards.import');
+                Volt::route('tableros/crear', 'pages.boards.manual-create')->name('admin.boards.create');
+                Volt::route('tableros/editar/{boardDetail}', 'pages.boards.manual-edit')->name('admin.boards.edit');
+                
+                Route::get('historial-tableros', function () {
+                    $boards = \App\Models\BoardDetail::latest()->take(50)->get();
+                    return view('historial-tableros', ['boards' => $boards]);
+                })->name('admin.historial.tableros');
+            });
+
             // Módulo Satisfacción Personal
             Route::middleware(['can:view_staff_satisfaction'])->group(function () {
                 Volt::route('satisfaccion-personal', 'pages.staff-satisfaction.index')->name('admin.staff-satisfaction.index');
@@ -189,6 +202,22 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
         Volt::route('satisfaccion-clientes', 'pages.client-satisfaction.index')->name('manager.client-satisfaction.index');
         Volt::route('tableros', 'pages.boards.index')->name('manager.boards.index');
         Volt::route('proyecto-automatizacion', 'pages.automation.index')->name('manager.automation.index');
+
+        // Rutas de Tableros para Manager
+        Route::middleware(['can:view_boards'])->group(function () {
+             Volt::route('tableros-control', 'pages.boards.dashboard')->name('manager.boards.dashboard'); // Optional dashboard view
+             // Manager uses same views but different route names if needed, or share?
+             // Usually Manager has their own prefix. Let's redirect or use same components.
+             // Following pattern:
+             Volt::route('tableros/importacion', 'pages.boards.import-wizard')->name('manager.boards.import');
+             Volt::route('tableros/crear', 'pages.boards.manual-create')->name('manager.boards.create');
+             Volt::route('tableros/editar/{boardDetail}', 'pages.boards.manual-edit')->name('manager.boards.edit');
+             
+             Route::get('historial-tableros', function () {
+                $boards = \App\Models\BoardDetail::latest()->take(50)->get();
+                return view('historial-tableros', ['boards' => $boards]);
+            })->name('manager.historial.tableros');
+        });
     });
 
 
@@ -280,11 +309,7 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
         Route::view('perfil', 'profile')->name('client-satisfaction.profile');
     });
 
-    // --- TABLEROS (Gestor de Tableros) ---
-    Route::prefix('tableros')->middleware(['role:Gestor de Tableros'])->group(function () {
-        Volt::route('dashboard', 'pages.boards.dashboard')->name('boards.dashboard');
-        Route::view('perfil', 'profile')->name('boards.profile');
-    });
+
 
     // --- PROYECTOS (Gestor de Proyectos) ---
     Route::prefix('proyectos')->middleware(['role:Gestor de Proyectos'])->group(function () {
@@ -296,6 +321,23 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
     // --- MÓDULOS DE SISTEMA (Rutas Amigables) - ELIMINADOS PARA USAR RUTAS POR ROL
     // Las rutas genéricas han sido reemplazadas por rutas específicas dentro de los grupos Admin y Gerente.
 
+});
+
+// Grupo para Gestor de Tableros
+Route::prefix('tableros')->middleware(['role:Gestor de Tableros'])->group(function () {
+    Volt::route('dashboard', 'pages.boards.dashboard')->name('boards.dashboard');
+    Route::view('perfil', 'profile')->name('boards.profile');
+    
+    Route::middleware(['can:view_boards'])->group(function () {
+        Volt::route('importacion', 'pages.boards.import-wizard')->name('boards.import');
+        Volt::route('crear', 'pages.boards.manual-create')->name('boards.create');
+        Volt::route('editar/{boardDetail}', 'pages.boards.manual-edit')->name('boards.edit');
+        
+        Route::get('historial_importacion', function () {
+            $boards = \App\Models\BoardDetail::latest()->take(50)->get();
+            return view('historial-tableros', ['boards' => $boards]);
+        })->name('boards.historial.importacion');
+    });
 });
 
 require __DIR__.'/auth.php';

@@ -1,34 +1,31 @@
-
-
-### Módulo Compras de Materiales
+### Módulo ### Tableros de Control
 
 usuario y rutas creadas
 
-- **Email:** `compras@gadium.com`
+- **Email:** `tableros@gadium.com`
 - **Password:** `password`
-- **Rol:** Gestor de Compras
-- **Ruta:** `/compras/dashboard`
+- **Rol:** Gestor de Tableros
+- **Ruta:** `/tableros/dashboard`
 
-Para este módulo necesito exactamente las mismas herramientas de importación de excel, osea importacion autimatica y manual, con las misma filosofía pero basado en el excel compras que esta en  
-D:\Gadium\doc\excel pruebas\Compras\compras.xlsx, te muestro el excel para que puedas ver la estructura del excel, de tomdas maneras te lo paso acá tambien.
+esta tablero esta dentro de la ruta de /admin , lo cual esta mal debe estar en la ruta /tableros
 
-Moneda	CC	Año	Empresa	Descripción	Materiales presupuestados	Materiales comprados	Resto (Valor)	Resto (%)	% de facturación
-U$D	3184	2024	JUAN MESSINA S.A.	Readecuación Eléctrica	USD 25.116	USD 16.133	USD 8.983	36%	100%
-U$D	3227	2024	SALYCLOR S.A.	Provisión sonda pH	USD 1.441	USD 1.441	USD 0	0%	100%
-U$D	3241	2024	MINETECH	TGCA - Tablero General	USD 2.036	USD 2.667	-USD 631	-31%	100%
-U$D	3255	2024	ELECTRO-OESTE	Motores trifásicos	USD 5.400	USD 4.860	USD 540	10%	100%
-U$D	3268	2024	TECH SOLUTIONS	Cableado estructurado	USD 3.200	USD 3.200	USD 0	0%	100%
-U$D	3280	2024	JUAN MESSINA S.A.	Mantenimiento preventivo	USD 1.850	USD 2.100	-USD 250	-14%	100%
-U$D	3292	2024	POWER-LINK	Baterías para UPS	USD 4.120	USD 3.500	USD 620	15%	100%
-U$D	3305	2024	MINETECH	Repuestos sensores	USD 950	USD 1.050	-USD 100	-11%	100%
-U$D	3318	2024	S-CONTROLS	Programación PLC	USD 6.800	USD 6.800	USD 0	0%	100%
-U$D	3324	2024	HIDRO-MAT	Bombas sumergibles	USD 12.300	USD 10.455	USD 1.845	15%	100%
-U$D	3337	2024	INDU-LIGHT	Luminarias LED Planta	USD 2.600	USD 2.860	-USD 260	-10%	100%
+esta vista esta mal cuando me logeo, tiene que llevarme a /tableros/dashboard
+
+en lo cual debe tener un sidebar y un header como los otros modulos, pero con las rutas de tableros, importacion automatica, importacion manual, historial del excel del tablero, del cual abajo esta especificado la estructura del excel, pero sin generarme los seeder porque los voy a subir, necesit corregir eso por favor, puedes hacerlo en esta rama
+
+Año	Proyecto	Cliente	Proyecto2	 Columnas 	 Gabinetes 	 Potencia 	 Pot/Control 	 Control 	Intervención	Documento corrección de Fallas
+2025	3294	DOM	Fabricación de tablero pozo de agua Potencia 150 HP	 1 	 -   	 -   	 1 	 -   		 -   
+2025	3367	Arcor	Automatismo para recuperación de agua de bombas Buscetto a Playa	 -   	 1 	 -   	 1 		 1 	 -   
+2025	3368	Calidra	Iluminación de almacén	 -   	 3 	 3 				 1 
+2025	3376	Arcor	Tablero Eléctrico de Envolvedor N°2-SOUDRONIC	 -   	 1 	 -   	 1 	 -   	 -   	 -   
+2025	3395	Térmica SL-SG	Cámara Térmica	 -   	 1 	 -   	 -   	 1 	 -   	 -   
+2025	3399	Saint Gobaint	Montaje Eléctrico, Programación y Control (Aditivos Etapa 3)	 -   	 1 	 -   	 -   	 1 	 1 	 -   
 
 
 
 
-las rutas deben estar protegida,
 
-no generes seeder de usuarios ni de pruebas lo probaremos con los archivos, recordad que necesito que la visual y la forma de que esta implementada en ventas, presupuestos, detalles de horas, debe ser implementada tambien en compras.
+las rutas deben estar protegida, en /tableros
+
+corregir por favorS
 

@@ -137,6 +137,10 @@ class ExcelImportService
         } elseif ($type === 'purchase_detail') {
             // Purchase Detail format
             $required = ['Moneda', 'CC', 'Año', 'Empresa', 'Descripción', 'Materiales presupuestados', 'Materiales comprados'];
+
+        } elseif ($type === 'board_detail') {
+            // Board Detail format
+            $required = ['Año', 'Proyecto Numero', 'Cliente', 'Descripción Proyecto', 'Columnas', 'Gabinetes', 'Potencia', 'Pot/Control', 'Control', 'Intervención', 'Documento corrección de Fallas'];
         } else {
             // Budget format
             $required = ['Empresa', 'Fecha', 'Monto', 'Orden de Pedido'];
@@ -163,8 +167,8 @@ class ExcelImportService
     {
         if ($type === 'sale') {
             return trim($row['RAZON_SOCI'] ?? '');
-        } elseif ($type === 'hour_detail') {
-            return ''; // No client in hour detail
+        } elseif ($type === 'hour_detail' || $type === 'purchase_detail' || $type === 'board_detail') {
+            return ''; // No client in hour detail, purchase detail, or board detail
         } else {
             return trim($row['Empresa'] ?? '');
         }
@@ -175,7 +179,9 @@ class ExcelImportService
      */
     protected function extractDate(array $row, string $type): ?string
     {
-        if ($type === 'hour_detail') {
+        if ($type === 'board_detail' || $type === 'purchase_detail') {
+            return null; // Boards and purchases don't use date field for import
+        } elseif ($type === 'hour_detail') {
              $dateValue = $row['Fecha'] ?? null;
         } else {
              $dateValue = $type === 'sale' ? ($row['FECHA_EMI'] ?? null) : ($row['Fecha'] ?? null);
@@ -252,7 +258,7 @@ class ExcelImportService
      */
     protected function extractAmount(array $row, string $type): ?float
     {
-        if ($type === 'hour_detail' || $type === 'purchase_detail') {
+        if ($type === 'hour_detail' || $type === 'purchase_detail' || $type === 'board_detail') {
             return 0.0;
         }
 
@@ -276,7 +282,7 @@ class ExcelImportService
      */
     protected function extractComprobante(array $row, string $type): string
     {
-        if ($type === 'hour_detail' || $type === 'purchase_detail') {
+        if ($type === 'hour_detail' || $type === 'purchase_detail' || $type === 'board_detail') {
             return '';
         }
 
@@ -292,7 +298,7 @@ class ExcelImportService
      */
     protected function extractMoneda(array $row, string $type): string
     {
-        if ($type === 'hour_detail' || $type === 'purchase_detail') {
+        if ($type === 'hour_detail' || $type === 'purchase_detail' || $type === 'board_detail') {
             return '';
         }
 
@@ -312,7 +318,7 @@ class ExcelImportService
 
         // Validar Fecha
         $fecha = $this->extractDate($row, $type);
-        if (!$fecha && $type !== 'purchase_detail') {
+        if (!$fecha && $type !== 'purchase_detail' && $type !== 'board_detail') {
             $dateField = $type === 'sale' ? 'FECHA_EMI' : 'Fecha';
             $errors[] = "Fila {$rowIndex}: Fecha inválida ({$row[$dateField]})";
         }
@@ -326,7 +332,7 @@ class ExcelImportService
 
         // Validar Cliente
         $clientName = $this->extractClientName($row, $type);
-        if (empty($clientName) && $type !== 'hour_detail') {
+        if (empty($clientName) && $type !== 'hour_detail' && $type !== 'purchase_detail' && $type !== 'board_detail') {
             $clientField = $type === 'sale' ? 'RAZON_SOCI' : 'Empresa';
             $errors[] = "Fila {$rowIndex}: Cliente vacío";
         }
@@ -349,6 +355,27 @@ class ExcelImportService
             }
             if (empty($row['CC'])) {
                 $errors[] = "Fila {$rowIndex}: CC vacío";
+            }
+        } elseif ($type === 'board_detail') {
+            if (empty($row['Año']) || !is_numeric($row['Año'])) {
+                $errors[] = "Fila {$rowIndex}: Año inválido";
+            }
+            if (empty($row['Proyecto Numero'])) {
+                $errors[] = "Fila {$rowIndex}: Proyecto Numero vacío";
+            }
+            if (empty($row['Cliente'])) {
+                $errors[] = "Fila {$rowIndex}: Cliente vacío";
+            }
+            
+            // Numeric fields are lenient as they default to 0 if invalid/empty, 
+            // but if present they should ideally be numeric.
+            // checking simple "is_numeric" for non-empty values
+            $numericFields = ['Columnas', 'Gabinetes', 'Potencia', 'Pot/Control', 'Control', 'Intervención', 'Documento corrección de Fallas'];
+            foreach ($numericFields as $field) {
+                $val = $row[$field] ?? '';
+                if ($val !== '' && $val !== null && !is_numeric($val)) {
+                    $errors[] = "Fila {$rowIndex}: {$field} debe ser numérico";
+                }
             }
         }
 
@@ -465,7 +492,7 @@ class ExcelImportService
             $clientName = $this->extractClientName($row, $type);
             $client = $this->normalizationService->resolveClientByAlias($clientName);
 
-            if (!$client && $type !== 'hour_detail' && $type !== 'purchase_detail') {
+            if (!$client && $type !== 'hour_detail' && $type !== 'purchase_detail' && $type !== 'board_detail') {
                 continue;
             }
 
@@ -474,7 +501,7 @@ class ExcelImportService
             $comprobante = $this->extractComprobante($row, $type);
             $moneda = $this->extractMoneda($row, $type);
 
-            if (!$fecha && $type !== 'purchase_detail') {
+            if (!$fecha && $type !== 'purchase_detail' && $type !== 'board_detail') {
                 continue;
             }
 
@@ -607,6 +634,33 @@ class ExcelImportService
                     'resto_valor' => $this->parsePurchaseAmount($row['Resto (Valor)'] ?? '0'),
                     'resto_porcentaje' => $this->parsePercentage($row['Resto (%)'] ?? '0'),
                     'porcentaje_facturacion' => $this->parsePercentage($row['% de facturación'] ?? '0'),
+                    'hash' => $hash,
+                ]);
+            } elseif ($type === 'board_detail') {
+                $ano = (int)($row['Año'] ?? 0);
+                $proyectoNumero = trim($row['Proyecto Numero'] ?? '');
+                $cliente = trim($row['Cliente'] ?? '');
+                $descripcion = trim($row['Descripción Proyecto'] ?? '');
+
+                $hash = \App\Models\BoardDetail::generateHash($ano, $proyectoNumero, $cliente, $descripcion);
+
+                if (\App\Models\BoardDetail::existsByHash($hash)) {
+                    $skipped++;
+                    continue;
+                }
+
+                \App\Models\BoardDetail::create([
+                    'ano' => $ano,
+                    'proyecto_numero' => $proyectoNumero,
+                    'cliente' => $cliente,
+                    'descripcion_proyecto' => $descripcion,
+                    'columnas' => (int)($row['Columnas'] ?? 0),
+                    'gabinetes' => (int)($row['Gabinetes'] ?? 0),
+                    'potencia' => (int)($row['Potencia'] ?? 0),
+                    'pot_control' => (int)($row['Pot/Control'] ?? 0),
+                    'control' => (int)($row['Control'] ?? 0),
+                    'intervencion' => (int)($row['Intervención'] ?? 0),
+                    'documento_correccion_fallas' => (int)($row['Documento corrección de Fallas'] ?? 0),
                     'hash' => $hash,
                 ]);
             }

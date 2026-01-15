@@ -13,7 +13,7 @@
     <div class="pt-4 text-xs font-semibold text-gray-500 uppercase tracking-widest px-4 mb-2">Operaciones</div>
     
     @can('view_sales')
-        @if(!$isViewer && !$isManager && !$isVendedor && !$isPresupuestador)
+        @if(!$isViewer && !$isManager && !$isVendedor && !$isPresupuestador && !$isHours && !$isPurchases && !$isBoards && !$isStaffSat && !$isClientSat && !$isAutomation)
             @php
                 $salesRoute = 'admin.sales.import';
             @endphp
@@ -24,7 +24,7 @@
     @endcan
 
     @can('view_production')
-        @if(!$isViewer && !$isManager && !$isVendedor && !$isPresupuestador)
+        @if(!$isViewer && !$isManager && !$isVendedor && !$isPresupuestador && !$isHours && !$isPurchases && !$isBoards && !$isStaffSat && !$isClientSat && !$isAutomation)
             @php
                 $prodRoute = $isManager ? 'manager.manufacturing.production.log' : 'admin.manufacturing.production.log';
             @endphp
@@ -35,7 +35,7 @@
     @endcan
     
     @can('view_sales')
-        @if(!$isViewer && !$isManager && !$isVendedor && !$isPresupuestador)
+        @if(!$isViewer && !$isManager && !$isVendedor && !$isPresupuestador && !$isHours && !$isPurchases && !$isBoards && !$isStaffSat && !$isClientSat && !$isAutomation)
             @php
                 $clientsRoute = 'admin.clients.resolve';
             @endphp
@@ -44,7 +44,7 @@
             </x-sidebar-link>
         @endif
         
-        @if(!$isViewer && !$isVendedor && !$isPresupuestador)
+        @if(!$isViewer && !$isVendedor && !$isPresupuestador && !$isHours && !$isPurchases && !$isBoards && !$isStaffSat && !$isClientSat && !$isAutomation)
             @php
                 $ventasRoute = $isManager ? 'manager.historial.ventas' : 'admin.historial.ventas';
                 $presupuestoRoute = $isManager ? 'manager.historial.presupuesto' : 'admin.historial.presupuesto';
@@ -70,6 +70,13 @@
             @endphp
             <x-sidebar-link :href="route($comprasRoute)" :active="request()->routeIs($comprasRoute)" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>'>
                 🛒 Historial Compras
+            </x-sidebar-link>
+            
+            @php
+                $tablerosRoute = $isManager ? 'manager.historial.tableros' : 'admin.historial.tableros';
+            @endphp
+            <x-sidebar-link :href="route($tablerosRoute)" :active="request()->routeIs($tablerosRoute)" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>'>
+                ⚡ Historial Tableros
             </x-sidebar-link>
         @endif
     @endcan
@@ -101,7 +108,7 @@
     @endcan
 
     @can('view_hr')
-        @if(!$isViewer && !$isManager && !$isVendedor && !$isPresupuestador)
+        @if(!$isViewer && !$isManager && !$isVendedor && !$isPresupuestador && !$isHours && !$isPurchases && !$isBoards && !$isStaffSat && !$isClientSat && !$isAutomation)
             @php
                 $hrRoute = $isManager ? 'manager.hr.factors' : 'admin.hr.factors';
             @endphp
@@ -205,6 +212,15 @@
 @if(auth()->user()->hasRole('Gestor de Tableros'))
     <x-sidebar-link :href="route('boards.dashboard')" :active="request()->routeIs('boards.dashboard')" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>'>
         Dashboard
+    </x-sidebar-link>
+    <x-sidebar-link :href="route('boards.import')" :active="request()->routeIs('boards.import')" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>'>
+        Importación Automática
+    </x-sidebar-link>
+    <x-sidebar-link :href="route('boards.create')" :active="request()->routeIs('boards.create')" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>'>
+        Importación Manual
+    </x-sidebar-link>
+    <x-sidebar-link :href="route('boards.historial.importacion')" :active="request()->routeIs('boards.historial.importacion')" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>'>
+        Historial Tableros
     </x-sidebar-link>
 @endif
 
