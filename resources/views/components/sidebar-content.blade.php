@@ -1,9 +1,9 @@
-@props(['isAdmin', 'isSuperAdmin', 'isManager', 'isViewer', 'isVendedor', 'dashboardRoute'])
+@props(['isAdmin', 'isSuperAdmin', 'isManager', 'isViewer', 'isVendedor', 'isPresupuestador', 'dashboardRoute'])
 
 <!-- Principal -->
 <div class="text-xs font-semibold text-gray-500 uppercase tracking-widest px-4 mb-2">Principal</div>
 
-@if(!$isVendedor)
+@if(!$isVendedor && !$isPresupuestador)
     <x-sidebar-link :href="route($dashboardRoute)" :active="request()->routeIs($dashboardRoute)" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>'>
         Dashboard
     </x-sidebar-link>
@@ -13,7 +13,7 @@
     <div class="pt-4 text-xs font-semibold text-gray-500 uppercase tracking-widest px-4 mb-2">Operaciones</div>
     
     @can('view_sales')
-        @if(!$isViewer && !$isManager && !$isVendedor)
+        @if(!$isViewer && !$isManager && !$isVendedor && !$isPresupuestador)
             @php
                 $salesRoute = 'admin.sales.import';
             @endphp
@@ -24,7 +24,7 @@
     @endcan
 
     @can('view_production')
-        @if(!$isViewer && !$isManager && !$isVendedor)
+        @if(!$isViewer && !$isManager && !$isVendedor && !$isPresupuestador)
             @php
                 $prodRoute = $isManager ? 'manager.manufacturing.production.log' : 'admin.manufacturing.production.log';
             @endphp
@@ -35,7 +35,7 @@
     @endcan
     
     @can('view_sales')
-        @if(!$isViewer && !$isManager && !$isVendedor)
+        @if(!$isViewer && !$isManager && !$isVendedor && !$isPresupuestador)
             @php
                 $clientsRoute = 'admin.clients.resolve';
             @endphp
@@ -44,7 +44,7 @@
             </x-sidebar-link>
         @endif
         
-        @if(!$isViewer && !$isVendedor)
+        @if(!$isViewer && !$isVendedor && !$isPresupuestador)
             @php
                 $ventasRoute = $isManager ? 'manager.historial.ventas' : 'admin.historial.ventas';
                 $presupuestoRoute = $isManager ? 'manager.historial.presupuesto' : 'admin.historial.presupuesto';
@@ -87,7 +87,7 @@
     @endcan
 
     @can('view_hr')
-        @if(!$isViewer && !$isManager && !$isVendedor)
+        @if(!$isViewer && !$isManager && !$isVendedor && !$isPresupuestador)
             @php
                 $hrRoute = $isManager ? 'manager.hr.factors' : 'admin.hr.factors';
             @endphp
@@ -115,6 +115,23 @@
 
         <x-sidebar-link :href="route('sales.historial.ventas')" :active="request()->routeIs('sales.historial.ventas')" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>'>
             Historial Ventas
+        </x-sidebar-link>
+    @endcan
+@endif
+
+{{-- Sidebar para Presupuestador --}}
+@if(auth()->user()->hasRole('Presupuestador'))
+    <x-sidebar-link :href="route('budget.dashboard')" :active="request()->routeIs('budget.dashboard')" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 36v-3m-6 6v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>'>
+        Dashboard
+    </x-sidebar-link>
+
+    @can('view_budgets')
+        <x-sidebar-link :href="route('budget.import')" :active="request()->routeIs('budget.import')" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>'>
+            Importación
+        </x-sidebar-link>
+
+        <x-sidebar-link :href="route('budget.historial.importacion')" :active="request()->routeIs('budget.historial.importacion')" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>'>
+            Historial Importación
         </x-sidebar-link>
     @endcan
 @endif

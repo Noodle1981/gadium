@@ -24,6 +24,7 @@ class RoleRedirect
             if ($user->hasAnyRole(['Super Admin', 'Admin'])) $rolePrefix = 'admin';
             elseif ($user->hasRole('Manager')) $rolePrefix = 'manager';
             elseif ($user->hasRole('Vendedor')) $rolePrefix = 'sales';
+            elseif ($user->hasRole('Presupuestador')) $rolePrefix = 'budget';
             elseif ($user->hasRole('Viewer')) $rolePrefix = 'viewer';
 
             // Si no hay prefijo (usuario sin rol), dejar continuar al dashboard base
