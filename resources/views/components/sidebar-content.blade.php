@@ -85,7 +85,7 @@
     @endcan
 
     @can('view_hr')
-        @if(!$isViewer)
+        @if(!$isViewer && !$isManager)
             @php
                 $hrRoute = $isManager ? 'manager.hr.factors' : 'admin.hr.factors';
             @endphp
