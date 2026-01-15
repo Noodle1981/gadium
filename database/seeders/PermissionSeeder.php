@@ -48,5 +48,41 @@ class PermissionSeeder extends Seeder
         // Permisos de Dashboards
         Permission::create(['name' => 'view_dashboards']);
         Permission::create(['name' => 'manage_dashboards']);
+
+        // Permisos de Detalles Horas
+        Permission::create(['name' => 'view_hours']);
+        Permission::create(['name' => 'create_hours']);
+        Permission::create(['name' => 'edit_hours']);
+        Permission::create(['name' => 'delete_hours']);
+
+        // Permisos de Compras Materiales
+        Permission::create(['name' => 'view_purchases']);
+        Permission::create(['name' => 'create_purchases']);
+        Permission::create(['name' => 'edit_purchases']);
+        Permission::create(['name' => 'delete_purchases']);
+
+        // Permisos de Satisfacción Personal
+        Permission::create(['name' => 'view_staff_satisfaction']);
+        Permission::create(['name' => 'create_staff_satisfaction']);
+        Permission::create(['name' => 'edit_staff_satisfaction']);
+        Permission::create(['name' => 'delete_staff_satisfaction']);
+
+        // Permisos de Satisfacción Clientes
+        Permission::create(['name' => 'view_client_satisfaction']);
+        Permission::create(['name' => 'create_client_satisfaction']);
+        Permission::create(['name' => 'edit_client_satisfaction']);
+        Permission::create(['name' => 'delete_client_satisfaction']);
+
+        // Permisos de Tableros
+        Permission::create(['name' => 'view_boards']);
+        Permission::create(['name' => 'create_boards']);
+        Permission::create(['name' => 'edit_boards']);
+        Permission::create(['name' => 'delete_boards']);
+
+        // Permisos de Proyecto Automatización
+        Permission::create(['name' => 'view_automation']);
+        Permission::create(['name' => 'create_automation']);
+        Permission::create(['name' => 'edit_automation']);
+        Permission::create(['name' => 'delete_automation']);
     }
 }

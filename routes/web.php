@@ -64,6 +64,36 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
             Route::middleware(['can:view_hr'])->group(function () {
                 Volt::route('rrhh', 'pages.hr.factor-manager')->name('admin.hr.factors'); // rrhh
             });
+
+            // Módulo Detalles Horas
+            Route::middleware(['can:view_hours'])->group(function () {
+                Volt::route('detalles-horas', 'pages.hours.index')->name('admin.hours.index');
+            });
+
+            // Módulo Compras Materiales
+            Route::middleware(['can:view_purchases'])->group(function () {
+                Volt::route('compras-materiales', 'pages.purchases.index')->name('admin.purchases.index');
+            });
+
+            // Módulo Satisfacción Personal
+            Route::middleware(['can:view_staff_satisfaction'])->group(function () {
+                Volt::route('satisfaccion-personal', 'pages.staff-satisfaction.index')->name('admin.staff-satisfaction.index');
+            });
+
+            // Módulo Satisfacción Clientes
+            Route::middleware(['can:view_client_satisfaction'])->group(function () {
+                Volt::route('satisfaccion-clientes', 'pages.client-satisfaction.index')->name('admin.client-satisfaction.index');
+            });
+
+            // Módulo Tableros
+            Route::middleware(['can:view_boards'])->group(function () {
+                Volt::route('tableros', 'pages.boards.index')->name('admin.boards.index');
+            });
+
+            // Módulo Proyecto Automatización
+            Route::middleware(['can:view_automation'])->group(function () {
+                Volt::route('proyecto-automatizacion', 'pages.automation.index')->name('admin.automation.index');
+            });
         });
     });
 
@@ -95,6 +125,14 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
             $budgets = \App\Models\Budget::with('client')->latest()->take(50)->get();
             return view('historial-presupuesto', ['budgets' => $budgets]);
         })->name('manager.historial.presupuesto');
+
+        // Nuevos Módulos para Manager
+        Volt::route('detalles-horas', 'pages.hours.index')->name('manager.hours.index');
+        Volt::route('compras-materiales', 'pages.purchases.index')->name('manager.purchases.index');
+        Volt::route('satisfaccion-personal', 'pages.staff-satisfaction.index')->name('manager.staff-satisfaction.index');
+        Volt::route('satisfaccion-clientes', 'pages.client-satisfaction.index')->name('manager.client-satisfaction.index');
+        Volt::route('tableros', 'pages.boards.index')->name('manager.boards.index');
+        Volt::route('proyecto-automatizacion', 'pages.automation.index')->name('manager.automation.index');
     });
 
 

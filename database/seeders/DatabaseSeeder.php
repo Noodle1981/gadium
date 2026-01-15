@@ -27,7 +27,10 @@ class DatabaseSeeder extends Seeder
         $this->command->line('   → Creando usuarios de prueba...');
         $this->call(UserSeeder::class);
         
-        $this->command->info('✅ ÉPICA 01 completada: 46 permisos, 4 roles, 4 usuarios');
+        $this->command->line('   → Creando usuarios de prueba para módulos nuevos...');
+        $this->call(ModuleTestUsersSeeder::class);
+        
+        $this->command->info('✅ ÉPICA 01 completada: 46 permisos, 4 roles, 10 usuarios');
         $this->command->newLine();
 
         // ÉPICA 02: Motor de Ingesta y Normalización de Datos

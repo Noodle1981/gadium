@@ -26,6 +26,13 @@ class RoleSeeder extends Seeder
             'view_production', 'create_production', 'edit_production',
             'view_hr', 'create_hr', 'edit_hr',
             'view_dashboards',
+            // Nuevos módulos
+            'view_hours', 'create_hours', 'edit_hours',
+            'view_purchases', 'create_purchases', 'edit_purchases',
+            'view_staff_satisfaction', 'create_staff_satisfaction', 'edit_staff_satisfaction',
+            'view_client_satisfaction', 'create_client_satisfaction', 'edit_client_satisfaction',
+            'view_boards', 'create_boards', 'edit_boards',
+            'view_automation', 'create_automation', 'edit_automation',
         ]);
 
         // Crear rol Manager con permisos operativos y administrativos (Gerente)
@@ -37,6 +44,13 @@ class RoleSeeder extends Seeder
             'view_production', 'create_production', 'edit_production',
             'view_hr',
             'view_dashboards',
+            // Nuevos módulos (solo view para Manager)
+            'view_hours',
+            'view_purchases',
+            'view_staff_satisfaction',
+            'view_client_satisfaction',
+            'view_boards',
+            'view_automation',
         ]);
 
 
