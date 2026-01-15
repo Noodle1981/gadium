@@ -180,6 +180,24 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
     });
 
 
+    // --- PRESUPUESTO (Presupuestador) ---
+    Route::prefix('presupuesto')->middleware(['role:Presupuestador'])->group(function () {
+        
+        Volt::route('dashboard', 'pages.budget.dashboard')->name('budget.dashboard');
+        Route::view('perfil', 'profile')->name('budget.profile');
+        
+        // Módulo Presupuesto
+        Route::middleware(['can:view_budgets'])->group(function () {
+            Volt::route('importacion', 'pages.budget.import-wizard')->name('budget.import');
+            
+            Route::get('historial_importacion', function () {
+                $budgets = \App\Models\Budget::with('client')->latest()->take(50)->get();
+                return view('historial-presupuesto', ['budgets' => $budgets]);
+            })->name('budget.historial.importacion');
+        });
+    });
+
+
     // --- MÓDULOS DE SISTEMA (Rutas Amigables) - ELIMINADOS PARA USAR RUTAS POR ROL
     // Las rutas genéricas han sido reemplazadas por rutas específicas dentro de los grupos Admin y Gerente.
 

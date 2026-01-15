@@ -1,18 +1,17 @@
-## Diseño Ventas
+## Diseño Presupuesto
+
+http://127.0.0.1:8000/presupuesto/dashboard
+
+para presupuesto, quiero la misma logica que ventas
 
 http://127.0.0.1:8000/ventas/dashboard
 
-hay que corregir los enlaces del sidebar
+pero debe quedar asi en el sidebar
 
 Principal
-Dashboard # repetido
-Operaciones # grupo de enlaces de importacion y resolucion de clientes 
-Importación # apunta a admin/importacion quitar enlace
-Resolución Clientes # apunta a admin/resolucion_clientes quitar enlace
-📊 Historial Ventas # apunta a admin/historial-ventas quitar enlace
-📑 Historial Presupuestos # apunta a admin/historial-presupuestos quitar enlace
-Dashboard # repetido Dejar este
-Importación # está bien
-Resolución Clientes # esta bien
-Historial Ventas # está bien
+Dashboard # presupuesto/dashboard
+Importación # presupuesto/importacion
+Historial Importacion # presupuesto/historial_importacion
+Perfil # presupuesto/perfil
 
+me comprendes?
