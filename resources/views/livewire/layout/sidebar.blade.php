@@ -21,14 +21,17 @@ new class extends Component
     $isSuperAdmin = $user->hasRole('Super Admin');
     $isManager = $user->hasRole('Manager');
     $isViewer = $user->hasRole('Viewer');
+    $isVendedor = $user->hasRole('Vendedor');
 
     $dashboardRoute = 'dashboard';
     if ($isAdmin) $dashboardRoute = 'admin.dashboard';
     elseif ($isManager) $dashboardRoute = 'manager.dashboard';
+    elseif ($isVendedor) $dashboardRoute = 'sales.dashboard';
 
     $profileRoute = 'admin.profile'; // Default
     if ($isManager) $profileRoute = 'manager.profile';
     elseif ($isAdmin) $profileRoute = 'admin.profile';
+    elseif ($isVendedor) $profileRoute = 'sales.profile';
 
 @endphp
 
