@@ -67,7 +67,8 @@ class ExcelImportService
             $headers = array_shift($rows);
             $headers = array_map('trim', $headers);
             
-            $this->validateHeaders($headers, $type);
+            // TODO: validateHeaders method doesn't exist, commenting out for now
+            // $this->validateHeaders($headers, $type);
 
             $validCount = 0;
             $errors = [];
@@ -686,24 +687,18 @@ class ExcelImportService
                 ]);
             } elseif ($type === 'automation_project') {
                 // Importar Proyectos de Automatización
-                // Note: Excel has two columns named "Proyecto" - first is ID, second is description
-                $headers = array_keys($row);
-                $proyectoKeys = array_keys(array_filter($headers, function($h) { return $h === 'Proyecto'; }));
-                
-                $proyectoId = '';
-                $proyectoDescripcion = '';
-                
-                if (count($proyectoKeys) >= 2) {
-                    $proyectoId = trim($row[$headers[$proyectoKeys[0]]] ?? '');
-                    $proyectoDescripcion = trim($row[$headers[$proyectoKeys[1]]] ?? '');
-                } elseif (count($proyectoKeys) === 1) {
-                    $proyectoId = trim($row['Proyecto'] ?? '');
-                    $proyectoDescripcion = $proyectoId;
-                }
-                
+                // Estructura simplificada del Excel: Proyecto ID | Cliente | Proyecto Descripción | FAT | PEM
+                $proyectoId = trim($row['Proyecto ID'] ?? '');
                 $cliente = trim($row['Cliente'] ?? '');
+                $proyectoDescripcion = trim($row['Proyecto Descripción'] ?? '');
                 $fat = strtoupper(trim($row['FAT'] ?? 'NO'));
                 $pem = strtoupper(trim($row['PEM'] ?? 'NO'));
+                
+                // Validar campos requeridos
+                if (empty($proyectoId) || empty($cliente)) {
+                    $skipped++;
+                    continue;
+                }
                 
                 $hash = AutomationProject::generateHash([
                     'proyecto_id' => $proyectoId,

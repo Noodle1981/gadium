@@ -9,15 +9,14 @@
     1.6 Las tareas deben estar cronometradas, es decir registrar fechas y hora de inicio y fin de la tarea
     1.7 La ia debe mantener comunicaciones para promt largos y consultas largas cuando le asignen leer nuevos_requerimientos.md y banco_de_preguntas.md
     1.8 armar una bitácora de la tarea, para ver en que se demora la tarea, errores encontrados y como mejorar eso.
+    1.9 los commit se realizan al finalizar la tarea, testear todo y armar auditoria de la tarea, y subir la tarea a la rama de la tarea.
 2. Probar el sistema
     2.1 Probar la implementación del la tarea
-    2.2 completar Seeders de datos de prueba
-    2.3 Los Seeder debe ir contatenado con otros de acuerdo al orden de las tareas, aprovechando la funcionalidad de los seeders de laravel del DataSeeder.php y activar la funcionalidad de "cargando seeder de tarea 1, detalles del seeder de tarea 1". y eso permitirá concatenar los seeders de las tareas anteriores.
+    2.2 completar Seeders de datos de prueba para usuarios
+    2.3 Los Seeder para prueba se ejecutara cuando se reciba la orden..
     2.4 Ejecutar Testing del estilo Unit Testing y Feature Testing, para verificar que todo funciona correctamente.
-    2.5 si no se usa más los archivos de testing, se debe borrar y documentar resultados y como se hizo
-    2.6 Antes de subir del trabajo a la rama de la tarea. armar una auditoria_nombre_de_la_tarea.md, explicar como está, cual es el estado, y si hay que mejorar algo, explicar que mejorar.
-    2.7 Arreglar y actualizar los arregloes de auditoria_nombre_de_la_tarea.md
-    2.8 subir trabajo a la rama de la tarea. y esperar instrucciones de mi parte para merge.
+    2.5 Antes de subir del trabajo a la rama de la tarea. armar una auditoria_nombre_de_la_tarea.md, explicar como está, cual es el estado, y si hay que mejorar algo, explicar que mejorar.
+    2.6 subir trabajo a la rama de la tarea. y esperar instrucciones de mi parte para merge.
 
 3. Respetar y mantener Documentaciones
     3.1 Mantener la documentación de la tarea actualizada

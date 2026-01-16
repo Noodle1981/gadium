@@ -1,33 +1,21 @@
-### Módulo ### Proyectos de Automatización 
+# módulo_importacion.md
 
-usuario y rutas creadas
+> Documento pendiente de completar
 
-- **Email:** `proyectos@gadium.com`
-- **Password:** `password`
-- **Rol:** Gestor de Proyectos
-- **Ruta:** `/proyectos/dashboard`
+El objeto es documentar la lógica del importador de excel, y la forma de configurar.
 
-# 1 
-cambiar ruta a /proyectos_automatizacion/
-# 2 
-tomar la logica de /ventas/dashboard, presupuesto/dashboard, horas
-# 3 -  Crear rutas y lógicas
+Analizar el importador de cada modulo del sistema
 
-Dashboard: `/proyectos_automatizacion/dashboard`
-Importación automática: 
-importacion manual: 
-Historial Importación: prefil
+- Importación: `/ventas/importacion`
+- Importación: `/presupuesto/importacion`
+- Importación: `/horas/importacion`
+- Importación: `/compras/importacion`
+- Importación: `/tareas/importacion`
 
+Analizar similitudes, diferencias y documentar, tambien revisasr como los guardan los datos en la base de datos.
 
-# 4 Diseño
-El diseño debe ser similar a /ventas/dashboard, presupuesto/dashboard, tablero, principalmente sidebar 
+con la finalidad de encontrar el problema en 
 
-# 5 Limpieza
+- Importación: `/proyectos_automatizacion/importacion`
 
-Limpiar cualquier rastro de ruta vieja /proyectos
-
-# 6 
-
-No generar Seeders, voy a probar importando
-
-
+todo eso documentarlo en D:\Gadium\doc\01_ARQUITECTURA\módulo_importacion.md

@@ -70,8 +70,8 @@ new class extends Component {
                 throw new \Exception('Error al guardar el archivo.');
             }
             
-            // Build correct path - Livewire stores in storage/app by default
-            $this->storedFilePath = storage_path('app') . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $path);
+            // Build correct path
+            $this->storedFilePath = storage_path('app/private') . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $path);
             
             if (!file_exists($this->storedFilePath)) {
                  throw new \Exception("El archivo no se guardó correctamente en: " . $this->storedFilePath);
@@ -259,9 +259,6 @@ new class extends Component {
         <!-- Step 3: Confirmation -->
         @if($step === 3)
             <div class="text-center space-y-6">
-                <!-- Debug info -->
-                <div class="text-xs text-gray-400 mb-2">Debug: Step = {{ $step }}</div>
-                
                 <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
                     <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                 </div>
