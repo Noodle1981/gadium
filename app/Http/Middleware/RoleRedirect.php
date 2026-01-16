@@ -30,7 +30,7 @@ class RoleRedirect
             elseif ($user->hasRole('Gestor de Satisfacción Personal')) $rolePrefix = 'staff_satisfaction';
             elseif ($user->hasRole('Gestor de Satisfacción Clientes')) $rolePrefix = 'client_satisfaction';
             elseif ($user->hasRole('Gestor de Tableros')) $rolePrefix = 'boards';
-            elseif ($user->hasRole('Gestor de Proyectos')) $rolePrefix = 'automation';
+            elseif ($user->hasRole('Gestor de Proyectos')) $rolePrefix = 'automation_projects';
             elseif ($user->hasRole('Viewer')) $rolePrefix = 'viewer';
 
             // Si no hay prefijo (usuario sin rol), dejar continuar al dashboard base
