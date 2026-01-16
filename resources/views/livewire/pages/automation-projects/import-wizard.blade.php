@@ -62,6 +62,7 @@ new class extends Component {
             $extension = $this->file->getClientOriginalExtension();
             $filename = uniqid('automation_projects_import_') . '.' . $extension;
             
+            
             // Store file
             $path = $this->file->storeAs('imports', $filename);
             
@@ -69,11 +70,11 @@ new class extends Component {
                 throw new \Exception('Error al guardar el archivo.');
             }
             
-            // Build correct path
-            $this->storedFilePath = storage_path('app/private') . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $path);
+            // Build correct path - Livewire stores in storage/app by default
+            $this->storedFilePath = storage_path('app') . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $path);
             
             if (!file_exists($this->storedFilePath)) {
-                 throw new \Exception("El archivo no se guardó correctamente.");
+                 throw new \Exception("El archivo no se guardó correctamente en: " . $this->storedFilePath);
             }
             
             // Analyze
