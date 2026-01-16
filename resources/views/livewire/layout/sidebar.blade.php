@@ -40,7 +40,7 @@ new class extends Component
     elseif ($isStaffSat) $dashboardRoute = 'staff-satisfaction.dashboard';
     elseif ($isClientSat) $dashboardRoute = 'client-satisfaction.dashboard';
     elseif ($isBoards) $dashboardRoute = 'boards.dashboard';
-    elseif ($isAutomation) $dashboardRoute = 'automation.dashboard';
+    elseif ($isAutomation) $dashboardRoute = 'automation_projects.dashboard';
 
     $profileRoute = 'admin.profile'; // Default
     if ($isManager) $profileRoute = 'manager.profile';
@@ -52,7 +52,7 @@ new class extends Component
     elseif ($isStaffSat) $profileRoute = 'staff-satisfaction.profile';
     elseif ($isClientSat) $profileRoute = 'client-satisfaction.profile';
     elseif ($isBoards) $profileRoute = 'boards.profile';
-    elseif ($isAutomation) $profileRoute = 'automation.profile';
+    elseif ($isAutomation) $profileRoute = 'automation_projects.profile';
 
 @endphp
 

@@ -105,7 +105,7 @@
 - **Email:** `proyectos@gadium.com`
 - **Password:** `password`
 - **Rol:** Gestor de Proyectos
-- **Ruta:** `/proyectos/dashboard`
+- **Ruta:** `/proyectos_automatizacion/dashboard`
 
 ---
 

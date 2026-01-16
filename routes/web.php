@@ -119,11 +119,6 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
             Route::middleware(['can:view_boards'])->group(function () {
                 Volt::route('tableros', 'pages.boards.index')->name('admin.boards.index');
             });
-
-            // Módulo Proyecto Automatización
-            Route::middleware(['can:view_automation'])->group(function () {
-                Volt::route('proyecto-automatizacion', 'pages.automation.index')->name('admin.automation.index');
-            });
         });
     });
 
@@ -201,7 +196,6 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
         Volt::route('satisfaccion-personal', 'pages.staff-satisfaction.index')->name('manager.staff-satisfaction.index');
         Volt::route('satisfaccion-clientes', 'pages.client-satisfaction.index')->name('manager.client-satisfaction.index');
         Volt::route('tableros', 'pages.boards.index')->name('manager.boards.index');
-        Volt::route('proyecto-automatizacion', 'pages.automation.index')->name('manager.automation.index');
 
         // Rutas de Tableros para Manager
         Route::middleware(['can:view_boards'])->group(function () {
@@ -311,11 +305,23 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
 
 
 
-    // --- PROYECTOS (Gestor de Proyectos) ---
-    Route::prefix('proyectos')->middleware(['role:Gestor de Proyectos'])->group(function () {
-        Volt::route('dashboard', 'pages.automation.dashboard')->name('automation.dashboard');
-        Route::view('perfil', 'profile')->name('automation.profile');
+    // --- PROYECTOS DE AUTOMATIZACIÓN (Gestor de Proyectos) ---
+    Route::prefix('proyectos_automatizacion')->middleware(['role:Gestor de Proyectos'])->group(function () {
+        Volt::route('dashboard', 'pages.automation-projects.dashboard')->name('automation_projects.dashboard');
+        Route::view('perfil', 'profile')->name('automation_projects.profile');
+        
+        Route::middleware(['can:view_automation'])->group(function () {
+            Volt::route('importacion', 'pages.automation-projects.import-wizard')->name('automation_projects.import');
+            Volt::route('crear', 'pages.automation-projects.manual-create')->name('automation_projects.create');
+            Volt::route('editar/{automationProject}', 'pages.automation-projects.manual-edit')->name('automation_projects.edit');
+            
+            Route::get('historial_importacion', function () {
+                $projects = \App\Models\AutomationProject::latest()->take(50)->get();
+                return view('historial-automation-projects', ['projects' => $projects]);
+            })->name('automation_projects.historial.importacion');
+        });
     });
+
 
 
     // --- MÓDULOS DE SISTEMA (Rutas Amigables) - ELIMINADOS PARA USAR RUTAS POR ROL

@@ -6,6 +6,7 @@ use App\Models\Budget;
 use App\Models\Client;
 use App\Models\Sale;
 use App\Models\HourDetail;
+use App\Models\AutomationProject;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 use Exception;
@@ -141,6 +142,9 @@ class ExcelImportService
         } elseif ($type === 'board_detail') {
             // Board Detail format
             $required = ['Año', 'Proyecto Numero', 'Cliente', 'Descripción Proyecto', 'Columnas', 'Gabinetes', 'Potencia', 'Pot/Control', 'Control', 'Intervención', 'Documento corrección de Fallas'];
+        } elseif ($type === 'automation_project') {
+            // Automation Project format
+            $required = ['Proyecto', 'Cliente', 'FAT', 'PEM'];
         } else {
             // Budget format
             $required = ['Empresa', 'Fecha', 'Monto', 'Orden de Pedido'];
@@ -167,8 +171,8 @@ class ExcelImportService
     {
         if ($type === 'sale') {
             return trim($row['RAZON_SOCI'] ?? '');
-        } elseif ($type === 'hour_detail' || $type === 'purchase_detail' || $type === 'board_detail') {
-            return ''; // No client in hour detail, purchase detail, or board detail
+        } elseif ($type === 'hour_detail' || $type === 'purchase_detail' || $type === 'board_detail' || $type === 'automation_project') {
+            return ''; // No client in hour detail, purchase detail, board detail, or automation project
         } else {
             return trim($row['Empresa'] ?? '');
         }
@@ -179,8 +183,8 @@ class ExcelImportService
      */
     protected function extractDate(array $row, string $type): ?string
     {
-        if ($type === 'board_detail' || $type === 'purchase_detail') {
-            return null; // Boards and purchases don't use date field for import
+        if ($type === 'board_detail' || $type === 'purchase_detail' || $type === 'automation_project') {
+            return null; // Boards, purchases, and automation projects don't use date field for import
         } elseif ($type === 'hour_detail') {
              $dateValue = $row['Fecha'] ?? null;
         } else {
@@ -258,7 +262,7 @@ class ExcelImportService
      */
     protected function extractAmount(array $row, string $type): ?float
     {
-        if ($type === 'hour_detail' || $type === 'purchase_detail' || $type === 'board_detail') {
+        if ($type === 'hour_detail' || $type === 'purchase_detail' || $type === 'board_detail' || $type === 'automation_project') {
             return 0.0;
         }
 
@@ -282,7 +286,7 @@ class ExcelImportService
      */
     protected function extractComprobante(array $row, string $type): string
     {
-        if ($type === 'hour_detail' || $type === 'purchase_detail' || $type === 'board_detail') {
+        if ($type === 'hour_detail' || $type === 'purchase_detail' || $type === 'board_detail' || $type === 'automation_project') {
             return '';
         }
 
@@ -298,7 +302,7 @@ class ExcelImportService
      */
     protected function extractMoneda(array $row, string $type): string
     {
-        if ($type === 'hour_detail' || $type === 'purchase_detail' || $type === 'board_detail') {
+        if ($type === 'hour_detail' || $type === 'purchase_detail' || $type === 'board_detail' || $type === 'automation_project') {
             return '';
         }
 
@@ -318,7 +322,7 @@ class ExcelImportService
 
         // Validar Fecha
         $fecha = $this->extractDate($row, $type);
-        if (!$fecha && $type !== 'purchase_detail' && $type !== 'board_detail') {
+        if (!$fecha && $type !== 'purchase_detail' && $type !== 'board_detail' && $type !== 'automation_project') {
             $dateField = $type === 'sale' ? 'FECHA_EMI' : 'Fecha';
             $errors[] = "Fila {$rowIndex}: Fecha inválida ({$row[$dateField]})";
         }
@@ -332,7 +336,7 @@ class ExcelImportService
 
         // Validar Cliente
         $clientName = $this->extractClientName($row, $type);
-        if (empty($clientName) && $type !== 'hour_detail' && $type !== 'purchase_detail' && $type !== 'board_detail') {
+        if (empty($clientName) && $type !== 'hour_detail' && $type !== 'purchase_detail' && $type !== 'board_detail' && $type !== 'automation_project') {
             $clientField = $type === 'sale' ? 'RAZON_SOCI' : 'Empresa';
             $errors[] = "Fila {$rowIndex}: Cliente vacío";
         }
@@ -376,6 +380,23 @@ class ExcelImportService
                 if ($val !== '' && $val !== null && !is_numeric($val)) {
                     $errors[] = "Fila {$rowIndex}: {$field} debe ser numérico";
                 }
+            }
+        } elseif ($type === 'automation_project') {
+            // Validaciones específicas para Proyectos de Automatización
+            if (empty($row['Proyecto'])) {
+                $errors[] = "Fila {$rowIndex}: Proyecto vacío";
+            }
+            if (empty($row['Cliente'])) {
+                $errors[] = "Fila {$rowIndex}: Cliente vacío";
+            }
+            // FAT y PEM son opcionales, pero si están deben ser SI/NO
+            $fat = strtoupper(trim($row['FAT'] ?? 'NO'));
+            $pem = strtoupper(trim($row['PEM'] ?? 'NO'));
+            if (!in_array($fat, ['SI', 'NO', ''])) {
+                $errors[] = "Fila {$rowIndex}: FAT debe ser SI o NO";
+            }
+            if (!in_array($pem, ['SI', 'NO', ''])) {
+                $errors[] = "Fila {$rowIndex}: PEM debe ser SI o NO";
             }
         }
 
@@ -492,7 +513,7 @@ class ExcelImportService
             $clientName = $this->extractClientName($row, $type);
             $client = $this->normalizationService->resolveClientByAlias($clientName);
 
-            if (!$client && $type !== 'hour_detail' && $type !== 'purchase_detail' && $type !== 'board_detail') {
+            if (!$client && $type !== 'hour_detail' && $type !== 'purchase_detail' && $type !== 'board_detail' && $type !== 'automation_project') {
                 continue;
             }
 
@@ -501,7 +522,7 @@ class ExcelImportService
             $comprobante = $this->extractComprobante($row, $type);
             $moneda = $this->extractMoneda($row, $type);
 
-            if (!$fecha && $type !== 'purchase_detail' && $type !== 'board_detail') {
+            if (!$fecha && $type !== 'purchase_detail' && $type !== 'board_detail' && $type !== 'automation_project') {
                 continue;
             }
 
@@ -661,6 +682,46 @@ class ExcelImportService
                     'control' => (int)($row['Control'] ?? 0),
                     'intervencion' => (int)($row['Intervención'] ?? 0),
                     'documento_correccion_fallas' => (int)($row['Documento corrección de Fallas'] ?? 0),
+                    'hash' => $hash,
+                ]);
+            } elseif ($type === 'automation_project') {
+                // Importar Proyectos de Automatización
+                // Note: Excel has two columns named "Proyecto" - first is ID, second is description
+                $headers = array_keys($row);
+                $proyectoKeys = array_keys(array_filter($headers, function($h) { return $h === 'Proyecto'; }));
+                
+                $proyectoId = '';
+                $proyectoDescripcion = '';
+                
+                if (count($proyectoKeys) >= 2) {
+                    $proyectoId = trim($row[$headers[$proyectoKeys[0]]] ?? '');
+                    $proyectoDescripcion = trim($row[$headers[$proyectoKeys[1]]] ?? '');
+                } elseif (count($proyectoKeys) === 1) {
+                    $proyectoId = trim($row['Proyecto'] ?? '');
+                    $proyectoDescripcion = $proyectoId;
+                }
+                
+                $cliente = trim($row['Cliente'] ?? '');
+                $fat = strtoupper(trim($row['FAT'] ?? 'NO'));
+                $pem = strtoupper(trim($row['PEM'] ?? 'NO'));
+                
+                $hash = AutomationProject::generateHash([
+                    'proyecto_id' => $proyectoId,
+                    'cliente' => $cliente,
+                    'proyecto_descripcion' => $proyectoDescripcion,
+                ]);
+                
+                if (AutomationProject::byHash($hash)->exists()) {
+                    $skipped++;
+                    continue;
+                }
+                
+                AutomationProject::create([
+                    'proyecto_id' => $proyectoId,
+                    'cliente' => $cliente,
+                    'proyecto_descripcion' => $proyectoDescripcion,
+                    'fat' => $fat,
+                    'pem' => $pem,
                     'hash' => $hash,
                 ]);
             }
