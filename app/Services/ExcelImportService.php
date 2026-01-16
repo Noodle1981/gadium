@@ -10,6 +10,7 @@ use App\Models\AutomationProject;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 use Exception;
+use Illuminate\Support\Facades\Log;
 
 class ExcelImportService
 {
@@ -384,8 +385,8 @@ class ExcelImportService
             }
         } elseif ($type === 'automation_project') {
             // Validaciones específicas para Proyectos de Automatización
-            if (empty($row['Proyecto'])) {
-                $errors[] = "Fila {$rowIndex}: Proyecto vacío";
+            if (empty($row['Proyecto ID'])) {
+                $errors[] = "Fila {$rowIndex}: Proyecto ID vacío";
             }
             if (empty($row['Cliente'])) {
                 $errors[] = "Fila {$rowIndex}: Cliente vacío";

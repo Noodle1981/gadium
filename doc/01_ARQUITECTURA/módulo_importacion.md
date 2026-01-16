@@ -1,425 +1,223 @@
-# Módulo de Importación - Arquitectura y Análisis
+# Documentación Técnica: Módulos de Importación
 
-## Resumen Ejecutivo
+> **Última actualización:** 16/01/2026
+> **Estado:** Documentación viva
 
-Este documento analiza la arquitectura del sistema de importación de Excel utilizado en todos los módulos del sistema Gadium. El objetivo es documentar los patrones comunes y encontrar las diferencias que causan el fallo en el módulo de **Proyectos de Automatización**.
-
----
-
-## Módulos Analizados
-
-| Módulo | Ruta | Tipo | Estado |
-|--------|------|------|--------|
-| Ventas | `/ventas/importacion` | `sale` | ✅ Funcionando |
-| Presupuesto | `/presupuesto/importacion` | `budget` | ✅ Funcionando |
-| Horas | `/horas/importacion` | `hour_detail` | ✅ Funcionando |
-| Compras | `/compras/importacion` | `purchase_detail` | ✅ Funcionando |
-| **Proyectos Automatización** | `/proyectos_automatizacion/importacion` | `automation_project` | ❌ **FALLA** |
+Este documento detalla la arquitectura, archivos involucrados y especificaciones de datos para cada uno de los módulos de importación del sistema. 
 
 ---
 
-## Arquitectura Común
+## Indice
 
-### 1. Componente Livewire (import-wizard.blade.php)
-
-Todos los módulos siguen el mismo patrón de 4 pasos:
-
-```
-Paso 1: Carga de Archivo
-    ↓
-Paso 2: Resolución de Clientes (solo ventas/presupuesto)
-    ↓
-Paso 3: Confirmación
-    ↓
-Paso 4: Resultado
-```
-
-#### Propiedades Comunes
-
-```php
-public $step = 1;
-public $file;
-public $storedFilePath;  // #[Locked]
-public $type;            // Tipo de importación
-public $totalRows = 0;
-public $validRows = 0;
-public $validationErrors = [];
-public $processing = false;
-public $analyzing = false;
-public $importedCount = 0;
-public $skippedCount = 0;
-```
-
-#### Métodos Comunes
-
-1. **`updatedFile()`** - Se ejecuta cuando se selecciona un archivo
-2. **`analyzeFile()`** - Valida y analiza el archivo
-3. **`startImport()`** - Ejecuta la importación
-4. **`resetWizard()`** - Reinicia el wizard
+1. [Arquitectura General](#arquitectura-general)
+2. [Módulo: Ventas](#módulo-ventas)
+3. [Módulo: Presupuestos](#módulo-presupuestos)
+4. [Módulo: Horas](#módulo-horas)
+5. [Módulo: Compras](#módulo-compras)
+6. [Módulo: Tableros](#módulo-tableros)
+7. [Módulo: Proyectos Automatización](#módulo-proyectos-automatización)
+8. [Mejoras UI/UX Propuestas](#mejoras-uiux-propuestas)
 
 ---
 
-### 2. Flujo de Importación
+## Arquitectura General
 
-#### Paso 1: Análisis del Archivo
+Todos los importadores comparten una arquitectura común basada en **Livewire** y un servicio centralizado de procesamiento de Excel.
 
-```php
-public function analyzeFile()
-{
-    // 1. Validar archivo existe
-    if (!$this->file) {
-        throw new \Exception('No se ha seleccionado ningún archivo.');
-    }
-    
-    // 2. Generar nombre único
-    $filename = uniqid('import_') . '.' . $extension;
-    
-    // 3. Guardar archivo
-    $path = $this->file->storeAs('imports', $filename);
-    
-    // 4. Construir ruta completa
-    $this->storedFilePath = storage_path('app/private') . DIRECTORY_SEPARATOR . 
-                           str_replace('/', DIRECTORY_SEPARATOR, $path);
-    
-    // 5. Verificar que existe
-    if (!file_exists($this->storedFilePath)) {
-        throw new \Exception("El archivo no se guardó correctamente.");
-    }
-    
-    // 6. Analizar con ExcelImportService
-    $analysis = $service->validateAndAnalyze($this->storedFilePath, $this->type);
-    
-    // 7. Guardar resultados
-    $this->totalRows = $analysis['total_rows'] ?? 0;
-    $this->validRows = $analysis['valid_rows'] ?? 0;
-    $this->validationErrors = $analysis['errors'] ?? [];
-    
-    // 8. Limpiar file property
-    $this->file = null;
-    
-    // 9. Decidir siguiente paso
-    if (!empty($this->validationErrors)) {
-        // Quedarse en paso 1
-        return;
-    }
-    
-    if (!empty($this->unknownClients)) {
-        $this->step = 2; // Ir a resolución
-    } else {
-        $this->step = 3; // Ir a confirmación
-    }
-}
-```
+### Flujo de Importación
+1. **Carga (Step 1):** Usuario sube archivo `.xlsx` o `.xls`. Se valida extensión y tamaño.
+2. **Análisis (Backend):** `ExcelImportService` lee el archivo, valida headers y tipos de dato.
+3. **Resolución (Step 2 - Opcional):** Si hay clientes desconocidos (solo Ventas/Presupuestos), se solicita asignación manual.
+4. **Confirmación (Step 3):** Muestra resumen de filas válidas/inválidas.
+5. **Procesamiento (Backend):** Se procesa el archivo en chunks de 1000 filas. Se detectan duplicados mediante Hash.
+6. **Resultado (Step 4):** Resumen final de importados vs omitidos.
 
-#### Paso 2: Importación
-
-```php
-public function startImport()
-{
-    $this->processing = true;
-    
-    // 1. Verificar archivo existe
-    if (!$this->storedFilePath || !file_exists($this->storedFilePath)) {
-        $this->addError('file', 'Archivo no encontrado.');
-        return;
-    }
-    
-    // 2. Leer filas del Excel
-    $rows = $service->readExcelRows($this->storedFilePath);
-    
-    // 3. Procesar en chunks de 1000
-    $chunk = [];
-    foreach ($rows as $row) {
-        $chunk[] = $row;
-        
-        if (count($chunk) >= 1000) {
-            $stats = $service->importChunk($chunk, $this->type);
-            $this->importedCount += $stats['inserted'];
-            $this->skippedCount += $stats['skipped'];
-            $chunk = [];
-        }
-    }
-    
-    // 4. Procesar resto
-    if (!empty($chunk)) {
-        $stats = $service->importChunk($chunk, $this->type);
-        $this->importedCount += $stats['inserted'];
-        $this->skippedCount += $stats['skipped'];
-    }
-    
-    // 5. Limpiar archivo
-    @unlink($this->storedFilePath);
-    
-    // 6. Ir a paso 4
-    $this->step = 4;
-    $this->processing = false;
-}
-```
+### Archivos Compartidos
+- **Servicio:** `app/Services/ExcelImportService.php`
+- **Servicio Normalización:** `app/Services/ClientNormalizationService.php`
 
 ---
 
-## ExcelImportService - Servicio Central
+## Módulo: Ventas
 
-### Métodos Principales
+Permite importar el historial de ventas (facturación).
 
-#### 1. `validateAndAnalyze(string $filePath, string $type): array`
+- **Ruta:** `/ventas/importacion`
+- **Tipo Interno:** `sale`
+- **Vista:** `resources/views/livewire/pages/sales/import-wizard.blade.php`
+- **Modelo:** `App\Models\Sale`
 
-Valida el archivo y retorna:
-```php
-[
-    'total_rows' => int,
-    'valid_rows' => int,
-    'errors' => array,
-    'unknown_clients' => array  // Solo para sale/budget
-]
-```
+### Estructura Excel Esperada
 
-#### 2. `readExcelRows(string $filePath): array`
+| Header (Exacto) | Tipo Dato | Obligatorio | Notas |
+|-----------------|-----------|-------------|-------|
+| FECHA_EMI | Fecha | ✅ | Formatos: `dd/mm/yyyy`, `yyyy-mm-dd` |
+| RAZON_SOCI | Texto | ✅ | Se normaliza para buscar Cliente |
+| TOTAL_COMP | Moneda | ✅ | Soporta `1.234,56` (EU) |
+| MONEDA | Texto | ❌ | Default: `USD` si es `CTE` |
+| T_COMP | Texto | ❌ | Tipo de comprobante (ej: FAC) |
+| N_COMP_REM | Texto | ❌ | Número de comprobante |
+| ... | ... | ... | (Campos informativos adicionales) |
 
-Lee el Excel y retorna array de filas con headers como keys.
-
-**IMPORTANTE:** Maneja headers duplicados agregando sufijo `_2`, `_3`, etc.
-
-```php
-// Si hay dos columnas "Proyecto":
-// Primera: "Proyecto"
-// Segunda: "Proyecto_2"
-```
-
-#### 3. `importChunk(array $rows, string $type): array`
-
-Importa un chunk de filas y retorna:
-```php
-[
-    'inserted' => int,
-    'skipped' => int
-]
-```
+### Lógica Específica
+- **Resolución de Clientes:** ✅ Habilitada. Si "RAZON_SOCI" no coincide con un alias, pide intervención del usuario.
+- **Validación:** Rechaza filas sin fecha o sin monto.
 
 ---
 
-## Comparación: Módulos Funcionando vs Proyectos Automatización
+## Módulo: Presupuestos
 
-### ✅ Módulos que Funcionan (Ventas, Presupuesto, Horas, Compras)
+Importación de presupuestos emitidos.
 
-**Características comunes:**
+- **Ruta:** `/presupuesto/importacion`
+- **Tipo Interno:** `budget`
+- **Vista:** `resources/views/livewire/pages/budget/import-wizard.blade.php`
+- **Modelo:** `App\Models\Budget`
 
-1. **Ruta de Storage:** `storage_path('app/private')`
-2. **Stepper:** Pasos 1, 2 (opcional), 3, 4
-3. **Botón en Paso 3:** 
-   ```blade
-   <button wire:click="startImport" 
-           wire:loading.attr="disabled">
-       <span wire:loading.remove>Iniciar Importación</span>
-       <span wire:loading>Procesando...</span>
-   </button>
-   ```
-4. **Manejo de errores:** Try-catch en ambos métodos
-5. **Limpieza:** `$this->file = null` después de guardar
+### Estructura Excel Esperada
 
-### ❌ Proyectos Automatización - Problemas Identificados
+| Header (Exacto) | Tipo Dato | Obligatorio | Notas |
+|-----------------|-----------|-------------|-------|
+| Fecha | Fecha | ✅ | |
+| Empresa | Texto | ✅ | Equivale a Cliente |
+| Monto | Moneda | ✅ | |
+| Nº de Presupuesto | Texto | ❌ | Se guarda como comprobante |
+| Centro de Costo | Texto | ❌ | |
+| Nombre Proyecto | Texto | ❌ | |
+| Fecha estimada de culminación | Fecha | ❌ | |
 
-#### Problema 1: Headers Duplicados
-
-**Excel tiene:**
-- Columna 1: "Proyecto" (ID)
-- Columna 2: "Proyecto" (Descripción)
-
-**Solución implementada:**
-- `readExcelRows()` renombra a "Proyecto" y "Proyecto_2"
-- `importChunk()` usa estos nombres
-
-#### Problema 2: Código Inicial Incorrecto
-
-**Código original (NO FUNCIONA):**
-```php
-$headers = array_keys($row);
-$proyectoKeys = array_keys(array_filter($headers, 
-    function($h) { return $h === 'Proyecto'; }));
-```
-
-**Problema:** `array_keys($row)` solo devuelve keys únicas. Si hay dos "Proyecto", PHP solo mantiene la última.
-
-**Código corregido:**
-```php
-$proyectoId = trim($row['Proyecto'] ?? '');
-$proyectoDescripcion = trim($row['Proyecto_2'] ?? $proyectoId);
-```
-
-#### Problema 3: Método `validateHeaders` No Existe
-
-**Línea problemática en `validateAndAnalyze()`:**
-```php
-$this->validateHeaders($headers, $type);  // ❌ Método no existe
-```
-
-**Solución:**
-```php
-// TODO: validateHeaders method doesn't exist, commenting out for now
-// $this->validateHeaders($headers, $type);
-```
+### Lógica Específica
+- **Resolución de Clientes:** ✅ Habilitada.
+- **Moneda:** Siempre asume `USD`.
 
 ---
 
-## Estructura de Datos por Módulo
+## Módulo: Horas
 
-### Ventas (`sale`)
+Registro de imputación de horas del personal.
 
-**Tabla:** `sales`
+- **Ruta:** `/horas/importacion`
+- **Tipo Interno:** `hour_detail`
+- **Vista:** `resources/views/livewire/pages/hours/import-wizard.blade.php`
+- **Modelo:** `App\Models\HourDetail`
 
-**Campos:**
-- `cliente_id` (FK)
-- `fecha`
-- `monto`
-- `comprobante`
-- `moneda`
-- `hash`
+### Estructura Excel Esperada
 
-**Headers Excel:**
-- Empresa
-- Fecha
-- Monto
-- Orden de Pedido
-- Moneda
+| Header (Exacto) | Tipo Dato | Obligatorio | Notas |
+|-----------------|-----------|-------------|-------|
+| Dia | Texto | ❌ | |
+| Año | Número | ❌ | Determina fecha |
+| Mes | Número | ❌ | Determina fecha |
+| Personal | Texto | ✅ | Nombre del empleado |
+| Funcion | Texto | ❌ | Rol |
+| Proyecto | Texto | ✅ | Código o nombre proyecto |
+| Hs | Número | ✅ | Cantidad de horas |
+| Hs comun | Número | ❌ | Desglose |
 
-### Presupuesto (`budget`)
-
-**Tabla:** `budgets`
-
-**Campos:** (Mismos que ventas)
-
-**Headers Excel:** (Mismos que ventas)
-
-### Horas (`hour_detail`)
-
-**Tabla:** `hour_details`
-
-**Campos:**
-- `proyecto`
-- `cliente`
-- `horas`
-- `fecha`
-- `hash`
-
-**Headers Excel:**
-- Proyecto
-- Cliente
-- Horas
-- Fecha
-
-### Compras (`purchase_detail`)
-
-**Tabla:** `purchase_details`
-
-**Campos:**
-- `proyecto_numero`
-- `cliente`
-- `descripcion_proyecto`
-- `materiales_comprados`
-- `resto_valor`
-- `resto_porcentaje`
-- `porcentaje_facturacion`
-- `hash`
-
-**Headers Excel:**
-- Proyecto Numero
-- Cliente
-- Descripción Proyecto
-- Materiales comprados
-- Resto (Valor)
-- Resto (%)
-- % de facturación
-
-### Proyectos Automatización (`automation_project`)
-
-**Tabla:** `automation_projects`
-
-**Campos:**
-- `proyecto_id`
-- `cliente`
-- `proyecto_descripcion`
-- `fat` (SI/NO)
-- `pem` (SI/NO)
-- `hash`
-
-**Headers Excel:**
-- **Proyecto** (ID) → Renombrado a "Proyecto"
-- **Proyecto** (Descripción) → Renombrado a "Proyecto_2"
-- Cliente
-- FAT
-- PEM
+### Lógica Específica
+- **Fecha:** Se construye usando `Año` y `Mes` si no viene explícita.
+- **Validación:** Requiere columna `Hs` numérica.
 
 ---
 
-## Sistema de Hash para Idempotencia
+## Módulo: Compras
 
-Todos los módulos usan un hash SHA256 para detectar duplicados:
+Detalle de compras y gastos por proyecto.
 
-```php
-public static function generateHash(array $data): string
-{
-    return hash('sha256', json_encode($data));
-}
+- **Ruta:** `/compras/importacion`
+- **Tipo Interno:** `purchase_detail`
+- **Vista:** `resources/views/livewire/pages/purchases/import-wizard.blade.php`
+- **Modelo:** `App\Models\PurchaseDetail`
 
-// Scope para buscar por hash
-public function scopeByHash($query, string $hash)
-{
-    return $query->where('hash', $hash);
-}
-```
+### Estructura Excel Esperada
 
-**Antes de insertar:**
-```php
-if (Model::byHash($hash)->exists()) {
-    $skipped++;
-    continue;
-}
-```
+| Header (Exacto) | Tipo Dato | Obligatorio | Notas |
+|-----------------|-----------|-------------|-------|
+| CC | Texto | ✅ | Centro de Costo |
+| Empresa | Texto | ✅ | Proveedor |
+| Año | Número | ❌ | |
+| Descripción | Texto | ❌ | |
+| Materiales comprados | Moneda | ❌ | Parseo inteligente (USD 1.000) |
+| Resto (Valor) | Moneda | ❌ | |
 
----
-
-## Recomendaciones
-
-### Para Proyectos Automatización
-
-1. ✅ **HECHO:** Modificar `readExcelRows()` para manejar headers duplicados
-2. ✅ **HECHO:** Simplificar lógica de importación usando "Proyecto" y "Proyecto_2"
-3. ✅ **HECHO:** Comentar llamada a `validateHeaders()` inexistente
-4. ⏳ **PENDIENTE:** Probar importación completa
-5. ⏳ **PENDIENTE:** Verificar que datos se guardan correctamente en BD
-
-### Para Futuros Módulos
-
-1. **Usar plantilla estándar** de import-wizard de ventas/presupuesto
-2. **Evitar headers duplicados** en Excel siempre que sea posible
-3. **Implementar `validateHeaders()`** si se necesita validación específica
-4. **Mantener consistencia** en nombres de archivos temporales
-5. **Usar mismo path de storage:** `storage_path('app/private')`
+### Lógica Específica
+- **Moneda:** Default `USD`.
+- **Parseo:** Maneja strings como `USD 1.200,50` eliminando el prefijo.
 
 ---
 
-## Checklist de Implementación
+## Módulo: Tableros
 
-Para crear un nuevo módulo de importación:
+Importación de detalles de tableros eléctricos.
 
-- [ ] Crear migración con campo `hash`
-- [ ] Crear modelo con `generateHash()` y `scopeByHash()`
-- [ ] Agregar tipo al `ExcelImportService::importChunk()`
-- [ ] Crear `import-wizard.blade.php` basado en plantilla
-- [ ] Definir headers esperados del Excel
-- [ ] Implementar lógica de extracción de datos
-- [ ] Probar con archivo Excel real
-- [ ] Verificar detección de duplicados
-- [ ] Documentar estructura de Excel esperada
+- **Ruta:** `/tableros/importacion` (Verificar ruta exacta)
+- **Tipo Interno:** `board_detail`
+- **Vista:** `resources/views/livewire/pages/boards/import-wizard.blade.php`
+- **Modelo:** `App\Models\BoardDetail`
+
+### Estructura Excel Esperada
+
+| Header (Exacto) | Tipo Dato | Obligatorio | Notas |
+|-----------------|-----------|-------------|-------|
+| Año | Número | ✅ | |
+| Proyecto Numero | Texto | ✅ | |
+| Cliente | Texto | ✅ | |
+| Descripción Proyecto | Texto | ❌ | |
+| Columnas | Número | ❌ | Cantidad física |
+| Gabinetes | Número | ❌ | Cantidad física |
 
 ---
 
-## Conclusión
+## Módulo: Proyectos Automatización
 
-El sistema de importación es robusto y consistente en todos los módulos. El problema con Proyectos de Automatización se debe principalmente a:
+Gestión de proyectos del área de automatización.
 
-1. **Headers duplicados en Excel** que PHP no puede manejar nativamente con `array_combine()`
-2. **Código complejo** intentando detectar columnas duplicadas de forma incorrecta
-3. **Método faltante** `validateHeaders()` que causaba errores silenciosos
+- **Ruta:** `/proyectos_automatizacion/importacion`
+- **Tipo Interno:** `automation_project`
+- **Vista:** `resources/views/livewire/pages/automation-projects/import-wizard.blade.php`
+- **Modelo:** `App\Models\AutomationProject`
 
-**Solución:** Implementar renombrado automático de headers duplicados en `readExcelRows()` y simplificar la lógica de importación.
+### Estructura Excel Esperada
+
+> **Nota:** Estructura simplificada (v2)
+
+| Header (Exacto) | Tipo Dato | Obligatorio | Notas |
+|-----------------|-----------|-------------|-------|
+| Proyecto ID | Texto | ✅ | ID único del proyecto |
+| Cliente | Texto | ✅ | Nombre del cliente |
+| Proyecto Descripción | Texto | ❌ | Descripción detallada |
+| FAT | Texto | ❌ | SI/NO (Auto mayúsculas) |
+| PEM | Texto | ❌ | SI/NO (Auto mayúsculas) |
+
+### Lógica Específica
+- **Validación Rigurosa:** Chequea existencia de `Proyecto ID` y `Cliente`.
+- **FAT/PEM:** Normaliza automáticamente a mayúsculas y tiene default `NO`.
+- **Idempotencia:** Hash basado en `ID + Cliente + Descripción`.
+
+---
+
+## Mejoras UI/UX Propuestas
+
+Ideas para mejorar la experiencia de importación en futuras iteraciones:
+
+1. **Previsualización de Datos (Step 2.5):**
+   - Antes de confirmar, mostrar una tabla con las primeras 5 filas tal como se interpretaron.
+   - Permitiría ver si las fechas o montos se parsearon bien.
+
+2. **Mapeo de Columnas Dinámico:**
+   - Si el Excel tiene headers diferentes (ej: "Client" en vez de "Cliente"), permitir al usuario seleccionar qué columna corresponde a qué dato en la UI.
+   - Eliminaría la necesidad de que el Excel sea exacto.
+
+3. **Descarga de Plantillas:**
+   - Agregar un botón "Descargar Plantilla de Ejemplo" en el Paso 1 de cada wizard.
+   - Evita errores de estructura.
+
+4. **Logs de Error Detallados:**
+   - Si una fila falla, permitir descargar un `.txt` o `.csv` solo con las filas fallidas y la razón del error.
+
+5. **Barra de Progreso Real:**
+   - Implementar polling o websockets para ver progreso fila a fila en importaciones grandes (>1000 filas).
+
+---
+
+> **Nota:** Para mantener el sistema sano, cualquier nuevo módulo de importación DEBE seguir estrictamente el patrón aquí documentado.
