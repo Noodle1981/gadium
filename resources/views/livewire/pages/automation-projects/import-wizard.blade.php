@@ -258,6 +258,9 @@ new class extends Component {
         <!-- Step 3: Confirmation -->
         @if($step === 3)
             <div class="text-center space-y-6">
+                <!-- Debug info -->
+                <div class="text-xs text-gray-400 mb-2">Debug: Step = {{ $step }}</div>
+                
                 <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-green-100">
                     <svg class="h-6 w-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                 </div>
@@ -271,7 +274,11 @@ new class extends Component {
                 </div>
                 
                 <div class="mt-6">
-                    <button wire:click="startImport" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none" wire:loading.attr="disabled">
+                    <button 
+                        wire:click="startImport" 
+                        type="button"
+                        class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" 
+                        wire:loading.attr="disabled">
                         <span wire:loading.remove wire:target="startImport">Iniciar Importación</span>
                         <span wire:loading wire:target="startImport">Procesando...</span>
                     </button>
