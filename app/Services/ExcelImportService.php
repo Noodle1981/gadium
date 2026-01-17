@@ -8,7 +8,9 @@ use App\Models\Sale;
 use App\Models\HourDetail;
 use App\Models\AutomationProject;
 use App\Models\ClientSatisfactionResponse;
+use App\Models\StaffSatisfactionResponse;
 use App\Services\ClientSatisfactionCalculator;
+use App\Services\StaffSatisfactionCalculator;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 use Exception;
@@ -17,6 +19,12 @@ use Illuminate\Support\Facades\Log;
 class ExcelImportService
 {
     protected $normalizationService;
+    protected $customDate = null;
+
+    public function setCustomDate($date)
+    {
+        $this->customDate = $date;
+    }
 
     public function __construct(ClientNormalizationService $normalizationService)
     {
@@ -154,6 +162,9 @@ class ExcelImportService
             // Headers: Fecha, Cliente, Proyecto, Pregunta 1...
             // Los headers de preguntas son largos, validaremos los básicos y las cantidades
             $required = ['Fecha', 'Cliente', 'Proyecto:']; // 'Proyecto:' con dos puntos según excel sample
+        } elseif ($type === 'staff_satisfaction') {
+            // Satisfacción Personal (Operarios)
+            $required = ['Personal'];
         } else {
             // Budget format
             $required = ['Empresa', 'Fecha', 'Monto', 'Orden de Pedido'];
@@ -184,6 +195,8 @@ class ExcelImportService
             return ''; // No client in hour detail, purchase detail, board detail, or automation project
         } elseif ($type === 'client_satisfaction') {
             return trim($row['Cliente'] ?? '');
+        } elseif ($type === 'staff_satisfaction') {
+            return '';
         } else {
             return trim($row['Empresa'] ?? '');
         }
@@ -198,6 +211,8 @@ class ExcelImportService
             return null; // Boards, purchases, and automation projects don't use date field for import
         } elseif ($type === 'hour_detail') {
              $dateValue = $row['Fecha'] ?? null;
+        } elseif ($type === 'staff_satisfaction') {
+             return $this->customDate;
         } else {
              $dateValue = ($type === 'sale' || $type === 'client_satisfaction') ? ($row['FECHA_EMI'] ?? $row['Fecha'] ?? null) : ($row['Fecha'] ?? null);
         }
@@ -273,7 +288,7 @@ class ExcelImportService
      */
     protected function extractAmount(array $row, string $type): ?float
     {
-        if ($type === 'hour_detail' || $type === 'purchase_detail' || $type === 'board_detail' || $type === 'automation_project' || $type === 'client_satisfaction') {
+        if ($type === 'hour_detail' || $type === 'purchase_detail' || $type === 'board_detail' || $type === 'automation_project' || $type === 'client_satisfaction' || $type === 'staff_satisfaction') {
             return 0.0;
         }
 
@@ -297,7 +312,7 @@ class ExcelImportService
      */
     protected function extractComprobante(array $row, string $type): string
     {
-        if ($type === 'hour_detail' || $type === 'purchase_detail' || $type === 'board_detail' || $type === 'automation_project' || $type === 'client_satisfaction') {
+        if ($type === 'hour_detail' || $type === 'purchase_detail' || $type === 'board_detail' || $type === 'automation_project' || $type === 'client_satisfaction' || $type === 'staff_satisfaction') {
             return '';
         }
 
@@ -313,7 +328,7 @@ class ExcelImportService
      */
     protected function extractMoneda(array $row, string $type): string
     {
-        if ($type === 'hour_detail' || $type === 'purchase_detail' || $type === 'board_detail' || $type === 'automation_project' || $type === 'client_satisfaction') {
+        if ($type === 'hour_detail' || $type === 'purchase_detail' || $type === 'board_detail' || $type === 'automation_project' || $type === 'client_satisfaction' || $type === 'staff_satisfaction') {
             return '';
         }
 
@@ -409,6 +424,10 @@ class ExcelImportService
             // Simplemente chequeamos si hay valores fuera de rango en lo que parezcan ser numeros
             // O mejor, confiamos en la extracción posterior.
             // Aquí solo validamos campos obligatorios críticos.
+        } elseif ($type === 'staff_satisfaction') {
+            if (empty($row['Personal'])) {
+                $errors[] = "Fila {$rowIndex}: Personal vacío";
+            }
         }
 
         return $errors;
@@ -523,8 +542,9 @@ class ExcelImportService
         foreach ($rows as $row) {
             $clientName = $this->extractClientName($row, $type);
             $client = $this->normalizationService->resolveClientByAlias($clientName);
-
-            if (!$client && $type !== 'hour_detail' && $type !== 'purchase_detail' && $type !== 'board_detail' && $type !== 'automation_project') {
+            
+            // Allow staff_satisfaction to bypass client check
+            if (!$client && $type !== 'hour_detail' && $type !== 'purchase_detail' && $type !== 'board_detail' && $type !== 'automation_project' && $type !== 'staff_satisfaction') {
                 continue;
             }
 
@@ -763,6 +783,49 @@ class ExcelImportService
                 $calculator = app(ClientSatisfactionCalculator::class);
                 $calculator->updateMonthlyStats($fecha, $client->id);
                 $calculator->updateMonthlyStats($fecha, null);
+            } elseif ($type === 'staff_satisfaction') {
+                $fecha = $this->extractDate($row, $type); // Will get customDate
+                $personal = trim($row['Personal'] ?? '');
+                
+                // Get boolean responses (columns 2 to 13, 0-indexed is Personal)
+                // array_slice preserves keys? No.
+                // $row is associative. We need positional access or explicit keys.
+                // The keys are long questions. Let's iterate values since we configured the headers order in analysis.
+                // But $row keys come from Excel header row.
+                // Let's assume the order is fixed as per requirement.
+                $values = array_values($row);
+                // Index 0 is Personal. Indices 1-12 are the 12 options.
+                
+                $data = [
+                    'personal' => $personal,
+                    'fecha' => $fecha,
+                    'p1_mal' => !empty($values[1]),
+                    'p1_normal' => !empty($values[2]),
+                    'p1_bien' => !empty($values[3]),
+                    'p2_mal' => !empty($values[4]),
+                    'p2_normal' => !empty($values[5]),
+                    'p2_bien' => !empty($values[6]),
+                    'p3_mal' => !empty($values[7]),
+                    'p3_normal' => !empty($values[8]),
+                    'p3_bien' => !empty($values[9]),
+                    'p4_mal' => !empty($values[10]),
+                    'p4_normal' => !empty($values[11]),
+                    'p4_bien' => !empty($values[12]),
+                ];
+                
+                $hash = StaffSatisfactionResponse::generateHash($data);
+                
+                if (StaffSatisfactionResponse::existsByHash($hash)) {
+                    $skipped++;
+                    continue;
+                }
+                
+                $data['hash'] = $hash;
+                StaffSatisfactionResponse::create($data);
+                
+                // Recalculate Stats for the month
+                $calculator = app(StaffSatisfactionCalculator::class);
+                $calculator->updateMonthlyStats($fecha ? \Carbon\Carbon::parse($fecha)->format('Y-m') : null);
             }
 
             $inserted++;

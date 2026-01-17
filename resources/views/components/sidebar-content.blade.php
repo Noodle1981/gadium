@@ -199,6 +199,15 @@
     <x-sidebar-link :href="route('staff-satisfaction.dashboard')" :active="request()->routeIs('staff-satisfaction.dashboard')" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'>
         Dashboard
     </x-sidebar-link>
+    <x-sidebar-link :href="route('staff-satisfaction.import')" :active="request()->routeIs('staff-satisfaction.import')" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>'>
+        Importación Automática
+    </x-sidebar-link>
+    <x-sidebar-link :href="route('staff-satisfaction.create')" :active="request()->routeIs('staff-satisfaction.create')" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>'>
+        Importación Manual
+    </x-sidebar-link>
+    <x-sidebar-link :href="route('staff-satisfaction.historial.importacion')" :active="request()->routeIs('staff-satisfaction.historial.importacion')" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>'>
+        Historial Importación
+    </x-sidebar-link>
 @endif
 
 {{-- Sidebar para Safisfacción Clientes --}}

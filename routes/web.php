@@ -295,6 +295,12 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
     Route::prefix('satisfaccion_personal')->middleware(['role:Gestor de Satisfacción Personal'])->group(function () {
         Volt::route('dashboard', 'pages.staff-satisfaction.dashboard')->name('staff-satisfaction.dashboard');
         Route::view('perfil', 'profile')->name('staff-satisfaction.profile');
+
+        Route::middleware(['can:view_staff_satisfaction'])->group(function () {
+            Volt::route('importacion', 'pages.staff-satisfaction.import-wizard')->name('staff-satisfaction.import');
+            Volt::route('crear', 'pages.staff-satisfaction.manual-create')->name('staff-satisfaction.create');
+            Volt::route('historial_importacion', 'pages.staff-satisfaction.history')->name('staff-satisfaction.historial.importacion');
+        });
     });
 
     // --- SATISFACCIÓN CLIENTES (Gestor de Satisfacción Clientes) ---

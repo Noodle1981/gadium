@@ -248,3 +248,28 @@ El módulo procesa encuestas de satisfacción con la siguiente estructura:
 - **Dashboard**: Muestra KPIs de promedio de satisfacción y tabla con codificación de colores (Rojo/Amarillo/Verde) para identificación rápida de problemas.
 - **Filtros**: Por rango de fechas y clientes específicos.
 
+## Módulo de Satisfacción Personal (Operarios)
+
+### Estructura de Datos
+El módulo procesa encuestas de satisfacción del personal sobre el clima organizacional.
+1. **Entidades Principales**:
+   - `StaffSatisfactionResponse`: Almacena cada respuesta individual (Personal, Fecha, 4 preguntas con 3 opciones booleanas cada una: Mal/Normal/Bien).
+   - `StaffSatisfactionAnalysis`: Almacena métricas calculadas por mes (conteos y porcentajes por opción).
+
+2. **Cálculos Automáticos**:
+   - Se cuentan las ocurrencias de cada opción (Ej: cuántos "Mal", "Normal", "Bien" para la Pregunta 1).
+   - Se calculan porcentajes sobre el total de respuestas del periodo.
+   - Estos cálculos se realizan mediante `StaffSatisfactionCalculator`.
+
+### Flujo de Importación
+- **Fecha Manual**: Dado que el Excel fuente no contiene fecha, el **Wizard de Importación** solicita al usuario seleccionar el Mes/Año al inicio del proceso.
+- **Validación**: Verifica que exista la columna `Personal`.
+- **Idempotencia**: Hash basado en `Personal + Fecha + Respuestas`.
+
+### Visualización
+### Visualización
+- **Dashboard**: Presenta 4 Gráficas de Pastel (Pie Charts), una por cada pregunta de la encuesta, mostrando la distribución de respuestas (Rojo/Amarillo/Verde).
+- **Etiquetas de Datos**: Los porcentajes de cada opción se muestran directamente sobre el gráfico en texto blanco y negrita para facilitar la lectura visual rápida.
+- **KPIs**: Total de respuestas del periodo.
+
+
