@@ -299,9 +299,17 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
 
     // --- SATISFACCIÓN CLIENTES (Gestor de Satisfacción Clientes) ---
     Route::prefix('satisfaccion_clientes')->middleware(['role:Gestor de Satisfacción Clientes'])->group(function () {
-        Volt::route('dashboard', 'pages.client-satisfaction.dashboard')->name('client-satisfaction.dashboard');
-        Route::view('perfil', 'profile')->name('client-satisfaction.profile');
+    Volt::route('dashboard', 'pages.client-satisfaction.dashboard')->name('client-satisfaction.dashboard');
+    Route::view('perfil', 'profile')->name('client-satisfaction.profile');
+
+    Route::middleware(['can:view_client_satisfaction'])->group(function () {
+        Volt::route('importacion', 'pages.client-satisfaction.import-wizard')->name('client-satisfaction.import');
+        Volt::route('crear', 'pages.client-satisfaction.manual-create')->name('client-satisfaction.create');
+        // Volt::route('editar/{clientSatisfactionResponse}', 'pages.client-satisfaction.manual-edit')->name('client-satisfaction.edit'); // Future
+        
+        Volt::route('historial_importacion', 'pages.client-satisfaction.history')->name('client-satisfaction.historial.importacion');
     });
+});
 
 
 

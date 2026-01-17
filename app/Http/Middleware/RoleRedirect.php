@@ -27,8 +27,8 @@ class RoleRedirect
             elseif ($user->hasRole('Presupuestador')) $rolePrefix = 'budget';
             elseif ($user->hasRole('Gestor de Horas')) $rolePrefix = 'hours';
             elseif ($user->hasRole('Gestor de Compras')) $rolePrefix = 'purchases';
-            elseif ($user->hasRole('Gestor de Satisfacción Personal')) $rolePrefix = 'staff_satisfaction';
-            elseif ($user->hasRole('Gestor de Satisfacción Clientes')) $rolePrefix = 'client_satisfaction';
+            elseif ($user->hasRole('Gestor de Satisfacción Personal')) $rolePrefix = 'staff-satisfaction';
+            elseif ($user->hasRole('Gestor de Satisfacción Clientes')) $rolePrefix = 'client-satisfaction';
             elseif ($user->hasRole('Gestor de Tableros')) $rolePrefix = 'boards';
             elseif ($user->hasRole('Gestor de Proyectos')) $rolePrefix = 'automation_projects';
             elseif ($user->hasRole('Viewer')) $rolePrefix = 'viewer';

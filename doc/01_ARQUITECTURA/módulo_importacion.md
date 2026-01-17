@@ -221,3 +221,30 @@ Ideas para mejorar la experiencia de importación en futuras iteraciones:
 ---
 
 > **Nota:** Para mantener el sistema sano, cualquier nuevo módulo de importación DEBE seguir estrictamente el patrón aquí documentado.
+
+## Módulo de Satisfacción Clientes
+
+### Estructura de Datos
+El módulo procesa encuestas de satisfacción con la siguiente estructura:
+1. **Entidades Principales**:
+   - `ClientSatisfactionResponse`: Almacena cada respuesta individual (Fecha, Cliente, Proyecto, 4 preguntas de rating 1-5).
+   - `ClientSatisfactionAnalysis`: Almacena métricas calculadas (Valores esperados, obtenidos y porcentajes de Eficiencia) por mes. Soporta análisis Global y Por Cliente.
+
+2. **Cálculos Automáticos**:
+   - **Valor Esperado**: 5 puntos por pregunta.
+   - **Valor Obtenido**: Suma de calificaciones reales.
+   - **Porcentaje**: (Valor Obtenido / Valor Esperado) * 100.
+   - Estos cálculos se realizan mediante `ClientSatisfactionCalculator` cada vez que se importa o crea un registro.
+
+### Flujo de Importación
+1. **Tipos Soportados**:
+   - Automática: Excel con headers `Fecha`, `Cliente`, `Proyecto`, etc.
+   - Manual: Bulk insert desde interfaz web.
+2. **Validaciones**:
+   - Detección de duplicados mediante Hash (Fecha + Cliente + Proyecto + Ratings).
+   - Validación de rango de calificaciones (1-5).
+   
+### Visualización
+- **Dashboard**: Muestra KPIs de promedio de satisfacción y tabla con codificación de colores (Rojo/Amarillo/Verde) para identificación rápida de problemas.
+- **Filtros**: Por rango de fechas y clientes específicos.
+

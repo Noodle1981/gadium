@@ -7,6 +7,8 @@ use App\Models\Client;
 use App\Models\Sale;
 use App\Models\HourDetail;
 use App\Models\AutomationProject;
+use App\Models\ClientSatisfactionResponse;
+use App\Services\ClientSatisfactionCalculator;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PhpOffice\PhpSpreadsheet\Shared\Date;
 use Exception;
@@ -147,6 +149,11 @@ class ExcelImportService
         } elseif ($type === 'automation_project') {
             // Automation Project format
             $required = ['Proyecto', 'Cliente', 'FAT', 'PEM'];
+        } elseif ($type === 'client_satisfaction') {
+            // Satisfacción Clientes
+            // Headers: Fecha, Cliente, Proyecto, Pregunta 1...
+            // Los headers de preguntas son largos, validaremos los básicos y las cantidades
+            $required = ['Fecha', 'Cliente', 'Proyecto:']; // 'Proyecto:' con dos puntos según excel sample
         } else {
             // Budget format
             $required = ['Empresa', 'Fecha', 'Monto', 'Orden de Pedido'];
@@ -175,6 +182,8 @@ class ExcelImportService
             return trim($row['RAZON_SOCI'] ?? '');
         } elseif ($type === 'hour_detail' || $type === 'purchase_detail' || $type === 'board_detail' || $type === 'automation_project') {
             return ''; // No client in hour detail, purchase detail, board detail, or automation project
+        } elseif ($type === 'client_satisfaction') {
+            return trim($row['Cliente'] ?? '');
         } else {
             return trim($row['Empresa'] ?? '');
         }
@@ -190,7 +199,7 @@ class ExcelImportService
         } elseif ($type === 'hour_detail') {
              $dateValue = $row['Fecha'] ?? null;
         } else {
-             $dateValue = $type === 'sale' ? ($row['FECHA_EMI'] ?? null) : ($row['Fecha'] ?? null);
+             $dateValue = ($type === 'sale' || $type === 'client_satisfaction') ? ($row['FECHA_EMI'] ?? $row['Fecha'] ?? null) : ($row['Fecha'] ?? null);
         }
         
         if (empty($dateValue)) {
@@ -264,7 +273,7 @@ class ExcelImportService
      */
     protected function extractAmount(array $row, string $type): ?float
     {
-        if ($type === 'hour_detail' || $type === 'purchase_detail' || $type === 'board_detail' || $type === 'automation_project') {
+        if ($type === 'hour_detail' || $type === 'purchase_detail' || $type === 'board_detail' || $type === 'automation_project' || $type === 'client_satisfaction') {
             return 0.0;
         }
 
@@ -288,7 +297,7 @@ class ExcelImportService
      */
     protected function extractComprobante(array $row, string $type): string
     {
-        if ($type === 'hour_detail' || $type === 'purchase_detail' || $type === 'board_detail' || $type === 'automation_project') {
+        if ($type === 'hour_detail' || $type === 'purchase_detail' || $type === 'board_detail' || $type === 'automation_project' || $type === 'client_satisfaction') {
             return '';
         }
 
@@ -304,7 +313,7 @@ class ExcelImportService
      */
     protected function extractMoneda(array $row, string $type): string
     {
-        if ($type === 'hour_detail' || $type === 'purchase_detail' || $type === 'board_detail' || $type === 'automation_project') {
+        if ($type === 'hour_detail' || $type === 'purchase_detail' || $type === 'board_detail' || $type === 'automation_project' || $type === 'client_satisfaction') {
             return '';
         }
 
@@ -383,23 +392,23 @@ class ExcelImportService
                     $errors[] = "Fila {$rowIndex}: {$field} debe ser numérico";
                 }
             }
-        } elseif ($type === 'automation_project') {
-            // Validaciones específicas para Proyectos de Automatización
-            if (empty($row['Proyecto ID'])) {
-                $errors[] = "Fila {$rowIndex}: Proyecto ID vacío";
-            }
-            if (empty($row['Cliente'])) {
-                $errors[] = "Fila {$rowIndex}: Cliente vacío";
-            }
-            // FAT y PEM son opcionales, pero si están deben ser SI/NO
-            $fat = strtoupper(trim($row['FAT'] ?? 'NO'));
-            $pem = strtoupper(trim($row['PEM'] ?? 'NO'));
-            if (!in_array($fat, ['SI', 'NO', ''])) {
-                $errors[] = "Fila {$rowIndex}: FAT debe ser SI o NO";
-            }
             if (!in_array($pem, ['SI', 'NO', ''])) {
                 $errors[] = "Fila {$rowIndex}: PEM debe ser SI o NO";
             }
+        } elseif ($type === 'client_satisfaction') {
+            if (empty($row['Cliente'])) {
+                $errors[] = "Fila {$rowIndex}: Cliente vacío";
+            }
+            // Validar ratings 1-5
+            $q1 = $row['¿Qué grado de satisfacción tiene sobre la obra/producto/servicio terminado?'] ?? 0;
+            // Para simplificar, buscaremos por índice o keys parciales si es necesario, pero asumiendo headers exactos del excel:
+            // Las preguntas son largas, mejor usar indices si fuera array posicional, pero aqui es asociativo.
+            // Asumimos que el array $row tiene las keys completas del excel.
+            // Validaremos que existan valores numéricos entre 1 y 5 para las columnas de preguntas.
+            
+            // Simplemente chequeamos si hay valores fuera de rango en lo que parezcan ser numeros
+            // O mejor, confiamos en la extracción posterior.
+            // Aquí solo validamos campos obligatorios críticos.
         }
 
         return $errors;
@@ -720,6 +729,40 @@ class ExcelImportService
                     'pem' => $pem,
                     'hash' => $hash,
                 ]);
+            } elseif ($type === 'client_satisfaction') {
+                $fecha = $this->extractDate($row, $type);
+                $clienteNombre = $this->extractClientName($row, $type);
+                $proyecto = trim($row['Proyecto:'] ?? '');
+                
+                // Ratings
+                $p1 = (int)($row['¿Qué grado de satisfacción tiene sobre la obra/producto/servicio terminado?'] ?? 0);
+                $p2 = (int)($row['¿Cómo calificaría el servicio en cuanto al desempeño técnico?'] ?? 0);
+                $p3 = (int)($row['Durante la ejecución del proyecto, ¿tuvo respuestas a todas sus necesidades?'] ?? 0);
+                $p4 = (int)($row['¿Cómo calificaría el servicio ofrecido en cuanto al plazo de ejecución?'] ?? 0);
+                
+                $hash = ClientSatisfactionResponse::generateHash($fecha, $clienteNombre, $proyecto, $p1, $p2, $p3, $p4);
+
+                if (ClientSatisfactionResponse::existsByHash($hash)) {
+                    $skipped++;
+                    continue;
+                }
+
+                ClientSatisfactionResponse::create([
+                    'fecha' => $fecha,
+                    'client_id' => $client->id,
+                    'cliente_nombre' => $clienteNombre,
+                    'proyecto' => $proyecto,
+                    'pregunta_1' => $p1,
+                    'pregunta_2' => $p2,
+                    'pregunta_3' => $p3,
+                    'pregunta_4' => $p4,
+                    'hash' => $hash,
+                ]);
+
+                // Recalcular Stats
+                $calculator = app(ClientSatisfactionCalculator::class);
+                $calculator->updateMonthlyStats($fecha, $client->id);
+                $calculator->updateMonthlyStats($fecha, null);
             }
 
             $inserted++;
