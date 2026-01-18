@@ -9,6 +9,11 @@ new class extends Component {
     public $rows = [];
     public $fecha;
 
+    // Autocomplete State per Row
+    public $searchQueries = [];
+    public $searchResults = [];
+    public $showResults = [];
+
     public function mount()
     {
         $this->fecha = now()->format('Y-m-d');
@@ -19,21 +24,61 @@ new class extends Component {
     {
         $this->rows[] = [
             'personal' => '',
-            // P1
             'p1_mal' => false, 'p1_normal' => false, 'p1_bien' => false,
-            // P2
             'p2_mal' => false, 'p2_normal' => false, 'p2_bien' => false,
-            // P3
             'p3_mal' => false, 'p3_normal' => false, 'p3_bien' => false,
-            // P4
             'p4_mal' => false, 'p4_normal' => false, 'p4_bien' => false,
         ];
+        
+        $index = count($this->rows) - 1;
+        $this->searchQueries[$index] = '';
+        $this->searchResults[$index] = [];
+        $this->showResults[$index] = false;
+    }
+
+    public function updatedSearchQueries($value, $key)
+    {
+        if (strlen($value) > 1) {
+            $names = \App\Models\HourDetail::select('personal')
+                ->distinct()
+                ->where('personal', 'like', '%' . $value . '%')
+                ->limit(5)
+                ->pluck('personal');
+            
+            $this->searchResults[$key] = $names->map(function($name) {
+                return [
+                    'id' => md5($name),
+                    'nombre' => $name,
+                ];
+            })->toArray();
+            
+            $this->showResults[$key] = !empty($this->searchResults[$key]);
+        } else {
+            $this->searchResults[$key] = [];
+            $this->showResults[$key] = false;
+        }
+    }
+
+    public function selectPersonal($index, $name)
+    {
+        $this->rows[$index]['personal'] = $name;
+        $this->searchQueries[$index] = $name;
+        $this->showResults[$index] = false;
     }
 
     public function removeRow($index)
     {
         unset($this->rows[$index]);
+        unset($this->searchQueries[$index]);
+        unset($this->searchResults[$index]);
+        unset($this->showResults[$index]);
+
         $this->rows = array_values($this->rows);
+        $this->searchQueries = array_values($this->searchQueries);
+        $this->searchResults = array_values($this->searchResults);
+        $this->showResults = array_values($this->showResults);
+        
+        if (empty($this->rows)) $this->addRow();
     }
 
     public function save()
@@ -125,7 +170,27 @@ new class extends Component {
                     @foreach($rows as $index => $row)
                         <tr>
                             <td class="px-3 py-2 sticky left-0 bg-white z-10 shadow-sm">
-                                <input type="text" wire:model="rows.{{ $index }}.personal" placeholder="Nombre Operario" class="block w-40 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-xs">
+                                <div class="relative">
+                                    <input 
+                                        type="text" 
+                                        wire:model.live.debounce.300ms="searchQueries.{{ $index }}"
+                                        placeholder="Nombre Operario" 
+                                        class="block w-40 border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-xs {{ $rows[$index]['personal'] ? 'bg-green-50 border-green-300 text-green-900 font-semibold' : '' }}"
+                                    >
+                                    
+                                    @if(isset($showResults[$index]) && $showResults[$index])
+                                        <div class="absolute z-50 mt-1 w-48 bg-white shadow-xl max-h-48 rounded-md text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm left-0">
+                                            @foreach($searchResults[$index] as $result)
+                                                <div 
+                                                    wire:click="selectPersonal({{ $index }}, '{{ $result['nombre'] }}')"
+                                                    class="cursor-pointer select-none relative py-2 pl-3 pr-2 hover:bg-orange-50 text-xs"
+                                                >
+                                                    <span class="block truncate font-medium">{{ $result['nombre'] }}</span>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                </div>
                             </td>
 
                             <!-- P1 -->

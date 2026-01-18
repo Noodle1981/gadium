@@ -14,6 +14,57 @@ new #[Layout('layouts.app')] class extends Component {
     public float $materiales_comprados = 0;
     public float $porcentaje_facturacion = 0;
 
+    // Autocomplete State
+    public $searchResults = [];
+    public $showCompanySearch = false;
+    public $isNewCompany = false;
+    public $selectedCompanyHash = null; // Fake ID for UI logic
+
+    public function updatedEmpresa($value)
+    {
+        $this->isNewCompany = false;
+        $this->selectedCompanyHash = null;
+
+        if (strlen($value) >= 2) {
+            // Fetch distinct companies that match the search
+            // Using a simple LIKE for efficiency on large tables
+            $companies = PurchaseDetail::select('empresa')
+                ->distinct()
+                ->where('empresa', 'like', '%' . $value . '%')
+                ->limit(10)
+                ->pluck('empresa');
+            
+            $this->searchResults = $companies->map(function($name) {
+                return [
+                    'id' => md5($name), // Generate a fake ID for consistent UI handling
+                    'nombre' => $name,
+                ];
+            })->toArray();
+            
+            $this->showCompanySearch = !empty($this->searchResults);
+        } else {
+            $this->searchResults = [];
+            $this->showCompanySearch = false;
+        }
+    }
+
+    public function selectCompany($name)
+    {
+        $this->empresa = $name;
+        $this->selectedCompanyHash = md5($name);
+        $this->showCompanySearch = false;
+        $this->searchResults = [];
+        $this->isNewCompany = false;
+    }
+
+    public function markAsNewCompany()
+    {
+        $this->selectedCompanyHash = null;
+        $this->isNewCompany = true;
+        $this->showCompanySearch = false;
+        $this->searchResults = [];
+    }
+
     public function mount()
     {
         $this->ano = date('Y');
@@ -121,8 +172,58 @@ new #[Layout('layouts.app')] class extends Component {
                             </div>
 
                             <div>
-                                <label class="block font-medium text-sm text-gray-700">Empresa</label>
-                                <input type="text" wire:model="empresa" class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm block w-full mt-1">
+                                <label class="block font-medium text-sm text-gray-700">Empresa (Proveedor)</label>
+                                <div class="relative mt-1">
+                                    <div class="relative">
+                                        <input 
+                                            type="text" 
+                                            wire:model.live.debounce.300ms="empresa" 
+                                            class="border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm block w-full mt-1 {{ $selectedCompanyHash ? 'bg-green-50 border-green-300 text-green-800' : '' }}"
+                                            placeholder="Buscar Empresa..."
+                                        >
+                                        
+                                        <!-- Badge: Existente -->
+                                        @if($selectedCompanyHash)
+                                            <span class="absolute right-2 top-2 px-2 py-1 bg-green-100 text-green-800 text-xs rounded font-medium mt-1">
+                                                ✓ Existente
+                                            </span>
+                                        @endif
+                                        
+                                        <!-- Badge: Nuevo -->
+                                        @if($isNewCompany)
+                                            <span class="absolute right-2 top-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded font-medium mt-1">
+                                                ⊕ Nuevo
+                                            </span>
+                                        @endif
+                                    </div>
+                                    
+                                    @if($showCompanySearch)
+                                        <div class="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
+                                            @if(!empty($searchResults))
+                                                @foreach($searchResults as $result)
+                                                    <div 
+                                                        wire:click="selectCompany('{{ $result['nombre'] }}')"
+                                                        class="cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-orange-50 flex justify-between items-center"
+                                                    >
+                                                        <span class="block truncate font-medium">{{ $result['nombre'] }}</span>
+                                                    </div>
+                                                @endforeach
+                                            @else
+                                                <div class="py-3 px-4 text-sm text-gray-500 text-center">
+                                                    No se encontraron coincidencias
+                                                </div>
+                                            @endif
+                                            
+                                            <!-- Opción: Crear nuevo -->
+                                            <div 
+                                                wire:click="markAsNewCompany"
+                                                class="cursor-pointer select-none relative py-2 pl-3 pr-9 bg-blue-50 hover:bg-blue-100 border-t border-blue-200 text-blue-700 font-medium"
+                                            >
+                                                <span class="block">⊕ Crear nuevo: "{{ $empresa }}"</span>
+                                            </div>
+                                        </div>
+                                    @endif
+                                </div>
                                 @error('empresa') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                             </div>
                             

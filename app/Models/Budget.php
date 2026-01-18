@@ -65,4 +65,12 @@ class Budget extends Model
         
         return hash('sha256', $data);
     }
+
+    /**
+     * Verificar si un presupuesto con este hash ya existe
+     */
+    public static function existsByHash(string $hash): bool
+    {
+        return self::where('hash', $hash)->exists();
+    }
 }

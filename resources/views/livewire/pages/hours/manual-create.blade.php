@@ -11,8 +11,11 @@ new class extends Component {
     public $proyecto = '';
     public $dia = '';
 
-    // Autocomplete
-    public $personalSuggestions = [];
+    // Autocomplete State
+    public $personalSearchResults = [];
+    public $showPersonalSearch = false;
+    public $isNewPersonal = false;
+    public $selectedPersonalHash = null;
 
     // 2. Métricas
     public $hs = 0;
@@ -61,24 +64,47 @@ new class extends Component {
         $this->calculateWeighted();
     }
     
-    public function updatedPersonal()
+    public function updatedPersonal($value)
     {
-        if (strlen($this->personal) > 1) {
-            $this->personalSuggestions = HourDetail::select('personal')
+        $this->isNewPersonal = false;
+        $this->selectedPersonalHash = null;
+
+        if (strlen($value) > 1) {
+            $names = HourDetail::select('personal')
                 ->distinct()
-                ->where('personal', 'like', '%' . $this->personal . '%')
-                ->limit(5)
-                ->pluck('personal')
-                ->toArray();
+                ->where('personal', 'like', '%' . $value . '%')
+                ->limit(10)
+                ->pluck('personal');
+            
+            $this->personalSearchResults = $names->map(function($name) {
+                return [
+                    'id' => md5($name),
+                    'nombre' => $name,
+                ];
+            })->toArray();
+            
+            $this->showPersonalSearch = !empty($this->personalSearchResults);
         } else {
-            $this->personalSuggestions = [];
+            $this->personalSearchResults = [];
+            $this->showPersonalSearch = false;
         }
     }
 
     public function selectPersonal($name)
     {
         $this->personal = $name;
-        $this->personalSuggestions = [];
+        $this->selectedPersonalHash = md5($name);
+        $this->showPersonalSearch = false;
+        $this->personalSearchResults = [];
+        $this->isNewPersonal = false;
+    }
+    
+    public function markAsNewPersonal()
+    {
+        $this->selectedPersonalHash = null;
+        $this->isNewPersonal = true;
+        $this->showPersonalSearch = false;
+        $this->personalSearchResults = [];
     }
 
     public function calculateWeighted()
@@ -159,7 +185,7 @@ new class extends Component {
 
 
     <x-slot name="header">
-        <div class="bg-gradient-to-r from-orange-500 to-orange-700 rounded-xl shadow-lg overflow-hidden -mx-6 sm:-mx-8">
+        <div class="bg-gradient-to-r from-orange-600 to-orange-800 rounded-xl shadow-lg overflow-hidden -mx-6 sm:-mx-8">
                 <div class="px-8 py-10">
                 <div class="flex items-center justify-between">
                     <div>
@@ -234,20 +260,46 @@ new class extends Component {
                             <div class="relative group">
                                 <label for="personal" class="block text-sm font-semibold text-gray-700 mb-1 group-hover:text-orange-600 transition-colors">Personal *</label>
                                 <div class="relative">
-                                    <input type="text" wire:model.live="personal" id="personal" placeholder="Nombre completo" autocomplete="off"
-                                           class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm transition-shadow">
+                                    <input type="text" wire:model.live.debounce.300ms="personal" id="personal" placeholder="Nombre completo" autocomplete="off"
+                                           class="mt-1 block w-full rounded-lg border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm transition-shadow {{ $selectedPersonalHash ? 'bg-green-50 border-green-300 text-green-800' : '' }}">
                                     
-                                    @if(!empty($personalSuggestions))
+                                    <!-- Badge: Existente -->
+                                    @if($selectedPersonalHash)
+                                        <span class="absolute right-2 top-3 px-2 py-1 bg-green-100 text-green-800 text-xs rounded font-medium">
+                                            ✓ Existente
+                                        </span>
+                                    @endif
+                                    
+                                    <!-- Badge: Nuevo -->
+                                    @if($isNewPersonal)
+                                        <span class="absolute right-2 top-3 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded font-medium">
+                                            ⊕ Nuevo
+                                        </span>
+                                    @endif
+
+                                    @if($showPersonalSearch)
                                         <div class="absolute z-50 mt-1 w-full bg-white rounded-md shadow-lg border border-gray-200">
                                             <ul class="max-h-60 overflow-auto py-1 text-base ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                                                @foreach($personalSuggestions as $suggestion)
-                                                    <li wire:click="selectPersonal('{{ $suggestion }}')" 
-                                                        class="cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-orange-50 text-gray-900">
-                                                        <span class="block truncate font-normal">
-                                                            {{ $suggestion }}
-                                                        </span>
+                                                @if(!empty($personalSearchResults))
+                                                    @foreach($personalSearchResults as $result)
+                                                        <li wire:click="selectPersonal('{{ $result['nombre'] }}')" 
+                                                            class="cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-orange-50 text-gray-900 group-result">
+                                                            <span class="block truncate font-medium">
+                                                                {{ $result['nombre'] }}
+                                                            </span>
+                                                        </li>
+                                                    @endforeach
+                                                @else
+                                                     <li class="py-3 px-4 text-sm text-gray-500 text-center">
+                                                        No se encontraron coincidencias
                                                     </li>
-                                                @endforeach
+                                                @endif
+                                                
+                                                <!-- Opción: Crear nuevo -->
+                                                <li wire:click="markAsNewPersonal"
+                                                    class="cursor-pointer select-none relative py-2 pl-3 pr-9 bg-blue-50 hover:bg-blue-100 border-t border-blue-200 text-blue-700 font-medium">
+                                                    <span class="block">⊕ Crear nuevo: "{{ $personal }}"</span>
+                                                </li>
                                             </ul>
                                         </div>
                                     @endif

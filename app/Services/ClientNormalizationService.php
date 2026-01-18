@@ -27,6 +27,27 @@ class ClientNormalizationService
         $similar = collect();
 
         foreach ($clients as $client) {
+            // 1. Coincidencia parcial (Autocomplete)
+            // Si el nombre normalizado del cliente CONTIENE el término buscado
+            if ($normalized !== '' && str_contains($client->nombre_normalizado, $normalized)) {
+                
+                // Priorizar "Empieza con" vs "Contiene"
+                $isStart = str_starts_with($client->nombre_normalizado, $normalized);
+                $score = $isStart ? 100.0 : 90.0;
+                
+                // Ajustar score si es exacto
+                if ($client->nombre_normalizado === $normalized) {
+                    $score = 100.0;
+                }
+
+                $similar->push([
+                    'client' => $client,
+                    'similarity' => $score,
+                ]);
+                continue;
+            }
+
+            // 2. Coincidencia difusa (Typos)
             $similarity = $this->calculateSimilarity($normalized, $client->nombre_normalizado);
             
             if ($similarity >= $threshold) {

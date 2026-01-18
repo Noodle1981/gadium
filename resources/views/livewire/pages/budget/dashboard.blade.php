@@ -11,7 +11,9 @@ new class extends Component {
 
     public function mount()
     {
-        $this->selectedYear = Carbon::now()->year;
+        // Default to the most recent year with data, or current year if empty
+        $lastDate = Budget::max('fecha');
+        $this->selectedYear = $lastDate ? Carbon::parse($lastDate)->year : Carbon::now()->year;
         $this->selectedMonth = 'all'; 
     }
 

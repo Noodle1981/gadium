@@ -1,161 +1,80 @@
-# Reglas Visuales y de Diseño - Sistema Gadium
+# Visual Rules & Standards
 
-Este documento define los estándares visuales y de UX para garantizar la consistencia en todos los módulos del sistema.
+## History & List Views (Vistas de Historial)
 
-## 1. Estructura General de Página
+All History views (e.g., Sales History, Budget History) must follow this standard structure:
 
-El sistema utiliza un diseño basado en **contenedores centrados pero expandibles**.
+### 1. Gradient Banner Header (`x-slot:header`)
+Instead of a simple white background, use a gradient header that matches the module's identity.
 
-- **Contenedor Principal**: Por defecto, el contenido debe estar centrado con un ancho máximo de `max-w-7xl`.
-- **Excepción**: Tablas densas o vistas de mapas pueden requerir ancho completo (`max-w-full`), pero siempre deben ofrecer una vista predeterminada alineada.
+*   **Wrapper**: `bg-gradient-to-r from-orange-600 to-orange-800 rounded-xl shadow-2xl overflow-hidden -mx-6 sm:-mx-8` (Adjust colors per module if needed).
+*   **Content**:
+    *   **Left**: Title (`h1 text-2xl font-bold text-white`) + Subtitle (`p text-orange-100 text-sm`).
+    *   **Right**: Primary Actions (e.g., "Importar", "Crear Nuevo").
+*   **Actions**: Buttons should be placed *inside* the banner on the right side, using `bg-white text-orange-700` styling for high contrast.
 
-```html
-<div class="py-12">
-    <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-        <!-- Contenido -->
-    </div>
-</div>
-```
+### 2. Livewire/Volt Component Architecture
+Convert static views to **Livewire/Volt** components to enable SPA-like interactivity (Search, Pagination) without full page reloads.
+
+### 3. Controls Bar
+Immediately above the data table (`p-6 text-gray-900`), include:
+*   **Search**: A real-time search input (`wire:model.live.debounce.300ms="search"`).
+*   **Count**: "Mostrando X registros".
+*   **View Options**: Toggle Expand/Collapse columns if the table is wide.
+
+### 4. Data Table
+*   **Style**: `min-w-full divide-y divide-gray-200 text-xs`.
+*   **Responsiveness**: Use `overflow-x-auto`.
+*   **Pagination**: Use standard Laravel pagination links at the bottom (`{{ $items->links() }}`).
+
+## Feedback & Modals
+
+For critical actions (e.g., creating or updating records), distinct feedback is required.
+
+### 1. Success Modal (Modal de Éxito)
+Instead of subtle flash messages, use a blocking modal for successful operations that require redirection.
+*   **Trigger**: Use `Livewire.dispatch('event-name')` from PHP.
+*   **UI**: fixed inset-0 overlay, centered white card.
+*   **Content**: Success Icon (Green check), Title "¡Cambio Realizado!", Message "El [entidad] ha sido...".
+*   **Action**: Single button "Aceptar" that redirects to the index/history view.
+
+### 2. Error Modal (Modal de Error)
+For validation errors or blockers, show a modal to alert the user.
+*   **Trigger**: Use `Livewire.dispatch('show-error-modal')` when catching `ValidationException` or adding manual errors.
+*   **UI**: fixed inset-0 overlay, centered white card.
+*   **Content**: Error Icon (Red X), Title "¡Atención!", Message "Revise los campos para más información" or specific error.
+*   **Action**: Single button "Entendido" or "Cerrar" that closes the modal.
+
+## Navigation & Sidebar (Navegación Lateral)
+
+Modules should be grouped logically in the sidebar using `x-nav-link` components.
+
+### 1. Structure
+*   **Role-Based Visibility**: Use `@role('RoleName')` to conditionally show/hide links.
+*   **Grouping**: Group related links (e.g., "Operaciones", "Gestión").
+*   **Active State**: Ensure `request()->routeIs('pattern.*')` is used for `active` prop to highlight the current section.
+
+### 2. Icons
+*   Use Heroicons (Outline version) consistently.
+*   Size: `w-5 h-5` or `w-6 h-6`.
 
 ---
 
-## 2. Encabezados de Módulo (Headers)
+## Example Implementation (Sales History)
 
-Cada vista principal debe tener un "Hero Header" distintivo que se integra con el navbar sticky.
-
-### Estándar Visual
-- **Tipo**: Tarjeta con gradiente de borde a borde del contenedor.
-- **Gradiente Ventas**: `bg-gradient-to-r from-orange-600 to-orange-800`
-- **Márgenes Negativos**: `-mx-6 sm:-mx-8` (Crucial para que el gradiente toque los bordes del navbar).
-- **Tipografía**: Título `text-2xl font-bold text-white`, Subtítulo `text-orange-100 text-sm`.
-- **Iconografía**: Icono SVG decorativo a la derecha, `w-12 h-12 text-orange-300 opacity-50`.
-
-> [!TIP]
-> **Referencia Viva**: Ver implementación en módulo Ventas (`/ventas`).
-> Este componente DEBE ir dentro de `<x-slot name="header">` para funcionar con los márgenes negativos. NO colocar dentro del contenedor `max-w-7xl` del cuerpo de página.
-
-### Código Base (Componente Blade / Volt)
-```html
+```blade
 <x-slot name="header">
-    <div class="bg-gradient-to-r from-orange-600 to-orange-800 rounded-xl shadow-2xl overflow-hidden -mx-6 sm:-mx-8">
-        <div class="px-8 py-6">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h1 class="text-2xl font-bold text-white mb-1">Título de la Página</h1>
-                    <p class="text-orange-100 text-sm">Descripción corta de la funcionalidad</p>
-                </div>
-                <div class="hidden md:block">
-                    <!-- SVG Icon here -->
-                </div>
-            </div>
+    <div class="bg-gradient-to-r from-orange-600 to-orange-800 ...">
+        <div class="flex justify-between ...">
+            <h1>Historial</h1>
+            <a href="..." class="bg-white text-orange-700 ...">Importar</a>
         </div>
     </div>
 </x-slot>
-```
 
----
-
-## 3. Tablas de Datos Densas
-
-Para tablas con muchas columnas (ej: Historial de Ventas, Reportes), se aplica el patrón **"Clean First, Expand Later"**.
-
-### Reglas de UX
-1. **Vista por Defecto (Clean)**: 
-   - Mostrar solo 5-7 columnas críticas.
-   - Contenedor alineado a `max-w-7xl`.
-2. **Vista Expandida (Full Detail)**:
-   - Botón de acción para alternar vista.
-   - Contenedor se expande a `max-w-full`.
-   - Se revelan columnas secundarias.
-
-### Implementación (Alpine.js)
-```html
-<div class="py-12" x-data="{ expanded: false }">
-    <div class="mx-auto sm:px-6 lg:px-8 transition-all duration-300" 
-         :class="expanded ? 'max-w-full' : 'max-w-7xl'">
-        
-        <!-- Botón Toggle -->
-        <button @click="expanded = !expanded">
-            <span x-show="!expanded">>>> Expandir Vista</span>
-            <span x-show="expanded">Contraer Vista</span>
-        </button>
-
-        <!-- Tabla -->
-        <table>
-            <thead>
-                <tr>
-                    <th>Columna Principal</th>
-                    <th x-show="expanded">Columna Secundaria (Detalle)</th>
-                </tr>
-            </thead>
-            <!-- ... -->
-        </table>
-    </div>
+<div class="p-6 ...">
+    <input wire:model.live="search" ... />
+    <table>...</table>
+    {{ $items->links() }}
 </div>
 ```
-
----
-
-## 4. Paleta de Colores por Módulo
-
-Para mantener identidad visual pero diferenciar contextos:
-
-- **Ventas**: Orange (`from-orange-600 to-orange-800`)
-- **Compras**: (Por definir, ej: Teal/Emerald)
-- **Producción**: (Por definir, ej: Blue/Indigo)
-- **RRHH**: (Por definir, ej: Rose/Pink)
-
----
-
-## 5. Componentes UI
-
-### Botones de Acción Principal
-- `bg-{primary}-600 hover:bg-{primary}-700 text-white`
-- Donde `{primary}` es el color del módulo (ej: `orange` para Ventas).
-- Uppercase, tracking-widest, text-xs, font-semibold.
-
-### Botones Secundarios / Toggles
-- `bg-{fym}-100 text-{fym}-800 border border-{fym}-200`
-- Donde `{fym}` es el color del módulo (ej: orange).
-
----
-
-## 6. Dashboard: Filosofía "Clean & Cards"
-
-Para los dashboards operativos del sistema, se prioriza la **legibilidad instantánea** sobre la visualización de datos complejos.
-
-**Principios:**
-- **No Gráficos Complejos (No JS Charts/Livewire issues)**: Evitar Chart.js para evitar conflictos de renderizado y tiempos de carga. Usar barras de progreso CSS simples si es necesario.
-- **KPI Cards**: Tarjetas grandes, claras y coniconografía sutil.
-- **Filtros Simplificados**: Filtrar por **Mes y Año** estándar, evitando lógicas complejas de trimestres (Q1-Q4) a menos que sea estrictamente necesario.
-- **Listas > Pies**: Preferir listas ordenadas con barras de porcentaje visual (como en Transportes) en lugar de gráficos de torta (pie charts).
-- **Tarjetas Destacadas**: Usar diseños especiales (gradientes, emblemas) para métricas de orgullo (ej: Cliente Estrella).
-
-**Layout Recomendado:**
-- Encabezado con Selectores (Año/Mes).
-- 4 Tarjetas KPI en Grid superior.
-- 2 Paneles de detalle inferior (Listas, Rankings).
-
----
-
-## 7. Navbar y Branding
-
-El sistema mantiene una identidad corporativa fuerte pero adaptable.
-
-### Logo
-- **Escritorio**: Logo completo (`img/logo.webp`), altura `h-12`.
-- **Móvil**: SÓLO Logo (`img/logo.webp`), altura `h-8`. **Nunca usar texto plano "Gadium" como reemplazo**. El logo es la única identidad.
-
-### Menú Móvil (Hamburguesa)
-- **Ancho del Drawer**: Debe ser contenido, máx `w-64` (256px). No debe ocupar toda la pantalla.
-- **Backdrop**: Obligatorio oscurecer el fondo (`bg-black/50 backdrop-blur-sm`).
-- **Navegación**: Replicar la estructura del sidebar de escritorio.
-
----
-
-## 8. Responsividad
-
-Todos los componentes deben ser `mobile-first` o adaptarse elegantemente.
-- **Tablas**: Scroll horizontal en móvil o tarjetas apiladas.
-- **Grids**: `grid-cols-1` en móvil, `grid-cols-2` o `4` en md/lg.
-- **Textos Críticos**: Usar `truncate` y `title="..."` (tooltip nativo) para números grandes o nombres largos en tarjetas pequeñas.

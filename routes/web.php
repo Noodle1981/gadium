@@ -44,16 +44,11 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
                 Volt::route('importacion', 'pages.sales.import-wizard')->name('admin.sales.import');
                 Volt::route('clientes', 'pages.clients.resolution')->name('admin.clients.resolve'); // clientes
                 
-                // Historial de Ventas y Presupuestos
-                Route::get('historial-ventas', function () {
-                    $sales = \App\Models\Sale::with('client')->latest()->take(50)->get();
-                    return view('historial-ventas', ['sales' => $sales]);
-                })->name('admin.historial.ventas');
                 
-                Route::get('historial-presupuestos', function () {
-                    $budgets = \App\Models\Budget::with('client')->latest()->take(50)->get();
-                    return view('historial-presupuesto', ['budgets' => $budgets]);
-                })->name('admin.historial.presupuesto');
+                // Historial de Ventas y Presupuestos
+                Volt::route('historial-ventas', 'pages.sales.history')->name('admin.historial.ventas');
+                
+                Volt::route('historial-presupuestos', 'pages.budget.history')->name('admin.historial.presupuesto');
             });
 
             // Módulo Producción
@@ -73,10 +68,7 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
                 Volt::route('detalles-horas/crear', 'pages.hours.manual-create')->name('admin.hours.create');
                 Volt::route('detalles-horas/editar/{hourDetail}', 'pages.hours.manual-edit')->name('admin.hours.edit');
                 
-                Route::get('historial-horas', function () {
-                    $hours = \App\Models\HourDetail::latest()->take(50)->get();
-                    return view('historial-horas', ['hours' => $hours]);
-                })->name('admin.historial.horas');
+                Volt::route('historial-horas', 'pages.hours.index')->name('admin.historial.horas');
             });
 
             // Módulo Compras Materiales
@@ -164,15 +156,9 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
         });
         
         // Historial de Ventas y Presupuestos (permanecen en /gerente)
-        Route::get('historial-ventas', function () {
-            $sales = \App\Models\Sale::with('client')->latest()->take(50)->get();
-            return view('historial-ventas', ['sales' => $sales]);
-        })->name('manager.historial.ventas');
+        Volt::route('historial-ventas', 'pages.sales.history')->name('manager.historial.ventas');
         
-        Route::get('historial-presupuestos', function () {
-            $budgets = \App\Models\Budget::with('client')->latest()->take(50)->get();
-            return view('historial-presupuesto', ['budgets' => $budgets]);
-        })->name('manager.historial.presupuesto');
+        Volt::route('historial-presupuestos', 'pages.budget.history')->name('manager.historial.presupuesto');
 
         // Nuevos Módulos para Manager
         Volt::route('detalles-horas', 'pages.hours.index')->name('manager.hours.index');
@@ -180,10 +166,7 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
         Volt::route('detalles-horas/crear', 'pages.hours.manual-create')->name('manager.hours.create');
         Volt::route('detalles-horas/editar/{hourDetail}', 'pages.hours.manual-edit')->name('manager.hours.edit');
         
-        Route::get('historial-horas', function () {
-            $hours = \App\Models\HourDetail::latest()->take(50)->get();
-            return view('historial-horas', ['hours' => $hours]);
-        })->name('manager.historial.horas');
+        Volt::route('historial-horas', 'pages.hours.index')->name('manager.historial.horas');
         Volt::route('compras-materiales', 'pages.purchases.index')->name('manager.purchases.index');
         Volt::route('compras-materiales/importacion', 'pages.purchases.import-wizard')->name('manager.purchases.import');
         Volt::route('compras-materiales/crear', 'pages.purchases.manual-create')->name('manager.purchases.create');
@@ -229,10 +212,7 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
             Volt::route('resolucion-clientes', 'pages.clients.resolution')->name('sales.clients.resolve');
             
             // Historial de Ventas
-            Route::get('historial-ventas', function () {
-                $sales = \App\Models\Sale::with('client')->latest()->take(50)->get();
-                return view('historial-ventas', ['sales' => $sales]);
-            })->name('sales.historial.ventas');
+            Volt::route('historial-ventas', 'pages.sales.history')->name('sales.historial.ventas');
         });
     });
 
@@ -249,10 +229,7 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
             Volt::route('crear', 'pages.budget.manual-create')->name('budget.create');
             Volt::route('editar/{budget}', 'pages.budget.manual-edit')->name('budget.edit');
             
-            Route::get('historial_importacion', function () {
-                $budgets = \App\Models\Budget::with('client')->latest()->take(50)->get();
-                return view('historial-presupuesto', ['budgets' => $budgets]);
-            })->name('budget.historial.importacion');
+            Volt::route('historial_importacion', 'pages.budget.history')->name('budget.historial.importacion');
         });
     });
 
@@ -267,10 +244,7 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
             Volt::route('crear', 'pages.hours.manual-create')->name('hours.create');
             Volt::route('editar/{hourDetail}', 'pages.hours.manual-edit')->name('hours.edit');
             
-            Route::get('historial_importacion', function () {
-                $hours = \App\Models\HourDetail::latest()->take(50)->get();
-                return view('historial-horas', ['hours' => $hours]);
-            })->name('hours.historial.importacion');
+            Volt::route('historial_importacion', 'pages.hours.index')->name('hours.historial.importacion');
         });
     });
 

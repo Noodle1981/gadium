@@ -10,6 +10,52 @@ new class extends Component {
     public $fat = 'NO';
     public $pem = 'NO';
 
+    // Autocomplete State
+    public $searchResults = [];
+    public $selectedClientId = null;
+    public $showClientSearch = false;
+    public $isNewClient = false;
+
+    public function updatedCliente($value)
+    {
+        $this->selectedClientId = null;
+        $this->isNewClient = false;
+
+        if (strlen($value) >= 2) {
+            $service = app(\App\Services\ClientNormalizationService::class);
+            $results = $service->findSimilarClients($value)->take(5);
+            
+            $this->searchResults = $results->map(function($item) {
+                return [
+                    'id' => $item['client']->id,
+                    'nombre' => $item['client']->nombre,
+                ];
+            })->toArray();
+            
+            $this->showClientSearch = !empty($this->searchResults);
+        } else {
+            $this->searchResults = [];
+            $this->showClientSearch = false;
+        }
+    }
+
+    public function selectClient($id, $name)
+    {
+        $this->cliente = $name;
+        $this->selectedClientId = $id;
+        $this->showClientSearch = false;
+        $this->searchResults = [];
+        $this->isNewClient = false;
+    }
+
+    public function markAsNewClient()
+    {
+        $this->selectedClientId = null;
+        $this->isNewClient = true;
+        $this->showClientSearch = false;
+        $this->searchResults = [];
+    }
+
     public function rules()
     {
         return [
@@ -65,7 +111,58 @@ new class extends Component {
             <!-- Cliente -->
             <div>
                 <label for="cliente" class="block text-sm font-medium text-gray-700">Cliente *</label>
-                <input type="text" wire:model="cliente" id="cliente" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                <div class="relative mt-1">
+                    <div class="relative">
+                        <input 
+                            type="text" 
+                            wire:model.live.debounce.300ms="cliente" 
+                            id="cliente" 
+                            placeholder="Buscar Cliente..."
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm {{ $selectedClientId ? 'bg-green-50 border-green-300 text-green-800' : '' }}"
+                        >
+                        
+                        <!-- Badge: Cliente Existente -->
+                        @if($selectedClientId)
+                            <span class="absolute right-2 top-2 px-2 py-1 bg-green-100 text-green-800 text-xs rounded font-medium">
+                                ✓ Existente
+                            </span>
+                        @endif
+                        
+                        <!-- Badge: Cliente Nuevo -->
+                        @if($isNewClient)
+                            <span class="absolute right-2 top-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded font-medium">
+                                ⊕ Nuevo
+                            </span>
+                        @endif
+                    </div>
+                    
+                    @if($showClientSearch)
+                        <div class="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
+                            @if(!empty($searchResults))
+                                @foreach($searchResults as $result)
+                                    <div 
+                                        wire:click="selectClient({{ $result['id'] }}, '{{ $result['nombre'] }}')"
+                                        class="cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-orange-50 flex justify-between items-center"
+                                    >
+                                        <span class="block truncate font-medium">{{ $result['nombre'] }}</span>
+                                    </div>
+                                @endforeach
+                            @else
+                                <div class="py-3 px-4 text-sm text-gray-500 text-center">
+                                    No se encontraron coincidencias
+                                </div>
+                            @endif
+                            
+                            <!-- Opción: Crear nuevo -->
+                            <div 
+                                wire:click="markAsNewClient"
+                                class="cursor-pointer select-none relative py-2 pl-3 pr-9 bg-blue-50 hover:bg-blue-100 border-t border-blue-200 text-blue-700 font-medium"
+                            >
+                                <span class="block">⊕ Crear nuevo: "{{ $cliente }}"</span>
+                            </div>
+                        </div>
+                    @endif
+                </div>
                 @error('cliente') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
             </div>
 

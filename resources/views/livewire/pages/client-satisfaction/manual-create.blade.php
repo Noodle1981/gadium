@@ -10,12 +10,15 @@ use Carbon\Carbon;
 new #[Layout('layouts.app')] class extends Component {
     
     public $rows = [];
-    public $clients = [];
+    
+    // Autocomplete State per Row
+    public $searchQueries = []; // [index => 'query']
+    public $searchResults = []; // [index => [results]]
+    public $showResults = [];   // [index => bool]
     
     public function mount()
     {
-        $this->clients = Client::orderBy('nombre')->get();
-        // Iniciar con una fila vacía
+        // No load all clients anymore
         $this->addRow();
     }
 
@@ -24,19 +27,60 @@ new #[Layout('layouts.app')] class extends Component {
         $this->rows[] = [
             'fecha' => date('Y-m-d'),
             'client_id' => '',
-            'cliente_nombre' => '', // Para inputs de texto si no usa select
+            'cliente_nombre' => '',
             'proyecto' => '',
-            'p1' => '', // Satisfacción Obra
-            'p2' => '', // Desempeño Técnico
-            'p3' => '', // Necesidades
-            'p4' => '', // Plazo
+            'p1' => '',
+            'p2' => '',
+            'p3' => '',
+            'p4' => '',
         ];
+        // Initialize autocomplete state for this row
+        $index = count($this->rows) - 1;
+        $this->searchQueries[$index] = '';
+        $this->searchResults[$index] = [];
+        $this->showResults[$index] = false;
+    }
+
+    public function updatedSearchQueries($value, $key)
+    {
+        // $key might be "0" or similar
+        if (strlen($value) >= 2) {
+            $service = app(\App\Services\ClientNormalizationService::class);
+            $results = $service->findSimilarClients($value)->take(5);
+            
+            $this->searchResults[$key] = $results->map(function($item) {
+                return [
+                    'id' => $item['client']->id,
+                    'nombre' => $item['client']->nombre,
+                ];
+            })->toArray();
+            
+            $this->showResults[$key] = !empty($this->searchResults[$key]);
+        } else {
+            $this->searchResults[$key] = [];
+            $this->showResults[$key] = false;
+        }
+    }
+
+    public function selectClient($index, $id, $name)
+    {
+        $this->rows[$index]['client_id'] = $id;
+        $this->rows[$index]['cliente_nombre'] = $name;
+        $this->searchQueries[$index] = $name;
+        $this->showResults[$index] = false;
     }
 
     public function removeRow($index)
     {
         unset($this->rows[$index]);
-        $this->rows = array_values($this->rows); // Reindexar
+        unset($this->searchQueries[$index]);
+        unset($this->searchResults[$index]);
+        unset($this->showResults[$index]);
+        
+        $this->rows = array_values($this->rows);
+        $this->searchQueries = array_values($this->searchQueries);
+        $this->searchResults = array_values($this->searchResults);
+        $this->showResults = array_values($this->showResults);
         
         if (empty($this->rows)) {
             $this->addRow();
@@ -46,6 +90,9 @@ new #[Layout('layouts.app')] class extends Component {
     public function clearAll()
     {
         $this->rows = [];
+        $this->searchQueries = [];
+        $this->searchResults = [];
+        $this->showResults = [];
         $this->addRow();
     }
 
@@ -174,14 +221,37 @@ new #[Layout('layouts.app')] class extends Component {
                                         @error("rows.{$index}.fecha") <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                                     </td>
                                     
-                                    <td class="px-3 py-2">
-                                        <select wire:model="rows.{{ $index }}.client_id" class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                                            <option value="">Seleccionar...</option>
-                                            @foreach($clients as $c)
-                                                <option value="{{ $c->id }}">{{ $c->nombre }}</option>
-                                            @endforeach
-                                        </select>
-                                        @error("rows.{$index}.client_id") <span class="text-red-500 text-xs">Requerido</span> @enderror
+                                    <td class="px-3 py-2 relative">
+                                        <div class="relative">
+                                            <input 
+                                                type="text" 
+                                                wire:model.live.debounce.300ms="searchQueries.{{ $index }}"
+                                                placeholder="Buscar Cliente..." 
+                                                class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500 sm:text-sm {{ $rows[$index]['client_id'] ? 'bg-green-50 border-green-300 text-green-800 font-semibold' : '' }}"
+                                            >
+                                            
+                                            <!-- Checkmark if selected -->
+                                            @if($rows[$index]['client_id'])
+                                                <div class="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none">
+                                                    <svg class="h-4 w-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                                </div>
+                                            @endif
+                                            
+                                            <!-- Dropdown Results -->
+                                            @if(isset($showResults[$index]) && $showResults[$index])
+                                                <div class="absolute z-50 mt-1 w-64 bg-white shadow-xl max-h-48 rounded-md text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm left-0">
+                                                    @foreach($searchResults[$index] as $result)
+                                                        <div 
+                                                            wire:click="selectClient({{ $index }}, {{ $result['id'] }}, '{{ $result['nombre'] }}')"
+                                                            class="cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-orange-50"
+                                                        >
+                                                            <span class="block truncate font-medium">{{ $result['nombre'] }}</span>
+                                                        </div>
+                                                    @endforeach
+                                                </div>
+                                            @endif
+                                        </div>
+                                        @error("rows.{$index}.client_id") <span class="text-red-500 text-xs block mt-1">Requerido</span> @enderror
                                     </td>
                                     
                                     <td class="px-3 py-2">

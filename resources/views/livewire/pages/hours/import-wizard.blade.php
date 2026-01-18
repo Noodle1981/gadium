@@ -166,7 +166,7 @@ new class extends Component {
 }; ?>
 
     <x-slot name="header">
-        <div class="mb-8 bg-gradient-to-r from-orange-500 to-orange-700 rounded-xl shadow-lg overflow-hidden relative -mx-6 sm:-mx-8">
+        <div class="mb-8 bg-gradient-to-r from-orange-600 to-orange-800 rounded-xl shadow-lg overflow-hidden relative -mx-6 sm:-mx-8">
              <div class="px-8 py-8">
                 <div class="flex items-center justify-between">
                     <div>
