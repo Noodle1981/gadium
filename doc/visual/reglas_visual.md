@@ -30,6 +30,10 @@ Cada vista principal debe tener un "Hero Header" distintivo que se integra con e
 - **Tipografía**: Título `text-2xl font-bold text-white`, Subtítulo `text-orange-100 text-sm`.
 - **Iconografía**: Icono SVG decorativo a la derecha, `w-12 h-12 text-orange-300 opacity-50`.
 
+> [!TIP]
+> **Referencia Viva**: Ver implementación en módulo Ventas (`/ventas`).
+> Este componente DEBE ir dentro de `<x-slot name="header">` para funcionar con los márgenes negativos. NO colocar dentro del contenedor `max-w-7xl` del cuerpo de página.
+
 ### Código Base (Componente Blade / Volt)
 ```html
 <x-slot name="header">

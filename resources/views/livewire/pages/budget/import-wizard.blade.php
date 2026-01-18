@@ -263,9 +263,21 @@ new class extends Component {
 
 <div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('Importación de Presupuestos') }}
-        </h2>
+        <div class="bg-gradient-to-r from-orange-600 to-orange-800 rounded-xl shadow-2xl overflow-hidden -mx-6 sm:-mx-8">
+            <div class="px-8 py-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-2xl font-bold text-white mb-1">Importación de Presupuestos</h1>
+                        <p class="text-orange-100 text-sm">Carga masiva de estimaciones comerciales</p>
+                    </div>
+                    <div class="hidden md:block">
+                        <svg class="w-12 h-12 text-orange-300 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
     </x-slot>
 
     <!-- Stepper -->
@@ -439,7 +451,7 @@ new class extends Component {
                 
                 <div class="mt-6">
                     <button wire:click="startImport" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-green-600 hover:bg-green-700 focus:outline-none">
-                        Iniciar Importación
+                        Importar Automáticamente
                     </button>
                 </div>
             </div>

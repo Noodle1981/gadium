@@ -165,25 +165,39 @@ new class extends Component {
     }
 }; ?>
 
-<div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    <x-slot name="header">
+        <div class="mb-8 bg-gradient-to-r from-orange-500 to-orange-700 rounded-xl shadow-lg overflow-hidden relative -mx-6 sm:-mx-8">
+             <div class="px-8 py-8">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-3xl font-bold text-white mb-2 tracking-tight">Importación de Horas</h1>
+                        <p class="text-orange-100 text-lg font-medium opacity-90">Carga masiva desde plantillas Excel</p>
+                    </div>
+                </div>
+             </div>
+        </div>
+    </x-slot>
+
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
     
     <!-- Stepper -->
     <div class="mb-8">
         <div class="flex items-center justify-between w-full">
             @foreach([1 => 'Carga', 3 => 'Confirmación', 4 => 'Resultado'] as $s => $label)
-                <div class="flex flex-col items-center {{ $step >= $s ? 'text-indigo-600' : 'text-gray-400' }}">
+                <div class="flex flex-col items-center {{ $step >= $s ? 'text-orange-600' : 'text-gray-400' }}">
                     <div class="flex items-center justify-center w-10 h-10 rounded-full border-2 
-                        {{ $step >= $s ? 'border-indigo-600 bg-indigo-50' : 'border-gray-300' }} font-bold">
+                        {{ $step >= $s ? 'border-orange-600 bg-orange-50' : 'border-gray-300' }} font-bold">
                         {{ $s === 3 ? 2 : ($s === 4 ? 3 : 1) }}
                     </div>
                     <span class="text-sm mt-1">{{ $label }}</span>
                 </div>
-                @if($s < 4) <div class="flex-1 h-1 bg-gray-200 mx-4 {{ $step > $s ? 'bg-indigo-600' : '' }}"></div> @endif
+                @if($s < 4) <div class="flex-1 h-1 bg-gray-200 mx-4 {{ $step > $s ? 'bg-orange-600' : '' }}"></div> @endif
             @endforeach
         </div>
     </div>
 
-    <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
+    <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6 border-t-4 border-orange-500">
         
         <!-- Step 1: Upload -->
         @if($step === 1)
@@ -201,14 +215,14 @@ new class extends Component {
                     x-on:dragleave.prevent="isDropping = false"
                     x-on:drop.prevent="isDropping = false; $refs.fileInput.files = $event.dataTransfer.files; $refs.fileInput.dispatchEvent(new Event('change'))"
                     class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-md relative transition-colors duration-200"
-                    :class="{ 'border-indigo-500 bg-indigo-50': isDropping }"
+                    :class="{ 'border-orange-500 bg-orange-50': isDropping }"
                 >
                     <div class="space-y-1 text-center">
                         <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
                             <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
                         <div class="flex text-sm text-gray-600">
-                            <label for="file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-indigo-600 hover:text-indigo-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-indigo-500">
+                            <label for="file-upload" class="relative cursor-pointer bg-white rounded-md font-medium text-orange-600 hover:text-orange-500 focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-orange-500">
                                 <span>Subir un archivo</span>
                                 <input id="file-upload" x-ref="fileInput" wire:model="file" type="file" class="sr-only" accept=".xlsx,.xls">
                             </label>
@@ -221,7 +235,7 @@ new class extends Component {
 
                     <!-- Loading State -->
                     <div wire:loading wire:target="file" class="absolute inset-0 bg-white bg-opacity-90 flex items-center justify-center">
-                        <div class="flex items-center space-x-2 text-indigo-600">
+                        <div class="flex items-center space-x-2 text-orange-600">
                             <svg class="animate-spin h-5 w-5 mr-3" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
                             <span>Analizando archivo...</span>
                         </div>
@@ -271,10 +285,11 @@ new class extends Component {
                 </div>
                 
                 <div class="mt-6">
-                    <button wire:click="startImport" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none" wire:loading.attr="disabled">
-                        <span wire:loading.remove wire:target="startImport">Iniciar Importación</span>
+                    <button wire:click="startImport" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-orange-600 hover:bg-orange-700 focus:outline-none" wire:loading.attr="disabled">
+                        <span wire:loading.remove wire:target="startImport">Importar Automáticamente</span>
                         <span wire:loading wire:target="startImport">Procesando...</span>
                     </button>
+                    <!-- Correction: "Iniciar Importación" renamed to "Importar Automáticamente" for consistency -->
                 </div>
             </div>
         @endif
@@ -305,7 +320,7 @@ new class extends Component {
                 </div>
                 
                 <div class="flex justify-center space-x-4 mt-6">
-                    <button wire:click="resetWizard" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200 focus:outline-none">
+                    <button wire:click="resetWizard" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-orange-700 bg-orange-100 hover:bg-orange-200 focus:outline-none">
                         Importar otro archivo
                     </button>
                     <a href="{{ route(auth()->user()->hasRole('Manager') ? 'manager.historial.horas' : (auth()->user()->hasRole('Gestor de Horas') ? 'hours.historial.importacion' : 'admin.historial.horas')) }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none">
