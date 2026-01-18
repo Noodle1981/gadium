@@ -20,6 +20,7 @@ class PurchaseDetail extends Model
         'resto_valor',
         'resto_porcentaje',
         'porcentaje_facturacion',
+        'supplier_id',
         'hash',
     ];
 
@@ -31,6 +32,14 @@ class PurchaseDetail extends Model
         'resto_porcentaje' => 'decimal:2',
         'porcentaje_facturacion' => 'decimal:2',
     ];
+
+    /**
+     * Relación con proveedor
+     */
+    public function supplier()
+    {
+        return $this->belongsTo(Supplier::class);
+    }
 
     /**
      * Generar hash único para detectar duplicados

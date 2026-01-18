@@ -18,7 +18,7 @@ use Illuminate\Support\Facades\Log;
 
 class ExcelImportService
 {
-    protected $normalizationService;
+    protected $employeeNormalizationService;
     protected $customDate = null;
 
     public function setCustomDate($date)
@@ -26,10 +26,16 @@ class ExcelImportService
         $this->customDate = $date;
     }
 
-    public function __construct(ClientNormalizationService $normalizationService)
+    public function __construct(ClientNormalizationService $normalizationService, EmployeeNormalizationService $employeeNormalizationService)
     {
         $this->normalizationService = $normalizationService;
+        $this->employeeNormalizationService = $employeeNormalizationService;
     }
+
+    // ... (rest of methods)
+
+
+
 
     /**
      * Parsea montos con formato "USD 1.234" o "-USD 631" a float
@@ -407,9 +413,7 @@ class ExcelImportService
                     $errors[] = "Fila {$rowIndex}: {$field} debe ser numérico";
                 }
             }
-            if (!in_array($pem, ['SI', 'NO', ''])) {
-                $errors[] = "Fila {$rowIndex}: PEM debe ser SI o NO";
-            }
+
         } elseif ($type === 'client_satisfaction') {
             if (empty($row['Cliente'])) {
                 $errors[] = "Fila {$rowIndex}: Cliente vacío";
@@ -625,41 +629,6 @@ class ExcelImportService
                     'horas_ponderadas' => is_numeric($row['Horas ponderadas'] ?? null) ? (float)$row['Horas ponderadas'] : null,
                 ]);
 
-            } elseif ($type === 'hour_detail') {
-                // Importar Detalle de Horas
-                $personal = trim($row['Personal'] ?? '');
-                $proyecto = trim($row['Proyecto'] ?? '');
-                $hs = is_numeric($row['Hs'] ?? null) ? (float)$row['Hs'] : 0;
-                
-                $hash = HourDetail::generateHash($fecha, $personal, $proyecto, $hs);
-                
-                if (HourDetail::existsByHash($hash)) {
-                    $skipped++;
-                    continue;
-                }
-                
-                HourDetail::create([
-                    'dia' => trim($row['Dia'] ?? ''),
-                    'fecha' => $fecha,
-                    'ano' => is_numeric($row['Año'] ?? null) ? (int)$row['Año'] : (int)date('Y', strtotime($fecha)),
-                    'mes' => is_numeric($row['Mes'] ?? null) ? (int)$row['Mes'] : (int)date('m', strtotime($fecha)),
-                    'personal' => $personal,
-                    'funcion' => trim($row['Funcion'] ?? ''),
-                    'proyecto' => $proyecto,
-                    'horas_ponderadas' => is_numeric($row['Horas ponderadas'] ?? null) ? (float)$row['Horas ponderadas'] : 0,
-                    'ponderador' => is_numeric($row['Ponderador'] ?? null) ? (float)$row['Ponderador'] : 1,
-                    'hs' => $hs,
-                    'hs_comun' => is_numeric($row['Hs comun'] ?? null) ? (float)$row['Hs comun'] : 0,
-                    'hs_50' => is_numeric($row['Hs (50%)'] ?? null) ? (float)$row['Hs (50%)'] : 0,
-                    'hs_100' => is_numeric($row['Hs (100%)'] ?? null) ? (float)$row['Hs (100%)'] : 0,
-                    'hs_viaje' => is_numeric($row['Hs de viaje'] ?? null) ? (float)$row['Hs de viaje'] : 0,
-                    'hs_pernoctada' => trim($row['Hs pernoctada'] ?? 'No'),
-                    'hs_adeudadas' => is_numeric($row['Hs adeudadas'] ?? null) ? (float)$row['Hs adeudadas'] : 0,
-                    'vianda' => trim($row['Vianda'] ?? '0'),
-                    'observacion' => trim($row['Observación'] ?? ''),
-                    'programacion' => trim($row['Programación'] ?? ''),
-                    'hash' => $hash,
-                ]);
             } elseif ($type === 'purchase_detail') {
                 // Importar Detalle de Compras
                 $cc = trim($row['CC'] ?? '');

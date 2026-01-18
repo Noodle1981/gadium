@@ -48,5 +48,21 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    /**
+     * Aliases for this user (for import normalization)
+     */
+    public function aliases()
+    {
+        return $this->hasMany(UserAlias::class);
+    }
+
+    /**
+     * Hours logged for this user
+     */
+    public function hourDetails()
+    {
+        return $this->hasMany(HourDetail::class);
+    }
 }
 

@@ -111,6 +111,16 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
             Route::middleware(['can:view_boards'])->group(function () {
                 Volt::route('tableros', 'pages.boards.index')->name('admin.boards.index');
             });
+
+            // Módulo Automatización
+            Route::middleware(['can:view_automation'])->group(function () {
+                Volt::route('automatizacion', 'pages.automation-projects.index')->name('admin.automation.index');
+                
+                Route::get('automatizacion/historial', function () {
+                    $projects = \App\Models\AutomationProject::latest()->take(50)->get();
+                    return view('historial-automation-projects', ['projects' => $projects]);
+                })->name('admin.automation.historial');
+            });
         });
     });
 
@@ -194,6 +204,32 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
                 $boards = \App\Models\BoardDetail::latest()->take(50)->get();
                 return view('historial-tableros', ['boards' => $boards]);
             })->name('manager.historial.tableros');
+        });
+
+        // Rutas de Automatización para Manager
+        Route::middleware(['can:view_automation'])->group(function () {
+            Route::get('automatizacion/historial', function () {
+                $projects = \App\Models\AutomationProject::latest()->take(50)->get();
+                return view('historial-automation-projects', ['projects' => $projects]);
+            })->name('manager.automation.historial');
+        });
+
+        // --- GESTIÓN DE CATÁLOGOS MAESTROS ---
+        Route::prefix('catalogo')->group(function () {
+            // Proyectos
+            Volt::route('proyectos', 'pages.manager.catalogs.projects.index')->name('manager.catalogs.projects.index');
+            
+            // Clientes
+            Volt::route('clientes', 'pages.manager.catalogs.clients.index')->name('manager.catalogs.clients.index');
+            
+            // Personal & Alias
+            Volt::route('personal', 'pages.manager.catalogs.employees.index')->name('manager.catalogs.employees.index');
+
+            // Proveedores
+            Volt::route('proveedores', 'pages.manager.catalogs.suppliers.index')->name('manager.catalogs.suppliers.index');
+
+            // Centros de Costo
+            Volt::route('centros-costo', 'pages.manager.catalogs.cost-centers.index')->name('manager.catalogs.cost-centers.index');
         });
     });
 

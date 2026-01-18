@@ -14,11 +14,11 @@ class RoleSeeder extends Seeder
     public function run(): void
     {
         // Crear rol Super Admin con todos los permisos
-        $superAdmin = Role::create(['name' => 'Super Admin']);
+        $superAdmin = Role::firstOrCreate(['name' => 'Super Admin']);
         $superAdmin->givePermissionTo(Permission::all());
 
         // Crear rol Admin con permisos de gestión (Programadores/Técnicos)
-        $admin = Role::create(['name' => 'Admin']);
+        $admin = Role::firstOrCreate(['name' => 'Admin']);
         $admin->givePermissionTo([
             'view_users', 'create_users', 'edit_users', 'delete_users',
             'view_roles', 'create_roles', 'edit_roles', 'delete_roles', // Gestión de Roles
@@ -36,7 +36,7 @@ class RoleSeeder extends Seeder
         ]);
 
         // Crear rol Manager con permisos operativos y administrativos (Gerente)
-        $manager = Role::create(['name' => 'Manager']);
+        $manager = Role::firstOrCreate(['name' => 'Manager']);
         $manager->givePermissionTo([
             'view_users', 'create_users', 'edit_users', 'delete_users', // Gestión de Usuarios completa
             'view_roles', 'create_roles', 'edit_roles', 'delete_roles', // Gestión de Roles completa

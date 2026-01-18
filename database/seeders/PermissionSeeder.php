@@ -16,73 +16,73 @@ class PermissionSeeder extends Seeder
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
         // Permisos de Usuarios
-        Permission::create(['name' => 'view_users']);
-        Permission::create(['name' => 'create_users']);
-        Permission::create(['name' => 'edit_users']);
-        Permission::create(['name' => 'delete_users']);
+        Permission::firstOrCreate(['name' => 'view_users']);
+        Permission::firstOrCreate(['name' => 'create_users']);
+        Permission::firstOrCreate(['name' => 'edit_users']);
+        Permission::firstOrCreate(['name' => 'delete_users']);
 
         // Permisos de Roles
-        Permission::create(['name' => 'view_roles']);
-        Permission::create(['name' => 'create_roles']);
-        Permission::create(['name' => 'edit_roles']);
-        Permission::create(['name' => 'delete_roles']);
+        Permission::firstOrCreate(['name' => 'view_roles']);
+        Permission::firstOrCreate(['name' => 'create_roles']);
+        Permission::firstOrCreate(['name' => 'edit_roles']);
+        Permission::firstOrCreate(['name' => 'delete_roles']);
 
         // Permisos de Ventas
-        Permission::create(['name' => 'view_sales']);
-        Permission::create(['name' => 'create_sales']);
-        Permission::create(['name' => 'edit_sales']);
-        Permission::create(['name' => 'delete_sales']);
+        Permission::firstOrCreate(['name' => 'view_sales']);
+        Permission::firstOrCreate(['name' => 'create_sales']);
+        Permission::firstOrCreate(['name' => 'edit_sales']);
+        Permission::firstOrCreate(['name' => 'delete_sales']);
 
         // Permisos de Producción
-        Permission::create(['name' => 'view_production']);
-        Permission::create(['name' => 'create_production']);
-        Permission::create(['name' => 'edit_production']);
-        Permission::create(['name' => 'delete_production']);
+        Permission::firstOrCreate(['name' => 'view_production']);
+        Permission::firstOrCreate(['name' => 'create_production']);
+        Permission::firstOrCreate(['name' => 'edit_production']);
+        Permission::firstOrCreate(['name' => 'delete_production']);
 
         // Permisos de RRHH
-        Permission::create(['name' => 'view_hr']);
-        Permission::create(['name' => 'create_hr']);
-        Permission::create(['name' => 'edit_hr']);
-        Permission::create(['name' => 'delete_hr']);
+        Permission::firstOrCreate(['name' => 'view_hr']);
+        Permission::firstOrCreate(['name' => 'create_hr']);
+        Permission::firstOrCreate(['name' => 'edit_hr']);
+        Permission::firstOrCreate(['name' => 'delete_hr']);
 
         // Permisos de Dashboards
-        Permission::create(['name' => 'view_dashboards']);
-        Permission::create(['name' => 'manage_dashboards']);
+        Permission::firstOrCreate(['name' => 'view_dashboards']);
+        Permission::firstOrCreate(['name' => 'manage_dashboards']);
 
         // Permisos de Detalles Horas
-        Permission::create(['name' => 'view_hours']);
-        Permission::create(['name' => 'create_hours']);
-        Permission::create(['name' => 'edit_hours']);
-        Permission::create(['name' => 'delete_hours']);
+        Permission::firstOrCreate(['name' => 'view_hours']);
+        Permission::firstOrCreate(['name' => 'create_hours']);
+        Permission::firstOrCreate(['name' => 'edit_hours']);
+        Permission::firstOrCreate(['name' => 'delete_hours']);
 
         // Permisos de Compras Materiales
-        Permission::create(['name' => 'view_purchases']);
-        Permission::create(['name' => 'create_purchases']);
-        Permission::create(['name' => 'edit_purchases']);
-        Permission::create(['name' => 'delete_purchases']);
+        Permission::firstOrCreate(['name' => 'view_purchases']);
+        Permission::firstOrCreate(['name' => 'create_purchases']);
+        Permission::firstOrCreate(['name' => 'edit_purchases']);
+        Permission::firstOrCreate(['name' => 'delete_purchases']);
 
         // Permisos de Satisfacción Personal
-        Permission::create(['name' => 'view_staff_satisfaction']);
-        Permission::create(['name' => 'create_staff_satisfaction']);
-        Permission::create(['name' => 'edit_staff_satisfaction']);
-        Permission::create(['name' => 'delete_staff_satisfaction']);
+        Permission::firstOrCreate(['name' => 'view_staff_satisfaction']);
+        Permission::firstOrCreate(['name' => 'create_staff_satisfaction']);
+        Permission::firstOrCreate(['name' => 'edit_staff_satisfaction']);
+        Permission::firstOrCreate(['name' => 'delete_staff_satisfaction']);
 
         // Permisos de Satisfacción Clientes
-        Permission::create(['name' => 'view_client_satisfaction']);
-        Permission::create(['name' => 'create_client_satisfaction']);
-        Permission::create(['name' => 'edit_client_satisfaction']);
-        Permission::create(['name' => 'delete_client_satisfaction']);
+        Permission::firstOrCreate(['name' => 'view_client_satisfaction']);
+        Permission::firstOrCreate(['name' => 'create_client_satisfaction']);
+        Permission::firstOrCreate(['name' => 'edit_client_satisfaction']);
+        Permission::firstOrCreate(['name' => 'delete_client_satisfaction']);
 
         // Permisos de Tableros
-        Permission::create(['name' => 'view_boards']);
-        Permission::create(['name' => 'create_boards']);
-        Permission::create(['name' => 'edit_boards']);
-        Permission::create(['name' => 'delete_boards']);
+        Permission::firstOrCreate(['name' => 'view_boards']);
+        Permission::firstOrCreate(['name' => 'create_boards']);
+        Permission::firstOrCreate(['name' => 'edit_boards']);
+        Permission::firstOrCreate(['name' => 'delete_boards']);
 
         // Permisos de Proyecto Automatización
-        Permission::create(['name' => 'view_automation']);
-        Permission::create(['name' => 'create_automation']);
-        Permission::create(['name' => 'edit_automation']);
-        Permission::create(['name' => 'delete_automation']);
+        Permission::firstOrCreate(['name' => 'view_automation']);
+        Permission::firstOrCreate(['name' => 'create_automation']);
+        Permission::firstOrCreate(['name' => 'edit_automation']);
+        Permission::firstOrCreate(['name' => 'delete_automation']);
     }
 }

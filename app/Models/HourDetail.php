@@ -34,6 +34,9 @@ class HourDetail extends Model
         'observacion',
         'programacion',
         'hash',
+        'user_id',
+        'job_function_id',
+        'guardia_id',
     ];
 
     protected $casts = [
@@ -49,6 +52,21 @@ class HourDetail extends Model
         'hs_viaje' => 'decimal:2',
         'hs_adeudadas' => 'decimal:2',
     ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function jobFunction()
+    {
+        return $this->belongsTo(JobFunction::class);
+    }
+
+    public function guardia()
+    {
+        return $this->belongsTo(Guardia::class);
+    }
 
     /**
      * Generar hash único para idempotencia
