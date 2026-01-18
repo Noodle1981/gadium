@@ -30,15 +30,12 @@ new #[Layout('layouts.guest')] class extends Component
         
         <!-- Header con Logo -->
         <div class="flex flex-col items-center mb-8">
-            <div class="relative w-16 h-16 mb-4">
+            <div class="relative w-32 h-32 mb-4">
                 <div class="absolute inset-0 bg-[#E8491B] blur-xl opacity-20 rounded-full"></div>
                 <!-- Asegúrate de tener el logo en public/img/logo.webp -->
                 <img src="{{ asset('img/logo.webp') }}" alt="Gadium Logo" class="relative w-full h-full object-contain drop-shadow-lg">
             </div>
-            <h2 class="text-2xl font-bold tracking-tight text-white">
-                Gadium<span class="text-[#E8491B]">.</span>
-            </h2>
-            <p class="text-slate-400 text-sm mt-1">Industrial Intelligence System</p>
+            <p class="text-slate-400 text-sm mt-1">Industrial Intelligence Dashboard</p>
         </div>
 
         <!-- Session Status -->
@@ -93,7 +90,7 @@ new #[Layout('layouts.guest')] class extends Component
     
     <!-- Footer Credits -->
     <div class="mt-8 text-center text-xs text-slate-600">
-        &copy; {{ date('Y') }} Gadium Industrial. All rights reserved.
+        &copy; {{ date('Y') }} Industrial Intelligence Dashboard. All rights reserved.
     </div>
 </div>
 

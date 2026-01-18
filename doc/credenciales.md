@@ -4,7 +4,7 @@
 ## Usuarios de Sistema
 
 ### Super Admin (Desarrolladores)
-- **Email:** `superadmin@gadium.com`
+- **Email:** `superadmin@gaudium.com`
 - **Password:** `password`
 - **Rol:** Super Admin
 - **Acceso:** Control total del sistema
@@ -19,7 +19,7 @@
   - Historial Presupuestos: `/admin/historial-presupuestos`
 
 ### Admin (Administradores)
-- **Email:** `admin@gadium.com`
+- **Email:** `admin@gaudium.com`
 - **Password:** `password`
 - **Rol:** Admin
 - **Acceso:** Gestión completa excepto Super Admins
@@ -34,7 +34,7 @@
   - RRHH: `/admin/rrhh`
 
 ### Manager (Gerente)
-- **Email:** `manager@gadium.com`
+- **Email:** `manager@gaudium.com`
 - **Password:** `password`
 - **Rol:** Manager
 - **Acceso:** Gestión de usuarios y roles operativos, reportes
@@ -47,7 +47,7 @@
   - Historial Presupuestos: `/gerente/historial-presupuestos`
 
 ### Vendedor (Usuario de Ventas)
-- **Email:** `ventas@gadium.com`
+- **Email:** `ventas@gaudium.com`
 - **Password:** `password`
 - **Rol:** Vendedor
 - **Acceso:** Solo módulo de ventas
@@ -58,7 +58,7 @@
   - Historial Ventas: `/ventas/historial-ventas`
 
 ### Presupuestador (Usuario de Presupuestos)
-- **Email:** `presupuesto@gadium.com`
+- **Email:** `presupuesto@gaudium.com`
 - **Password:** `password`
 - **Rol:** Presupuestador
 - **Acceso:** Solo módulo de presupuestos
@@ -72,37 +72,37 @@
 ## Módulos Nuevos (Gestores)
 
 ### Detalles de Horas
-- **Email:** `horas@gadium.com`
+- **Email:** `horas@gaudium.com`
 - **Password:** `password`
 - **Rol:** Gestor de Horas
 - **Ruta:** `/detalle_horas/dashboard`
 
 ### Compras de Materiales
-- **Email:** `compras@gadium.com`
+- **Email:** `compras@gaudium.com`
 - **Password:** `password`
 - **Rol:** Gestor de Compras
 - **Ruta:** `/compras/dashboard`
 
 ### Satisfacción del Personal
-- **Email:** `satisfaccion_personal@gadium.com`
+- **Email:** `satisfaccion_personal@gaudium.com`
 - **Password:** `password`
 - **Rol:** Gestor de Satisfacción Personal
 - **Ruta:** `/satisfaccion_personal/dashboard`
 
 ### Satisfacción de Clientes
-- **Email:** `satisfaccion_clientes@gadium.com`
+- **Email:** `satisfaccion_clientes@gaudium.com`
 - **Password:** `password`
 - **Rol:** Gestor de Satisfacción Clientes
 - **Ruta:** `/satisfaccion_clientes/dashboard`
 
 ### Tableros de Control
-- **Email:** `tableros@gadium.com`
+- **Email:** `tableros@gaudium.com`
 - **Password:** `password`
 - **Rol:** Gestor de Tableros
 - **Ruta:** `/tableros/dashboard`
 
 ### Proyecto de Automatización
-- **Email:** `proyectos@gadium.com`
+- **Email:** `proyectos@gaudium.com`
 - **Password:** `password`
 - **Rol:** Gestor de Proyectos
 - **Ruta:** `/proyectos_automatizacion/dashboard`
@@ -138,7 +138,7 @@
 
 **Ejemplo - Probar como Manager:**
 ```
-Email: manager@gadium.com
+Email: manager@gaudium.com
 Password: password
 
 Rutas disponibles:
@@ -156,3 +156,27 @@ La contraseña por defecto para todos los usuarios en desarrollo es `password`.
 ### Endpoints Disponibles
 - **Pareto**: `GET /api/v1/metrics/sales-concentration`
 - **Eficiencia**: `GET /api/v1/metrics/production-efficiency`
+✅ Rebranding completado a Gaudium
+
+He actualizado todos los emails de @gadium.com a @gaudium.com en:
+
+UserSeeder.php
+ModuleTestUsersSeeder.php
+doc/credenciales.md
+Y ejecuté ambos seeders. Ahora puedes usar:
+
+Usuarios principales:
+
+ventas@gaudium.com
+presupuesto@gaudium.com
+admin@gaudium.com
+manager@gaudium.com
+superadmin@gaudium.com
+Módulos:
+
+horas@gaudium.com
+compras@gaudium.com
+satisfaccion_personal@gaudium.com
+satisfaccion_clientes@gaudium.com
+tableros@gaudium.com
+proyectos@gaudium.com

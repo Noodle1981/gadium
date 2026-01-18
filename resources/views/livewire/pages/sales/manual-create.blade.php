@@ -43,6 +43,7 @@ new class extends Component {
     public $searchResults = [];
     public $selectedClientId = null;
     public $showClientSearch = false;
+    public $isNewClient = false;
     
     // Sections state
     public $showMoreDetails = false;
@@ -92,10 +93,24 @@ new class extends Component {
 
     public function updatedClienteNombre($value)
     {
+        // Reset client selection when typing
+        $this->selectedClientId = null;
+        $this->isNewClient = false;
+        
         if (strlen($value) >= 2) {
             $service = app(ClientNormalizationService::class);
-            $this->searchResults = $service->findSimilarClients($value)->take(5)->toArray();
-            $this->showClientSearch = !empty($this->searchResults);
+            $results = $service->findSimilarClients($value)->take(10);
+            
+            // Transform results to match expected structure
+            $this->searchResults = $results->map(function($item) {
+                return [
+                    'id' => $item['client']->id,
+                    'nombre' => $item['client']->nombre,
+                    'similarity' => $item['similarity']
+                ];
+            })->toArray();
+            
+            $this->showClientSearch = true;
         } else {
             $this->searchResults = [];
             $this->showClientSearch = false;
@@ -106,6 +121,15 @@ new class extends Component {
     {
         $this->selectedClientId = $clientId;
         $this->cliente_nombre = $clientName;
+        $this->isNewClient = false;
+        $this->showClientSearch = false;
+        $this->searchResults = [];
+    }
+    
+    public function markAsNewClient()
+    {
+        $this->selectedClientId = null;
+        $this->isNewClient = true;
         $this->showClientSearch = false;
         $this->searchResults = [];
     }
@@ -175,25 +199,28 @@ new class extends Component {
 
         session()->flash('success', '¡Venta creada exitosamente!');
         
-        // Reset form
-        $this->reset([
-            'cliente_nombre', 'fecha', 'monto', 'comprobante', 'selectedClientId',
-            'cod_cli', 't_comp', 'cond_vta', 'porc_desc', 'cotiz', 'tot_s_imp', 'cod_dep',
-            'n_remito', 'n_comp_rem', 'cant_rem', 'fecha_rem',
-            'cod_articu', 'descripcio', 'um', 'cantidad', 'precio',
-            'cod_transp', 'nom_transp'
-        ]);
-        $this->moneda = 'USD';
-        $this->fecha = date('Y-m-d');
-        $this->showMoreDetails = false;
+        // Redirect to sales history to show the new sale
+        return $this->redirect(route('sales.historial.ventas'), navigate: true);
     }
 }; ?>
 
 <div>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('Crear Venta Manual') }}
-        </h2>
+        <div class="bg-gradient-to-r from-orange-600 to-orange-800 rounded-xl shadow-2xl overflow-hidden -mx-6 sm:-mx-8">
+            <div class="px-8 py-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-2xl font-bold text-white mb-1">Crear Venta Manual</h1>
+                        <p class="text-orange-100 text-sm">Registro individual de operaciones comerciales</p>
+                    </div>
+                    <div class="hidden md:block">
+                        <svg class="w-12 h-12 text-orange-300 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
     </x-slot>
 
     <div class="py-12">
@@ -215,6 +242,25 @@ new class extends Component {
                     </div>
                 @endif
 
+                <!-- CTA Importación Masiva -->
+                <div class="mb-8 flex justify-end">
+                    @php
+                        $importRoute = 'admin.sales.import';
+                        if (auth()->user()->hasRole('Vendedor')) {
+                            $importRoute = 'sales.import';
+                        }
+                        // Managers share admin.sales.import route (defined in shared middleware group)
+                    @endphp
+                    
+                    <a href="{{ route($importRoute) }}" 
+                       class="inline-flex items-center px-4 py-2 bg-orange-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-orange-700 focus:bg-orange-700 active:bg-orange-900 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition ease-in-out duration-150 shadow-md">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                        </svg>
+                        Importación Automática Excel
+                    </a>
+                </div>
+
                 <form wire:submit="save" class="space-y-8">
                     
                     <!-- 1. CAMPOS PRINCIPALES (OBLIGATORIOS) -->
@@ -226,24 +272,56 @@ new class extends Component {
                             <div class="col-span-1 md:col-span-2">
                                 <label for="cliente_nombre" class="block text-sm font-medium text-gray-700">Cliente *</label>
                                 <div class="relative mt-1">
-                                    <input 
-                                        wire:model.live.debounce.300ms="cliente_nombre" 
-                                        type="text" 
-                                        id="cliente_nombre"
-                                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm"
-                                        placeholder="Nombre del cliente"
-                                    >
+                                    <div class="relative">
+                                        <input 
+                                            wire:model.live.debounce.300ms="cliente_nombre" 
+                                            type="text" 
+                                            id="cliente_nombre"
+                                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm pr-24"
+                                            placeholder="Buscar cliente..."
+                                        >
+                                        
+                                        <!-- Badge: Cliente Existente -->
+                                        @if($selectedClientId)
+                                            <span class="absolute right-2 top-2 px-2 py-1 bg-green-100 text-green-800 text-xs rounded font-medium">
+                                                ✓ Existente
+                                            </span>
+                                        @endif
+                                        
+                                        <!-- Badge: Cliente Nuevo -->
+                                        @if($isNewClient)
+                                            <span class="absolute right-2 top-2 px-2 py-1 bg-blue-100 text-blue-800 text-xs rounded font-medium">
+                                                ⊕ Nuevo
+                                            </span>
+                                        @endif
+                                    </div>
                                     
-                                    @if($showClientSearch && !empty($searchResults))
-                                        <div class="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
-                                            @foreach($searchResults as $result)
-                                                <div 
-                                                    wire:click="selectClient({{ $result['id'] }}, '{{ $result['nombre'] }}')"
-                                                    class="cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-orange-50"
-                                                >
-                                                    <span class="block truncate">{{ $result['nombre'] }}</span>
+                                    
+                                    @if($showClientSearch)
+                                        <div class="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm">
+                                            @if(!empty($searchResults))
+                                                @foreach($searchResults as $result)
+                                                    <div 
+                                                        wire:click="selectClient({{ $result['id'] }}, '{{ $result['nombre'] }}')"
+                                                        class="cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-orange-50 flex justify-between items-center"
+                                                    >
+                                                        <span class="block truncate font-medium">{{ $result['nombre'] }}</span>
+                                                        <span class="text-xs text-gray-500">ID: {{ $result['id'] }}</span>
+                                                    </div>
+                                                @endforeach
+                                            @else
+                                                <div class="py-3 px-4 text-sm text-gray-500 text-center">
+                                                    No se encontraron clientes similares
                                                 </div>
-                                            @endforeach
+                                            @endif
+                                            
+                                            <!-- Opción: Crear nuevo cliente -->
+                                            <div 
+                                                wire:click="markAsNewClient"
+                                                class="cursor-pointer select-none relative py-2 pl-3 pr-9 bg-blue-50 hover:bg-blue-100 border-t border-blue-200 text-blue-700 font-medium"
+                                            >
+                                                <span class="block">⊕ Crear nuevo cliente: "{{ $cliente_nombre }}"</span>
+                                            </div>
                                         </div>
                                     @endif
                                 </div>

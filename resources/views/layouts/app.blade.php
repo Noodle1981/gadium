@@ -12,15 +12,25 @@
         <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
         <!-- Scripts -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="font-sans antialiased text-gray-900 bg-gray-50">
+    <body class="font-sans antialiased text-gray-900 bg-gray-50" 
+          x-data="{ 
+              sidebarOpen: false, 
+              sidebarCollapsed: localStorage.getItem('sidebarCollapsed') === 'true',
+              toggleSidebar() {
+                  this.sidebarCollapsed = !this.sidebarCollapsed;
+                  localStorage.setItem('sidebarCollapsed', this.sidebarCollapsed);
+              }
+          }">
         <div class="flex flex-col lg:flex-row min-h-screen">
             <!-- Sidebar -->
             <livewire:layout.sidebar />
 
             <!-- Main Content Area -->
-            <div class="flex-1 flex flex-col lg:pl-64">
+            <div class="flex-1 flex flex-col transition-all duration-300"
+                 :class="sidebarCollapsed ? 'lg:pl-20' : 'lg:pl-64'">
                 
                 <!-- Page Heading (Optional, can be used for extra info) -->
                 @if (isset($header))

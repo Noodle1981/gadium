@@ -203,16 +203,28 @@ new class extends Component {
         ]);
 
         session()->flash('success', '¡Venta actualizada exitosamente!');
+        
+        // Redirect to sales history to show the updated sale
+        return $this->redirect(route('sales.historial.ventas'), navigate: true);
     }
 }; ?>
 
 <div>
     <x-slot name="header">
-        <div class="flex items-center justify-between">
-            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-                {{ __('Editar Venta') }} <span class="text-gray-500 text-sm ml-2">#{{ $sale->id }}</span>
-            </h2>
-            <a href="{{ route('sales.historial.ventas') }}" class="text-indigo-600 hover:text-indigo-900 text-sm font-medium">Volver al Historial</a>
+        <div class="bg-gradient-to-r from-orange-600 to-orange-800 rounded-xl shadow-2xl overflow-hidden -mx-6 sm:-mx-8">
+            <div class="px-8 py-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h1 class="text-2xl font-bold text-white mb-1">Editar Venta <span class="text-orange-200 text-xl">#{{ $sale->id }}</span></h1>
+                        <p class="text-orange-100 text-sm">Modificación de registro comercial</p>
+                    </div>
+                    <div class="hidden md:block">
+                        <svg class="w-12 h-12 text-orange-300 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
         </div>
     </x-slot>
 

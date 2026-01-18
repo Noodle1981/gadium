@@ -1,112 +1,228 @@
 <?php
 
 use Livewire\Volt\Component;
+use App\Models\Sale;
+use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 
-new class extends Component
-{
-    //
+new class extends Component {
+    public $selectedYear;
+    public $selectedMonth;
+
+    public function mount()
+    {
+        $this->selectedYear = Carbon::now()->year;
+        $this->selectedMonth = 'all'; // 'all' o 1-12
+    }
+
+    public function with()
+    {
+        // Query base
+        $query = Sale::query();
+
+        // Filtro de Año
+        $query->whereYear('fecha', $this->selectedYear);
+
+        // Filtro de Mes
+        if ($this->selectedMonth !== 'all') {
+            $query->whereMonth('fecha', $this->selectedMonth);
+        }
+
+        // Ejecutar query para métricas generales
+        // Clonamos para no afectar las otras consultas
+        
+        $totalVentas = (clone $query)->count();
+        $montoTotal = (clone $query)->sum('monto');
+        $ticketPromedio = $totalVentas > 0 ? $montoTotal / $totalVentas : 0;
+        
+        $cantidadClientes = (clone $query)->distinct('cliente_nombre')->count('cliente_nombre');
+
+        // Top Cliente (Solo el #1 para tarjeta destacada)
+        $topCliente = (clone $query)
+            ->select('cliente_nombre', DB::raw('SUM(monto) as total_compras'))
+            ->groupBy('cliente_nombre')
+            ->orderByDesc('total_compras')
+            ->first();
+
+        // Desglose de Transportes (Simple, para tarjetas pequeñas o lista)
+        $transportes = (clone $query)
+            ->select('nom_transp', DB::raw('COUNT(*) as cantidad'))
+            ->whereNotNull('nom_transp')
+            ->where('nom_transp', '!=', '')
+            ->groupBy('nom_transp')
+            ->orderByDesc('cantidad')
+            ->get();
+
+        // Años disponibles
+        $añosDisponibles = Sale::selectRaw('strftime("%Y", fecha) as year')
+            ->distinct()
+            ->orderBy('year', 'desc')
+            ->pluck('year')
+            ->filter()
+            ->values();
+            
+        // Meses para el select
+        $meses = [];
+        for ($i = 1; $i <= 12; $i++) {
+            $meses[$i] = Carbon::create(null, $i, 1)->locale('es')->monthName;
+        }
+
+        return [
+            'totalVentas' => $totalVentas,
+            'montoTotal' => $montoTotal,
+            'ticketPromedio' => $ticketPromedio,
+            'cantidadClientes' => $cantidadClientes,
+            'topCliente' => $topCliente,
+            'transportes' => $transportes,
+            'añosDisponibles' => $añosDisponibles,
+            'nombresMeses' => $meses,
+        ];
+    }
 }; ?>
 
-<div>
-    <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
-            {{ __('Dashboard de Ventas') }}
-        </h2>
-    </x-slot>
+<div class="h-[calc(100vh-65px)] overflow-hidden bg-gray-50 flex flex-col p-6">
+    <!-- Header y Filtros -->
+    <div class="flex justify-between items-center mb-8">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 tracking-tight">Dashboard de Ventas</h1>
+            <p class="text-gray-500 mt-1">Monitoreo de indicadores clave</p>
+        </div>
+        
+        <div class="flex gap-4 bg-white p-2 rounded-xl shadow-sm border border-gray-100">
+            <!-- Selector de Año -->
+            <select wire:model.live="selectedYear" 
+                    class="bg-gray-50 border-0 rounded-lg text-sm font-semibold text-gray-700 focus:ring-2 focus:ring-indigo-500 py-2 pl-3 pr-8 cursor-pointer hover:bg-gray-100 transition-colors">
+                @foreach($añosDisponibles as $year)
+                    <option value="{{ $year }}">{{ $year }}</option>
+                @endforeach
+            </select>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <!-- Header con gradiente premium -->
-            <div class="mb-8 bg-gradient-to-r from-orange-600 to-orange-800 rounded-xl shadow-2xl overflow-hidden">
-                <div class="px-8 py-12">
-                    <div class="flex items-center justify-between">
-                        <div>
-                            <h1 class="text-4xl font-bold text-white mb-2">Panel de Ventas</h1>
-                            <p class="text-orange-100 text-lg">Gestión y análisis de datos comerciales</p>
+            <!-- Selector de Mes -->
+            <select wire:model.live="selectedMonth" 
+                    class="bg-gray-50 border-0 rounded-lg text-sm font-semibold text-gray-700 focus:ring-2 focus:ring-indigo-500 py-2 pl-3 pr-8 cursor-pointer hover:bg-gray-100 transition-colors">
+                <option value="all">Todo el año</option>
+                @foreach($nombresMeses as $num => $nombre)
+                    <option value="{{ $num }}">{{ ucfirst($nombre) }}</option>
+                @endforeach
+            </select>
+        </div>
+    </div>
+
+    <!-- Grid de KPIs Principales -->
+    <div class="grid grid-cols-4 gap-6 mb-8">
+        <!-- Total Ventas -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 relative overflow-hidden group hover:shadow-md transition-all duration-300">
+            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                <svg class="w-16 h-16 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>
+            </div>
+            <p class="text-sm font-medium text-gray-500 mb-1">Total Ventas</p>
+            <h3 class="text-4xl font-bold text-gray-900">{{ number_format($totalVentas, 0, ',', '.') }}</h3>
+            <div class="mt-4 flex items-center text-sm text-green-600 font-medium bg-green-50 w-fit px-2 py-1 rounded-full">
+                <span class="w-2 h-2 bg-green-500 rounded-full mr-2"></span>
+                Transacciones
+            </div>
+        </div>
+
+        <!-- Monto Total -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 relative overflow-hidden group hover:shadow-md transition-all duration-300">
+            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                <svg class="w-16 h-16 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <p class="text-sm font-medium text-gray-500 mb-1">Ingresos Totales</p>
+            <h3 class="text-4xl font-bold text-gray-900">${{ number_format($montoTotal / 1000, 1, ',', '.') }}K</h3>
+            <div class="mt-4 flex items-center text-sm text-gray-500 font-medium w-fit px-2 py-1">
+                Total facturado
+            </div>
+        </div>
+
+        <!-- Ticket Promedio -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 relative overflow-hidden group hover:shadow-md transition-all duration-300">
+            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                <svg class="w-16 h-16 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 3.666V14m-3-3.666L15 7M6 6h12l-1.5 13.5a1.5 1.5 0 01-1.463 1.258h-6.074a1.5 1.5 0 01-1.463-1.258L6 6z"></path></svg>
+            </div>
+            <p class="text-sm font-medium text-gray-500 mb-1">Ticket Promedio</p>
+            <h3 class="text-4xl font-bold text-gray-900">${{ number_format($ticketPromedio, 0, ',', '.') }}</h3>
+            <div class="mt-4 flex items-center text-sm text-blue-600 font-medium bg-blue-50 w-fit px-2 py-1 rounded-full">
+                <span class="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
+                Por venta
+            </div>
+        </div>
+
+        <!-- Clientes Activos -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 relative overflow-hidden group hover:shadow-md transition-all duration-300">
+            <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                <svg class="w-16 h-16 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+            </div>
+            <p class="text-sm font-medium text-gray-500 mb-1">Clientes Únicos</p>
+            <h3 class="text-4xl font-bold text-gray-900">{{ number_format($cantidadClientes, 0, ',', '.') }}</h3>
+            <div class="mt-4 flex items-center text-sm text-purple-600 font-medium bg-purple-50 w-fit px-2 py-1 rounded-full">
+                <span class="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
+                Compraron en el periodo
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección Inferior: Transportes y Top Cliente -->
+    <div class="grid grid-cols-2 gap-6 h-full min-h-0">
+        <!-- Tarjeta de Transportes -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col">
+            <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                <svg class="w-5 h-5 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                Logística y Transportes
+            </h3>
+            <div class="space-y-4 overflow-y-auto pr-2 custom-scrollbar">
+                @foreach($transportes as $transporte)
+                    <div class="group p-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition-colors border border-transparent hover:border-gray-200">
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-bold text-gray-700">{{ $transporte->nom_transp }}</span>
+                            <span class="font-bold text-gray-900">{{ $transporte->cantidad }} envíos</span>
                         </div>
-                        <div class="hidden md:block">
-                            <svg class="w-24 h-24 text-orange-300 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                            </svg>
+                        <div class="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                            <div class="bg-indigo-500 h-2 rounded-full transition-all duration-500" 
+                                 style="width: {{ $totalVentas > 0 ? ($transporte->cantidad / $totalVentas) * 100 : 0 }}%"></div>
+                        </div>
+                        <div class="flex justify-end mt-1">
+                            <span class="text-xs text-gray-500 font-medium">{{ $totalVentas > 0 ? number_format(($transporte->cantidad / $totalVentas) * 100, 1) : 0 }}% del total</span>
                         </div>
                     </div>
+                @endforeach
+                
+                @if($transportes->isEmpty())
+                    <div class="text-center py-10 text-gray-400">
+                        No hay datos de transporte para este periodo
+                    </div>
+                @endif
+            </div>
+        </div>
+
+        <!-- Tarjeta de Cliente Top -->
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100 flex flex-col justify-center items-center text-center relative overflow-hidden">
+            <div class="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-yellow-400 to-orange-500"></div>
+            
+            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Cliente Estrella del Periodo</h3>
+            
+            @if($topCliente)
+                <div class="mb-4 relative">
+                    <div class="w-20 h-20 bg-gradient-to-br from-yellow-100 to-orange-100 rounded-full flex items-center justify-center mx-auto mb-1 shadow-inner">
+                         <svg class="w-10 h-10 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path></svg>
+                    </div>
+                    <div class="absolute -bottom-1 -right-1 bg-yellow-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-md">#1</div>
                 </div>
-            </div>
-
-            <!-- Mensaje de Grafana -->
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-xl sm:rounded-lg">
-                <div class="p-8">
-                    <div class="flex items-center justify-center py-12">
-                        <div class="text-center max-w-2xl">
-                            <div class="mb-6">
-                                <svg class="w-20 h-20 mx-auto text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
-                                </svg>
-                            </div>
-                            <h3 class="text-2xl font-bold text-gray-900 dark:text-gray-100 mb-4">
-                                Dashboards de Grafana
-                            </h3>
-                            <p class="text-gray-600 dark:text-gray-400 mb-6 leading-relaxed">
-                                Los dashboards interactivos de análisis de ventas se integrarán próximamente mediante Grafana.
-                                Podrás visualizar métricas en tiempo real, análisis de tendencias y reportes personalizados.
-                            </p>
-                            <div class="inline-flex items-center px-6 py-3 bg-orange-100 dark:bg-orange-900/30 rounded-lg">
-                                <svg class="w-5 h-5 text-orange-600 dark:text-orange-400 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                                </svg>
-                                <span class="text-sm font-medium text-orange-800 dark:text-orange-300">
-                                    Funcionalidad en desarrollo
-                                </span>
-                            </div>
-                        </div>
-                    </div>
+                
+                <h2 class="text-2xl font-black text-gray-900 mb-1 max-w-sm leading-tight">{{ $topCliente->cliente_nombre }}</h2>
+                <p class="text-sm text-gray-500 font-medium mb-4">Mayor volumen de compra</p>
+                
+                <div class="bg-gray-50 px-4 py-3 rounded-xl border border-gray-100 w-full max-w-xs mx-auto">
+                    <p class="text-[10px] text-gray-400 font-bold uppercase mb-0.5">Total Comprado</p>
+                    <p class="text-lg sm:text-xl font-mono font-bold text-gray-900 truncate" title="${{ number_format($topCliente->total_compras, 0, ',', '.') }}">
+                        ${{ number_format($topCliente->total_compras, 0, ',', '.') }}
+                    </p>
                 </div>
-            </div>
-
-            <!-- Accesos rápidos -->
-            <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
-                <a href="{{ route('sales.import') }}" class="block p-6 bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-lg transition-shadow duration-200 border-l-4 border-blue-500" wire:navigate>
-                    <div class="flex items-center">
-                        <div class="p-3 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
-                            <svg class="w-6 h-6 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
-                            </svg>
-                        </div>
-                        <div class="ml-4">
-                            <h4 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Importación</h4>
-                            <p class="text-sm text-gray-600 dark:text-gray-400">Cargar datos</p>
-                        </div>
-                    </div>
-                </a>
-
-                <a href="{{ route('sales.clients.resolve') }}" class="block p-6 bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-lg transition-shadow duration-200 border-l-4 border-green-500" wire:navigate>
-                    <div class="flex items-center">
-                        <div class="p-3 bg-green-100 dark:bg-green-900/30 rounded-lg">
-                            <svg class="w-6 h-6 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
-                            </svg>
-                        </div>
-                        <div class="ml-4">
-                            <h4 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Clientes</h4>
-                            <p class="text-sm text-gray-600 dark:text-gray-400">Resolver duplicados</p>
-                        </div>
-                    </div>
-                </a>
-
-                <a href="{{ route('sales.historial.ventas') }}" class="block p-6 bg-white dark:bg-gray-800 rounded-lg shadow hover:shadow-lg transition-shadow duration-200 border-l-4 border-purple-500" wire:navigate>
-                    <div class="flex items-center">
-                        <div class="p-3 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
-                            <svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                            </svg>
-                        </div>
-                        <div class="ml-4">
-                            <h4 class="text-lg font-semibold text-gray-900 dark:text-gray-100">Historial</h4>
-                            <p class="text-sm text-gray-600 dark:text-gray-400">Ver ventas</p>
-                        </div>
-                    </div>
-                </a>
-            </div>
+            @else
+                <div class="text-gray-400 text-sm">
+                    No hay datos de clientes para este periodo
+                </div>
+            @endif
         </div>
     </div>
 </div>

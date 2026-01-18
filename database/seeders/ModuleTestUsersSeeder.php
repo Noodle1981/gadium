@@ -21,37 +21,37 @@ class ModuleTestUsersSeeder extends Seeder
         $testUsers = [
             [
                 'name' => 'Gestor de Horas',
-                'email' => 'horas@gadium.com',
+                'email' => 'horas@gaudium.com',
                 'role' => 'Gestor de Horas',
                 'permissions' => ['view_hours', 'create_hours', 'edit_hours'],
             ],
             [
                 'name' => 'Gestor de Compras',
-                'email' => 'compras@gadium.com',
+                'email' => 'compras@gaudium.com',
                 'role' => 'Gestor de Compras',
                 'permissions' => ['view_purchases', 'create_purchases', 'edit_purchases'],
             ],
             [
                 'name' => 'Gestor de Satisfacción Personal',
-                'email' => 'satisfaccion_personal@gadium.com',
+                'email' => 'satisfaccion_personal@gaudium.com',
                 'role' => 'Gestor de Satisfacción Personal',
                 'permissions' => ['view_staff_satisfaction', 'create_staff_satisfaction', 'edit_staff_satisfaction'],
             ],
             [
                 'name' => 'Gestor de Satisfacción Clientes',
-                'email' => 'satisfaccion_clientes@gadium.com',
+                'email' => 'satisfaccion_clientes@gaudium.com',
                 'role' => 'Gestor de Satisfacción Clientes',
                 'permissions' => ['view_client_satisfaction', 'create_client_satisfaction', 'edit_client_satisfaction'],
             ],
             [
                 'name' => 'Gestor de Tableros',
-                'email' => 'tableros@gadium.com',
+                'email' => 'tableros@gaudium.com',
                 'role' => 'Gestor de Tableros',
                 'permissions' => ['view_boards', 'create_boards', 'edit_boards'],
             ],
             [
                 'name' => 'Gestor de Proyectos',
-                'email' => 'proyectos@gadium.com',
+                'email' => 'proyectos@gaudium.com',
                 'role' => 'Gestor de Proyectos',
                 'permissions' => ['view_automation', 'create_automation', 'edit_automation'],
             ],

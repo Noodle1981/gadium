@@ -8,9 +8,10 @@ $classes = ($active ?? false)
 
 <a href="{{ $href }}" {{ $attributes->merge(['class' => $classes]) }} wire:navigate>
     @if(isset($icon))
-        <div class="{{ ($active ?? false) ? 'text-white' : 'text-gray-500 group-hover:text-orange-500' }} mr-3 transition-colors duration-200">
+        <div class="{{ ($active ?? false) ? 'text-white' : 'text-gray-500 group-hover:text-orange-500' }} transition-colors duration-200"
+             :class="sidebarCollapsed ? 'mr-0' : 'mr-3'">
             {!! $icon !!}
         </div>
     @endif
-    <span class="font-medium">{{ $slot }}</span>
+    <span class="font-medium whitespace-nowrap" x-show="!sidebarCollapsed" x-transition.opacity>{{ $slot }}</span>
 </a>

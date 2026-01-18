@@ -16,28 +16,33 @@ class UserSeeder extends Seeder
         $users = [
             [
                 'name' => 'Super Administrador',
-                'email' => 'superadmin@gadium.com',
-                'role' => 'Super Admin'
+                'email' => 'superadmin@gaudium.com',
+                'role' => 'Super Admin',
+                'permissions' => []
             ],
             [
                 'name' => 'Administrador',
-                'email' => 'admin@gadium.com',
-                'role' => 'Admin'
+                'email' => 'admin@gaudium.com',
+                'role' => 'Admin',
+                'permissions' => []
             ],
             [
                 'name' => 'Gerente',
-                'email' => 'manager@gadium.com',
-                'role' => 'Manager'
+                'email' => 'manager@gaudium.com',
+                'role' => 'Manager',
+                'permissions' => []
             ],
             [
                 'name' => 'Vendedor',
-                'email' => 'ventas@gadium.com',
-                'role' => 'Vendedor'
+                'email' => 'ventas@gaudium.com',
+                'role' => 'Vendedor',
+                'permissions' => ['view_sales', 'create_sales', 'edit_sales']
             ],
             [
                 'name' => 'Presupuestador',
-                'email' => 'presupuesto@gadium.com',
-                'role' => 'Presupuestador'
+                'email' => 'presupuesto@gaudium.com',
+                'role' => 'Presupuestador',
+                'permissions' => ['view_budgets', 'create_budgets', 'edit_budgets']
             ],
         ];
 
@@ -57,6 +62,14 @@ class UserSeeder extends Seeder
 
             // Asignar rol
             $user->syncRoles([$userData['role']]);
+            
+            // Asignar permisos si existen
+            if (!empty($userData['permissions'])) {
+                foreach ($userData['permissions'] as $perm) {
+                    \Spatie\Permission\Models\Permission::firstOrCreate(['name' => $perm]);
+                }
+                $user->syncPermissions($userData['permissions']);
+            }
             
             $this->command->info("✅ Usuario {$userData['name']} ({$userData['email']}) actualizado con rol {$userData['role']}");
         }
