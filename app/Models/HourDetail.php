@@ -21,6 +21,7 @@ class HourDetail extends Model
         'personal',
         'funcion',
         'proyecto',
+        'project_id',
         'horas_ponderadas',
         'ponderador',
         'hs',
@@ -66,6 +67,14 @@ class HourDetail extends Model
     public function guardia()
     {
         return $this->belongsTo(Guardia::class);
+    }
+
+    /**
+     * Relación con proyecto
+     */
+    public function project()
+    {
+        return $this->belongsTo(Project::class, 'project_id', 'id');
     }
 
     /**

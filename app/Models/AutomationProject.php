@@ -7,9 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class AutomationProject extends Model
 {
     protected $fillable = [
-        'proyecto_id',
+        'proyecto_codigo',
         'cliente',
         'proyecto_descripcion',
+        'project_id',
+        'client_id',
         'fat',
         'pem',
         'hash',
@@ -19,6 +21,22 @@ class AutomationProject extends Model
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
+
+    /**
+     * Relación con proyecto
+     */
+    public function project()
+    {
+        return $this->belongsTo(Project::class, 'project_id', 'id');
+    }
+
+    /**
+     * Relación con cliente
+     */
+    public function client()
+    {
+        return $this->belongsTo(Client::class);
+    }
 
     /**
      * Generate a unique hash for duplicate detection

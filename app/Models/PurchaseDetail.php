@@ -21,6 +21,7 @@ class PurchaseDetail extends Model
         'resto_porcentaje',
         'porcentaje_facturacion',
         'supplier_id',
+        'cost_center_id',
         'hash',
     ];
 
@@ -39,6 +40,14 @@ class PurchaseDetail extends Model
     public function supplier()
     {
         return $this->belongsTo(Supplier::class);
+    }
+
+    /**
+     * Relación con centro de costo
+     */
+    public function costCenter()
+    {
+        return $this->belongsTo(CostCenter::class);
     }
 
     /**

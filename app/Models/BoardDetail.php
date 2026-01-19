@@ -14,6 +14,8 @@ class BoardDetail extends Model
         'proyecto_numero',
         'cliente',
         'descripcion_proyecto',
+        'project_id',
+        'client_id',
         'columnas',
         'gabinetes',
         'potencia',
@@ -34,6 +36,22 @@ class BoardDetail extends Model
         'intervencion' => 'integer',
         'documento_correccion_fallas' => 'integer',
     ];
+
+    /**
+     * Relación con proyecto
+     */
+    public function project()
+    {
+        return $this->belongsTo(Project::class, 'project_id', 'id');
+    }
+
+    /**
+     * Relación con cliente
+     */
+    public function client()
+    {
+        return $this->belongsTo(Client::class);
+    }
 
     /**
      * Generate a unique hash for duplication checking.
