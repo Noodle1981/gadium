@@ -1,27 +1,3 @@
-## Rediseño de la Vista
+## Auditoria DB
 
-http://127.0.0.1:8000/detalle_horas/dashboard
-
-
-
-http://127.0.0.1:8000/detalle_horas/importacion
-
-poner la card Panel de Presupuestos
-Gestión y control de estimaciones comerciales en donde va el banner
-
-http://127.0.0.1:8000/detalle_horas/crear
-
-poner en el banner una card con el nombre Cargar Horas Manualmente naranja
-
-todos los detalles de otros colores poberlos naranja
-
-quitar importacion automatica del sidebar, ponerlo dentro de http://127.0.0.1:8000/detalle_horas/historial_importacion
-
-http://127.0.0.1:8000/detalle_horas/historial_importacion
-
-poner la card Crear Presupuesto en el banner color naranja
-
-todos los detalles que sean verdes ponerlos naranja
-
-
-CUANDO SE COMPLETA MANUALMENTE CUANDO SE ESCRIBE EL CLIENTE DEBE TENER LA MISMA LOGICA QUE IMPORTAR MANUAL DE VENTAS, PARA EVITAR DUPLICADOS DE CLIENTES POR NOMBRES PARECIDOS
+Hola necesito una auditoria de la base de datos para ver si hay tablas que no se usan y si hay tablas que se usan pero no estan en el codigo. Necesito ver la trazabilidad, si bien el proyecto esta dividido en diferentes modulos, que tienen diferentes tabla de excel cargados, con la finalidad de que se puede mostrar en grafana, despues me di cuenta que estaba perdiendo lo "relacional" de las graficas de grafana, por lo que tuve que crear datos y eloquent nuevos en las tablas. tenemos un archivo en donde se trato de arreglar esa estructura, que se llama diagrama_base_de_datos.md, que te lo voy a incluir en el prompt, necesito una auditoría en profundidad y revelante, con un buen criterio de analista de base de datos, y me guardas esa informacion en adutoria.md que tambien te lo adjunto.

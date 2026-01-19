@@ -180,3 +180,26 @@ satisfaccion_personal@gaudium.com
 satisfaccion_clientes@gaudium.com
 tableros@gaudium.com
 proyectos@gaudium.com
+
+---
+
+## 🛠️ Comando Universal de Restauración / Generación
+
+Si necesitas regenerar todas las credenciales y permisos desde cero (reset de fábrica), ejecuta el siguiente comando en la terminal:
+
+```bash
+php artisan migrate:fresh --seed
+```
+
+Este comando ejecuta automáticamente el nuevo `UniversalCredentialsSeeder` (porque ya lo configuramos en el `DatabaseSeeder` principal), realizando todo el proceso:
+
+1. Borra la DB `(migrate:fresh)`
+2. Ejecuta `UniversalCredentialsSeeder` `(--seed)` que:
+    - Crea Permisos
+    - Crea Roles
+    - Crea Usuarios
+
+ 
+
+
+

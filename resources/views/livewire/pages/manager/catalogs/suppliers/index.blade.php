@@ -273,32 +273,40 @@ new class extends Component {
     }
 }; ?>
 
-<div class="min-h-screen bg-gray-100 pb-12">
-    <!-- Banner Principal -->
-    <div class="bg-gradient-to-r from-purple-600 to-purple-800 shadow-xl">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div class="flex justify-between items-center">
-                <div>
-                    <h2 class="text-3xl font-extrabold text-white tracking-tight">Catálogo de Proveedores</h2>
-                    <p class="mt-2 text-purple-100 text-sm">Gestión maestra de proveedores y empresas.</p>
+
+<div>
+    <x-slot name="header">
+        <div class="bg-gradient-to-r from-orange-600 to-orange-800 rounded-xl shadow-2xl overflow-hidden -mx-6 sm:-mx-8">
+            <div class="px-8 py-6">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div>
+                        <h1 class="text-2xl font-bold text-white mb-1">Catálogo de Proveedores</h1>
+                        <p class="text-orange-100 text-sm">Gestión maestra de proveedores y empresas.</p>
+                    </div>
+                    <button wire:click="create" 
+                        class="inline-flex items-center px-5 py-2.5 bg-white text-orange-700 rounded-xl font-bold shadow-md hover:bg-orange-50 transition-colors">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                        </svg>
+                        Nuevo Proveedor
+                    </button>
                 </div>
-                <button wire:click="create" 
-                    class="inline-flex items-center px-5 py-2.5 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-white font-medium transition-all shadow-lg backdrop-blur-sm">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                    </svg>
-                    Nuevo Proveedor
-                </button>
             </div>
+        </div>
+    </x-slot>
+
+    <!-- Main Content -->
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             
             <!-- Tabs Navigation -->
-            <div class="flex space-x-1 mt-6 bg-white/10 p-1 rounded-xl w-fit backdrop-blur-sm">
+            <div class="flex space-x-1 mb-6 bg-gray-200 p-1 rounded-xl w-fit">
                 <button wire:click="$set('activeTab', 'list')"
-                        class="px-4 py-2 rounded-lg text-sm font-medium transition-all {{ $activeTab === 'list' ? 'bg-white text-purple-700 shadow-sm' : 'text-purple-100 hover:bg-white/5' }}">
+                        class="px-4 py-2 rounded-lg text-sm font-medium transition-all {{ $activeTab === 'list' ? 'bg-white text-orange-700 shadow-sm' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-300/50' }}">
                     Listado Maestro
                 </button>
                 <button wire:click="$set('activeTab', 'resolution')"
-                        class="px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center {{ $activeTab === 'resolution' ? 'bg-white text-purple-700 shadow-sm' : 'text-purple-100 hover:bg-white/5' }}">
+                        class="px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center {{ $activeTab === 'resolution' ? 'bg-white text-orange-700 shadow-sm' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-300/50' }}">
                     Resolución de Pendientes
                     @if(count($unresolvedSuppliers) > 0)
                         <span class="ml-2 px-1.5 py-0.5 rounded-full text-xs bg-red-500 text-white animate-pulse">
@@ -307,160 +315,156 @@ new class extends Component {
                     @endif
                 </button>
             </div>
-        </div>
-    </div>
 
-    <!-- Main Content -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8">
-        
-        <!-- Success Message -->
-        @if(session('message'))
-            <div class="mb-6 p-4 bg-green-50 border-l-4 border-green-500 text-green-700 rounded-lg shadow-sm">
-                <p class="text-sm font-medium">{{ session('message') }}</p>
-            </div>
-        @endif
-        
-        <!-- LISTADO TAB -->
-        <div x-show="$wire.activeTab === 'list'" class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 transition-all duration-300">
-            <!-- Toolbar -->
-            <div class="p-6 border-b border-gray-100 bg-gray-50/50 flex flex-col md:flex-row gap-4 justify-between items-center">
-                <div class="flex-1 w-full md:w-auto relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <svg class="h-5 h-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
-                        </svg>
+            <!-- Success Message -->
+            @if(session('message'))
+                <div class="mb-6 p-4 bg-green-50 border-l-4 border-green-500 text-green-700 rounded-lg shadow-sm">
+                    <p class="text-sm font-medium">{{ session('message') }}</p>
+                </div>
+            @endif
+            
+            <!-- LISTADO TAB -->
+            <div x-show="$wire.activeTab === 'list'" class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 transition-all duration-300">
+                <!-- Toolbar -->
+                <div class="p-6 border-b border-gray-100 bg-gray-50/50 flex flex-col md:flex-row gap-4 justify-between items-center">
+                    <div class="flex-1 w-full md:w-auto relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 h-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <input wire:model.live.debounce.300ms="search" type="text" 
+                            class="block w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm transition-all" 
+                            placeholder="Buscar por nombre o Tax ID...">
                     </div>
-                    <input wire:model.live.debounce.300ms="search" type="text" 
-                        class="block w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 text-sm transition-all" 
-                        placeholder="Buscar por nombre o Tax ID...">
+                    
+                    <div class="w-full md:w-48">
+                        <select wire:model.live="statusFilter" class="block w-full pl-3 pr-10 py-2.5 text-sm border-gray-200 focus:outline-none focus:ring-orange-500 focus:border-orange-500 rounded-xl">
+                            <option value="">Todos los Estados</option>
+                            <option value="Activo">Activos</option>
+                            <option value="Inactivo">Inactivos</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Table -->
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Nombre</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Tax ID</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Contacto</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Estado</th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            @forelse($suppliers as $supplier)
+                                <tr class="hover:bg-gray-50/50 transition-colors">
+                                    <td class="px-6 py-4">
+                                        <div class="text-sm font-medium text-gray-900">{{ $supplier->name }}</div>
+                                        @if($supplier->address)
+                                            <div class="text-xs text-gray-500">{{ Str::limit($supplier->address, 40) }}</div>
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        <span class="text-sm text-gray-500">{{ $supplier->tax_id ?? '-' }}</span>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        @if($supplier->email)
+                                            <div class="text-xs text-gray-700">{{ $supplier->email }}</div>
+                                        @endif
+                                        @if($supplier->phone)
+                                            <div class="text-xs text-gray-500">{{ $supplier->phone }}</div>
+                                        @endif
+                                        @if(!$supplier->email && !$supplier->phone)
+                                            <span class="text-xs text-gray-400">-</span>
+                                        @endif
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap">
+                                        @php
+                                            $statusClass = $supplier->status === 'Activo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800';
+                                        @endphp
+                                        <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ $statusClass }}">
+                                            {{ $supplier->status ?? 'N/A' }}
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <button wire:click="edit({{ $supplier->id }})" class="text-orange-600 hover:text-orange-900 mr-3">Editar</button>
+                                        <button wire:click="delete({{ $supplier->id }})" class="text-red-400 hover:text-red-600" onclick="confirm('¿Estás seguro?') || event.stopImmediatePropagation()">Eliminar</button>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="5" class="px-6 py-12 text-center">
+                                        <div class="flex flex-col items-center justify-center">
+                                            <svg class="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+                                            </svg>
+                                            <p class="text-gray-500 text-sm font-medium">No se encontraron proveedores.</p>
+                                            @if(count($unresolvedSuppliers) > 0)
+                                                <p class="text-orange-500 text-xs mt-2">Hay {{ count($unresolvedSuppliers) }} proveedores detectados sin registrar. <button wire:click="$set('activeTab', 'resolution')" class="underline font-bold">Ver Resolución</button></p>
+                                            @endif
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="px-6 py-4 border-t border-gray-200">
+                    {{ $suppliers->links() }}
+                </div>
+            </div>
+
+            <!-- RESOLUTION TAB -->
+            <div x-show="$wire.activeTab === 'resolution'" class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 transition-all duration-300">
+                <div class="p-6 border-b border-gray-100 bg-yellow-50/50">
+                    <h3 class="text-lg font-bold text-yellow-800">Proveedores Detectados no Registrados</h3>
+                    <p class="text-sm text-yellow-600">Nombres de empresas encontrados en el historial de compras que aún no han sido dados de alta en el catálogo maestro.</p>
                 </div>
                 
-                <div class="w-full md:w-48">
-                    <select wire:model.live="statusFilter" class="block w-full pl-3 pr-10 py-2.5 text-sm border-gray-200 focus:outline-none focus:ring-purple-500 focus:border-purple-500 rounded-xl">
-                        <option value="">Todos los Estados</option>
-                        <option value="Activo">Activos</option>
-                        <option value="Inactivo">Inactivos</option>
-                    </select>
-                </div>
-            </div>
-
-            <!-- Table -->
-            <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Nombre</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Tax ID</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Contacto</th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Estado</th>
-                            <th scope="col" class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Acciones</th>
+                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Nombre Detectado</th>
+                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Registros Afectados</th>
+                            <th class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Acción</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
-                        @forelse($suppliers as $supplier)
-                            <tr class="hover:bg-gray-50/50 transition-colors">
+                        @forelse($unresolvedSuppliers as $supplier)
+                            <tr class="hover:bg-gray-50/50">
                                 <td class="px-6 py-4">
-                                    <div class="text-sm font-medium text-gray-900">{{ $supplier->name }}</div>
-                                    @if($supplier->address)
-                                        <div class="text-xs text-gray-500">{{ Str::limit($supplier->address, 40) }}</div>
-                                    @endif
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="text-sm text-gray-500">{{ $supplier->tax_id ?? '-' }}</span>
-                                </td>
-                                <td class="px-6 py-4">
-                                    @if($supplier->email)
-                                        <div class="text-xs text-gray-700">{{ $supplier->email }}</div>
-                                    @endif
-                                    @if($supplier->phone)
-                                        <div class="text-xs text-gray-500">{{ $supplier->phone }}</div>
-                                    @endif
-                                    @if(!$supplier->email && !$supplier->phone)
-                                        <span class="text-xs text-gray-400">-</span>
-                                    @endif
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    @php
-                                        $statusClass = $supplier->status === 'Activo' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800';
-                                    @endphp
-                                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full {{ $statusClass }}">
-                                        {{ $supplier->status ?? 'N/A' }}
+                                    <span class="text-sm font-medium text-gray-800">
+                                        {{ $supplier['name'] }}
                                     </span>
                                 </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ $supplier['count'] }} registro(s)
+                                </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <button wire:click="edit({{ $supplier->id }})" class="text-purple-600 hover:text-purple-900 mr-3">Editar</button>
-                                    <button wire:click="delete({{ $supplier->id }})" class="text-red-400 hover:text-red-600" onclick="confirm('¿Estás seguro?') || event.stopImmediatePropagation()">Eliminar</button>
+                                    <button wire:click="resolveSupplier('{{ addslashes($supplier['name']) }}')" class="text-orange-600 hover:text-orange-900 font-bold">
+                                        + Registrar
+                                    </button>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="px-6 py-12 text-center">
-                                    <div class="flex flex-col items-center justify-center">
-                                        <svg class="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
-                                        </svg>
-                                        <p class="text-gray-500 text-sm font-medium">No se encontraron proveedores.</p>
-                                        @if(count($unresolvedSuppliers) > 0)
-                                            <p class="text-purple-500 text-xs mt-2">Hay {{ count($unresolvedSuppliers) }} proveedores detectados sin registrar. <button wire:click="$set('activeTab', 'resolution')" class="underline font-bold">Ver Resolución</button></p>
-                                        @endif
-                                    </div>
+                                <td colspan="3" class="px-6 py-12 text-center text-gray-500">
+                                    <svg class="w-12 h-12 text-green-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    ¡Todo al día! No hay proveedores pendientes de resolución.
                                 </td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
-
-            <!-- Pagination -->
-            <div class="px-6 py-4 border-t border-gray-200">
-                {{ $suppliers->links() }}
-            </div>
-        </div>
-
-        <!-- RESOLUTION TAB -->
-        <div x-show="$wire.activeTab === 'resolution'" class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 transition-all duration-300">
-            <div class="p-6 border-b border-gray-100 bg-yellow-50/50">
-                <h3 class="text-lg font-bold text-yellow-800">Proveedores Detectados no Registrados</h3>
-                <p class="text-sm text-yellow-600">Nombres de empresas encontrados en el historial de compras que aún no han sido dados de alta en el catálogo maestro.</p>
-            </div>
-            
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Nombre Detectado</th>
-                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Registros Afectados</th>
-                        <th class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Acción</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    @forelse($unresolvedSuppliers as $supplier)
-                        <tr class="hover:bg-gray-50/50">
-                            <td class="px-6 py-4">
-                                <span class="text-sm font-medium text-gray-800">
-                                    {{ $supplier['name'] }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ $supplier['count'] }} registro(s)
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <button wire:click="resolveSupplier('{{ addslashes($supplier['name']) }}')" class="text-purple-600 hover:text-purple-900 font-bold">
-                                    + Registrar
-                                </button>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="3" class="px-6 py-12 text-center text-gray-500">
-                                <svg class="w-12 h-12 text-green-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                </svg>
-                                ¡Todo al día! No hay proveedores pendientes de resolución.
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
         </div>
     </div>
 
@@ -489,7 +493,7 @@ new class extends Component {
                                 <div class="flex gap-2">
                                     <input type="text" 
                                            wire:model.live.debounce.300ms="formName" 
-                                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500"
+                                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500"
                                            placeholder="Escribe el nombre del proveedor...">
                                     <button type="button"
                                             wire:click="searchSimilarSuppliers"
@@ -508,10 +512,10 @@ new class extends Component {
                                         @foreach($supplierSuggestions as $suggestion)
                                             <button type="button"
                                                     wire:click="selectExistingSupplier({{ $suggestion->id }}, '{{ addslashes($suggestion->name) }}')"
-                                                    class="w-full text-left px-4 py-2 hover:bg-purple-50 transition-colors border-b border-gray-100 last:border-b-0">
+                                                    class="w-full text-left px-4 py-2 hover:bg-orange-50 transition-colors border-b border-gray-100 last:border-b-0">
                                                 <div class="flex items-center justify-between">
                                                     <span class="text-sm font-medium text-gray-900">{{ $suggestion->name }}</span>
-                                                    <span class="text-xs text-purple-600 font-semibold">Ya existe ✓</span>
+                                                    <span class="text-xs text-orange-600 font-semibold">Ya existe ✓</span>
                                                 </div>
                                             </button>
                                         @endforeach
@@ -528,31 +532,31 @@ new class extends Component {
                             <!-- Tax ID -->
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Tax ID / RUC / CUIT</label>
-                                <input type="text" wire:model="formTaxId" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500">
+                                <input type="text" wire:model="formTaxId" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500">
                                 @error('formTaxId') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                             </div>
                             <!-- Address -->
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Dirección</label>
-                                <textarea wire:model="formAddress" rows="2" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500"></textarea>
+                                <textarea wire:model="formAddress" rows="2" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500"></textarea>
                                 @error('formAddress') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                             </div>
                             <!-- Email -->
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Email</label>
-                                <input type="email" wire:model="formEmail" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500">
+                                <input type="email" wire:model="formEmail" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500">
                                 @error('formEmail') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                             </div>
                             <!-- Phone -->
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Teléfono</label>
-                                <input type="text" wire:model="formPhone" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500">
+                                <input type="text" wire:model="formPhone" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500">
                                 @error('formPhone') <span class="text-red-500 text-xs">{{ $message }}</span> @enderror
                             </div>
                             <!-- Estado -->
                             <div>
                                 <label class="block text-sm font-medium text-gray-700">Estado</label>
-                                <select wire:model="formStatus" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-purple-500 focus:border-purple-500">
+                                <select wire:model="formStatus" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:ring-orange-500 focus:border-orange-500">
                                     <option value="Activo">Activo</option>
                                     <option value="Inactivo">Inactivo</option>
                                 </select>
@@ -561,10 +565,10 @@ new class extends Component {
                         </div>
                     </div>
                     <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                        <button type="button" wire:click="save" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-purple-600 text-base font-medium text-white hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 sm:ml-3 sm:w-auto sm:text-sm">
+                        <button type="button" wire:click="save" class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-orange-600 text-base font-medium text-white hover:bg-orange-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 sm:ml-3 sm:w-auto sm:text-sm">
                             Guardar
                         </button>
-                        <button type="button" wire:click="$set('showModal', false)" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                        <button type="button" wire:click="$set('showModal', false)" class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
                             Cancelar
                         </button>
                     </div>

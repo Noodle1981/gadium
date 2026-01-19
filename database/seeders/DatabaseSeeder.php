@@ -16,21 +16,13 @@ class DatabaseSeeder extends Seeder
         $this->command->info('🚀 Iniciando seeders de Gadium...');
         $this->command->newLine();
 
-        // ÉPICA 01: Gestión de Accesos y Gobierno de Datos
-        $this->command->info('📦 Cargando ÉPICA 01: Gestión de Accesos y Gobierno de Datos');
-        $this->command->line('   → Creando permisos del sistema...');
-        $this->call(PermissionSeeder::class);
+        // ÉPICA 01: Gestión de Accesos y Gobierno de Datos - UNIFICADA
+        $this->command->info('📦 Cargando ÉPICA 01: Gestión de Accesos y Gobierno de Datos (Unificado)');
         
-        $this->command->line('   → Creando roles (Super Admin, Admin, Manager, Viewer)...');
-        $this->call(RoleSeeder::class);
+        // Seeder Universal (Permisos -> Roles -> Usuarios)
+        $this->call(UniversalCredentialsSeeder::class);
         
-        $this->command->line('   → Creando usuarios de prueba...');
-        $this->call(UserSeeder::class);
-        
-        $this->command->line('   → Creando usuarios de prueba para módulos nuevos...');
-        $this->call(ModuleTestUsersSeeder::class);
-        
-        $this->command->info('✅ ÉPICA 01 completada: 46 permisos, 4 roles, 10 usuarios');
+        $this->command->info('✅ ÉPICA 01 completada: Sistema de credenciales inicializado.');
         $this->command->newLine();
 
         // ÉPICA 02: Motor de Ingesta y Normalización de Datos

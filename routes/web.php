@@ -47,8 +47,10 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
                 
                 // Historial de Ventas y Presupuestos
                 Volt::route('historial-ventas', 'pages.sales.history')->name('admin.historial.ventas');
+                Volt::route('ventas/editar/{sale}', 'pages.sales.manual-edit')->name('admin.sales.edit');
                 
                 Volt::route('historial-presupuestos', 'pages.budget.history')->name('admin.historial.presupuesto');
+                Volt::route('presupuestos/importacion', 'pages.budget.import-wizard')->name('admin.budget.import');
             });
 
             // Módulo Producción
@@ -115,6 +117,7 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
             // Módulo Automatización
             Route::middleware(['can:view_automation'])->group(function () {
                 Volt::route('automatizacion', 'pages.automation-projects.index')->name('admin.automation.index');
+                Volt::route('automatizacion/importacion', 'pages.automation-projects.import-wizard')->name('admin.automation.import');
                 
                 Route::get('automatizacion/historial', function () {
                     $projects = \App\Models\AutomationProject::latest()->take(50)->get();
@@ -135,10 +138,14 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
         // Agregar RRHH si tienen permiso
         Volt::route('rrhh', 'pages.hr.factor-manager')->name('manager.hr.factors');
         
+
         // Gestión de Usuarios (Manager tiene acceso completo)
         Route::middleware(['can:view_users'])->group(function () {
-            Route::resource('users', UserController::class)->names([
-                'index' => 'manager.users.index',
+            // Index uses Volt component (Visual Refactor)
+            Volt::route('users', 'pages.manager.users.index')->name('manager.users.index');
+
+            // CRUD Actions use Controller
+            Route::resource('users', UserController::class)->except(['index'])->names([
                 'create' => 'manager.users.create',
                 'store' => 'manager.users.store',
                 'show' => 'manager.users.show',
@@ -148,10 +155,14 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
             ]);
         });
 
+
         // Gestión de Roles (Manager tiene acceso completo)
         Route::middleware(['can:view_roles'])->group(function () {
-            Route::resource('roles', RoleController::class)->names([
-                'index' => 'manager.roles.index',
+            // Index uses Volt component (Visual Refactor)
+            Volt::route('roles', 'pages.manager.roles.index')->name('manager.roles.index');
+
+            // CRUD Actions use Controller
+            Route::resource('roles', RoleController::class)->except(['index'])->names([
                 'create' => 'manager.roles.create',
                 'store' => 'manager.roles.store',
                 'show' => 'manager.roles.show',
@@ -167,8 +178,10 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
         
         // Historial de Ventas y Presupuestos (permanecen en /gerente)
         Volt::route('historial-ventas', 'pages.sales.history')->name('manager.historial.ventas');
+        Volt::route('ventas/editar/{sale}', 'pages.sales.manual-edit')->name('manager.sales.edit');
         
         Volt::route('historial-presupuestos', 'pages.budget.history')->name('manager.historial.presupuesto');
+        Volt::route('presupuestos/importacion', 'pages.budget.import-wizard')->name('manager.budget.import');
 
         // Nuevos Módulos para Manager
         Volt::route('detalles-horas', 'pages.hours.index')->name('manager.hours.index');
@@ -208,6 +221,9 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
 
         // Rutas de Automatización para Manager
         Route::middleware(['can:view_automation'])->group(function () {
+            Volt::route('automatizacion', 'pages.automation-projects.index')->name('manager.automation.index');
+            Volt::route('automatizacion/importacion', 'pages.automation-projects.import-wizard')->name('manager.automation.import');
+
             Route::get('automatizacion/historial', function () {
                 $projects = \App\Models\AutomationProject::latest()->take(50)->get();
                 return view('historial-automation-projects', ['projects' => $projects]);

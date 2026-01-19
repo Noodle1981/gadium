@@ -144,177 +144,197 @@ new class extends Component {
     }
 }; ?>
 
-<div class="min-h-screen bg-gray-100 pb-12">
-    <!-- Banner Principal -->
-    <div class="bg-gradient-to-r from-orange-600 to-orange-800 shadow-xl">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
-                <div>
-                    <h2 class="text-3xl font-extrabold text-white tracking-tight">Catálogo de Personal</h2>
-                    <p class="mt-2 text-orange-100 text-sm">Gestión de Funciones, Guardias y Normalización de Nombres.</p>
+
+<div>
+    <x-slot name="header">
+        <div class="bg-gradient-to-r from-orange-600 to-orange-800 rounded-xl shadow-2xl overflow-hidden -mx-6 sm:-mx-8">
+            <div class="px-8 py-6">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div>
+                        <h1 class="text-2xl font-bold text-white mb-1">Catálogo de Personal</h1>
+                        <p class="text-orange-100 text-sm">Gestión de Funciones, Guardias y Normalización de Nombres.</p>
+                    </div>
+                    
+                    @if($tab !== 'aliases')
+                    <button wire:click="create" 
+                        class="inline-flex items-center px-5 py-2.5 bg-white text-orange-700 rounded-xl font-bold shadow-md hover:bg-orange-50 transition-colors">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                        </svg>
+                        Nuevo Item
+                    </button>
+                    @endif
                 </div>
-                
-                @if($tab !== 'aliases')
-                <button wire:click="create" 
-                    class="inline-flex items-center px-5 py-2.5 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-white font-medium transition-all shadow-lg backdrop-blur-sm">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                    </svg>
-                    Nuevo Item
-                </button>
-                @endif
             </div>
         </div>
-    </div>
+    </x-slot>
 
-    <!-- Navegación de Pestañas -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8">
-        <div class="bg-white rounded-t-2xl shadow-xl border-x border-t border-gray-100 p-2 flex space-x-2 overflow-x-auto">
-            <button wire:click="setTab('functions')" 
-                class="px-6 py-3 rounded-xl text-sm font-bold transition-all {{ $tab === 'functions' ? 'bg-orange-50 text-orange-600 shadow-sm' : 'text-gray-500 hover:bg-gray-50' }}">
-                Funciones
-            </button>
-            <button wire:click="setTab('guardias')" 
-                class="px-6 py-3 rounded-xl text-sm font-bold transition-all {{ $tab === 'guardias' ? 'bg-orange-50 text-orange-600 shadow-sm' : 'text-gray-500 hover:bg-gray-50' }}">
-                Guardias
-            </button>
-             <button wire:click="setTab('aliases')" class="px-6 py-3 rounded-xl text-sm font-bold transition-all {{ $tab === 'aliases' ? 'bg-orange-50 text-orange-600 shadow-sm' : 'text-gray-500 hover:bg-gray-50' }}">
-                Resolución de Alias
-            </button>
-        </div>
-        
-        <div class="bg-white rounded-b-2xl shadow-xl border-x border-b border-gray-100 min-h-[400px]">
+    <!-- Main Content -->
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            
+            <!-- Tabs Navigation -->
+            <div class="flex space-x-1 mb-6 bg-gray-200 p-1 rounded-xl w-fit overflow-x-auto">
+                <button wire:click="setTab('functions')" 
+                    class="px-4 py-2 rounded-lg text-sm font-medium transition-all {{ $tab === 'functions' ? 'bg-white text-orange-700 shadow-sm' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-300/50' }}">
+                    Funciones
+                </button>
+                <button wire:click="setTab('guardias')" 
+                    class="px-4 py-2 rounded-lg text-sm font-medium transition-all {{ $tab === 'guardias' ? 'bg-white text-orange-700 shadow-sm' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-300/50' }}">
+                    Guardias
+                </button>
+                 <button wire:click="setTab('aliases')" 
+                    class="px-4 py-2 rounded-lg text-sm font-medium transition-all {{ $tab === 'aliases' ? 'bg-white text-orange-700 shadow-sm' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-300/50' }}">
+                    Resolución de Alias
+                </button>
+            </div>
+            
             <!-- Tab Content: Functions -->
             @if($tab === 'functions')
-                <div class="p-6">
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Nombre de Función</th>
-                                    <th class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                @forelse($functions as $func)
-                                    <tr class="hover:bg-gray-50 transition-colors">
-                                        <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ $func->name }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <button wire:click="edit({{ $func->id }})" class="text-blue-600 hover:text-blue-900 mr-3">Editar</button>
-                                            <button wire:click="delete({{ $func->id }})" class="text-red-400 hover:text-red-600" onclick="confirm('¿Eliminar?') || event.stopImmediatePropagation()">Eliminar</button>
-                                        </td>
-                                    </tr>
-                                @empty
+                <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 slide-in-active">
+                    <div class="p-6">
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
                                     <tr>
-                                        <td colspan="2" class="px-6 py-12 text-center text-gray-500">No hay funciones registradas.</td>
+                                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Nombre de Función</th>
+                                        <th class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Acciones</th>
                                     </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    @forelse($functions as $func)
+                                        <tr class="hover:bg-gray-50 transition-colors">
+                                            <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ $func->name }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                <button wire:click="edit({{ $func->id }})" class="text-orange-600 hover:text-orange-900 mr-3">Editar</button>
+                                                <button wire:click="delete({{ $func->id }})" class="text-red-400 hover:text-red-600" onclick="confirm('¿Eliminar?') || event.stopImmediatePropagation()">Eliminar</button>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="2" class="px-6 py-12 text-center text-gray-500">No hay funciones registradas.</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mt-4">
+                            {{ $functions->links() }}
+                        </div>
                     </div>
                 </div>
             @endif
 
             <!-- Tab Content: Guardias -->
             @if($tab === 'guardias')
-                <div class="p-6">
-                     <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Tipo de Guardia</th>
-                                    <th class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Acciones</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                @forelse($guardias as $guardia)
-                                    <tr class="hover:bg-gray-50 transition-colors">
-                                        <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ $guardia->name }}</td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <button wire:click="edit({{ $guardia->id }})" class="text-blue-600 hover:text-blue-900 mr-3">Editar</button>
-                                            <button wire:click="delete({{ $guardia->id }})" class="text-red-400 hover:text-red-600" onclick="confirm('¿Eliminar?') || event.stopImmediatePropagation()">Eliminar</button>
-                                        </td>
-                                    </tr>
-                                @empty
+                <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 slide-in-active">
+                    <div class="p-6">
+                         <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
                                     <tr>
-                                        <td colspan="2" class="px-6 py-12 text-center text-gray-500">No hay guardias registradas.</td>
+                                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Tipo de Guardia</th>
+                                        <th class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Acciones</th>
                                     </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    @forelse($guardias as $guardia)
+                                        <tr class="hover:bg-gray-50 transition-colors">
+                                            <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ $guardia->name }}</td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                <button wire:click="edit({{ $guardia->id }})" class="text-orange-600 hover:text-orange-900 mr-3">Editar</button>
+                                                <button wire:click="delete({{ $guardia->id }})" class="text-red-400 hover:text-red-600" onclick="confirm('¿Eliminar?') || event.stopImmediatePropagation()">Eliminar</button>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="2" class="px-6 py-12 text-center text-gray-500">No hay guardias registradas.</td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                         <div class="mt-4">
+                            {{ $guardias->links() }}
+                        </div>
                     </div>
                 </div>
             @endif
 
              <!-- Tab Content: Alias Resolution -->
             @if($tab === 'aliases')
-                <div class="p-6">
-                    <div class="mb-6 bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
-                        <div class="flex">
-                            <div class="flex-shrink-0">
-                                <svg class="h-5 w-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                            </div>
-                            <div class="ml-3">
-                                <p class="text-sm text-blue-700">
-                                    Estos nombres aparecen en los registros de Horas pero no están vinculados a ningún Usuario. 
-                                    Vincúlelos a un usuario existente para normalizar la base de datos y corregir automáticamente el historial.
-                                </p>
+                <div class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 slide-in-active">
+                    <div class="p-6">
+                        <div class="mb-6 bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-5 w-5 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                    </svg>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm text-blue-700">
+                                        Estos nombres aparecen en los registros de Horas pero no están vinculados a ningún Usuario. 
+                                        Vincúlelos a un usuario existente para normalizar la base de datos y corregir automáticamente el historial.
+                                    </p>
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Nombre Detectado (Alias)</th>
-                                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Registros Afectados</th>
-                                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Vincular a Usuario</th>
-                                    <th class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Acción</th>
-                                </tr>
-                            </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
-                                @forelse($unresolvedAliases as $alias)
-                                    @php $key = base64_encode($alias->personal); @endphp
-                                    <tr class="hover:bg-gray-50 transition-colors">
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                            {{ $alias->personal }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                            {{ $alias->total }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <select wire:model="selectedUserForAlias.{{ $key }}" class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm rounded-md">
-                                                <option value="">Seleccionar Usuario...</option>
-                                                @foreach($users as $user)
-                                                    <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->email }})</option>
-                                                @endforeach
-                                            </select>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                            <button wire:click="resolveAlias('{{ $alias->personal }}')" 
-                                                class="text-white bg-orange-600 hover:bg-orange-700 px-3 py-1.5 rounded-lg shadow-sm font-medium transition-colors">
-                                                Vincular y Corregir
-                                            </button>
-                                        </td>
-                                    </tr>
-                                @empty
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full divide-y divide-gray-200">
+                                <thead class="bg-gray-50">
                                     <tr>
-                                        <td colspan="4" class="px-6 py-12 text-center text-gray-500">
-                                            <div class="flex flex-col items-center">
-                                                <svg class="w-12 h-12 text-green-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                </svg>
-                                                <span class="font-medium text-lg">¡Excelente! Todos los registros están normalizados.</span>
-                                                <span class="text-sm mt-1">No se detectaron nombres sin vincular.</span>
-                                            </div>
-                                        </td>
+                                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Nombre Detectado (Alias)</th>
+                                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Registros Afectados</th>
+                                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Vincular a Usuario</th>
+                                        <th class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Acción</th>
                                     </tr>
-                                @endforelse
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody class="bg-white divide-y divide-gray-200">
+                                    @forelse($unresolvedAliases as $alias)
+                                        @php $key = base64_encode($alias->personal); @endphp
+                                        <tr class="hover:bg-gray-50 transition-colors">
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                                                {{ $alias->personal }}
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                                {{ $alias->total }}
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap">
+                                                <select wire:model="selectedUserForAlias.{{ $key }}" class="block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-orange-500 focus:border-orange-500 sm:text-sm rounded-md">
+                                                    <option value="">Seleccionar Usuario...</option>
+                                                    @foreach($users as $user)
+                                                        <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->email }})</option>
+                                                    @endforeach
+                                                </select>
+                                            </td>
+                                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                                <button wire:click="resolveAlias('{{ $alias->personal }}')" 
+                                                    class="text-white bg-orange-600 hover:bg-orange-700 px-3 py-1.5 rounded-lg shadow-sm font-medium transition-colors">
+                                                    Vincular y Corregir
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    @empty
+                                        <tr>
+                                            <td colspan="4" class="px-6 py-12 text-center text-gray-500">
+                                                <div class="flex flex-col items-center">
+                                                    <svg class="w-12 h-12 text-green-500 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                    <span class="font-medium text-lg">¡Excelente! Todos los registros están normalizados.</span>
+                                                    <span class="text-sm mt-1">No se detectaron nombres sin vincular.</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mt-4">
+                            {{ $unresolvedAliases->links() }}
+                        </div>
                     </div>
                 </div>
             @endif

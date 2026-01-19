@@ -264,32 +264,40 @@ new class extends Component {
     }
 }; ?>
 
-<div class="min-h-screen bg-gray-100 pb-12">
-    <!-- Banner Principal -->
-    <div class="bg-gradient-to-r from-orange-600 to-orange-800 shadow-xl">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div class="flex justify-between items-center">
-                <div>
-                    <h2 class="text-3xl font-extrabold text-white tracking-tight">Catálogo de Clientes</h2>
-                    <p class="mt-2 text-orange-100 text-sm">Gestión maestra de clientes y normalización de nombres.</p>
+
+<div>
+    <x-slot name="header">
+        <div class="bg-gradient-to-r from-orange-600 to-orange-800 rounded-xl shadow-2xl overflow-hidden -mx-6 sm:-mx-8">
+            <div class="px-8 py-6">
+                <div class="flex flex-col md:flex-row items-center justify-between gap-4">
+                    <div>
+                        <h1 class="text-2xl font-bold text-white mb-1">Catálogo de Clientes</h1>
+                        <p class="text-orange-100 text-sm">Gestión maestra de clientes y normalización de nombres.</p>
+                    </div>
+                    <button wire:click="create" 
+                        class="inline-flex items-center px-5 py-2.5 bg-white text-orange-700 rounded-xl font-bold shadow-md hover:bg-orange-50 transition-colors">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+                        </svg>
+                        Nuevo Cliente
+                    </button>
                 </div>
-                <button wire:click="create" 
-                    class="inline-flex items-center px-5 py-2.5 bg-white/10 hover:bg-white/20 border border-white/20 rounded-xl text-white font-medium transition-all shadow-lg backdrop-blur-sm">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-                    </svg>
-                    Nuevo Cliente
-                </button>
             </div>
+        </div>
+    </x-slot>
+
+    <!-- Main Content -->
+    <div class="py-12">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             
             <!-- Tabs Navigation -->
-            <div class="flex space-x-1 mt-6 bg-white/10 p-1 rounded-xl w-fit backdrop-blur-sm">
+            <div class="flex space-x-1 mb-6 bg-gray-200 p-1 rounded-xl w-fit">
                 <button wire:click="$set('activeTab', 'list')"
-                        class="px-4 py-2 rounded-lg text-sm font-medium transition-all {{ $activeTab === 'list' ? 'bg-white text-orange-700 shadow-sm' : 'text-orange-100 hover:bg-white/5' }}">
+                        class="px-4 py-2 rounded-lg text-sm font-medium transition-all {{ $activeTab === 'list' ? 'bg-white text-orange-700 shadow-sm' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-300/50' }}">
                     Listado Maestro
                 </button>
                 <button wire:click="$set('activeTab', 'resolution')"
-                        class="px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center {{ $activeTab === 'resolution' ? 'bg-white text-orange-700 shadow-sm' : 'text-orange-100 hover:bg-white/5' }}">
+                        class="px-4 py-2 rounded-lg text-sm font-medium transition-all flex items-center {{ $activeTab === 'resolution' ? 'bg-white text-orange-700 shadow-sm' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-300/50' }}">
                     Resolución de Pendientes
                     @if(count($unresolvedClients) > 0)
                         <span class="ml-2 px-1.5 py-0.5 rounded-full text-xs bg-red-500 text-white animate-pulse">
@@ -298,128 +306,124 @@ new class extends Component {
                     @endif
                 </button>
             </div>
-        </div>
-    </div>
-
-    <!-- Main Content -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8">
-        
-        <!-- Success Message -->
-        @if(session('message'))
-            <div class="mb-6 p-4 bg-green-50 border-l-4 border-green-500 text-green-700 rounded-lg shadow-sm">
-                <p class="text-sm font-medium">{{ session('message') }}</p>
-            </div>
-        @endif
-        
-        <!-- LISTADO TAB -->
-        <div x-show="$wire.activeTab === 'list'" class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 transition-all duration-300">
-            <!-- Toolbar -->
-            <div class="p-6 border-b border-gray-100 bg-gray-50/50">
-                <div class="relative">
-                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                        <svg class="h-5 h-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
-                        </svg>
+            
+            <!-- Success Message -->
+            @if(session('message'))
+                <div class="mb-6 p-4 bg-green-50 border-l-4 border-green-500 text-green-700 rounded-lg shadow-sm">
+                    <p class="text-sm font-medium">{{ session('message') }}</p>
+                </div>
+            @endif
+            
+            <!-- LISTADO TAB -->
+            <div x-show="$wire.activeTab === 'list'" class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 transition-all duration-300">
+                <!-- Toolbar -->
+                <div class="p-6 border-b border-gray-100 bg-gray-50/50">
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                            <svg class="h-5 h-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd" />
+                            </svg>
+                        </div>
+                        <input wire:model.live.debounce.300ms="search" type="text" 
+                            class="block w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm transition-all" 
+                            placeholder="Buscar cliente por nombre...">
                     </div>
-                    <input wire:model.live.debounce.300ms="search" type="text" 
-                        class="block w-full pl-10 pr-3 py-2.5 border border-gray-200 rounded-xl leading-5 bg-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 focus:border-orange-500 text-sm transition-all" 
-                        placeholder="Buscar cliente por nombre...">
+                </div>
+
+                <!-- Table -->
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Nombre del Cliente</th>
+                                <th scope="col" class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            @forelse($clients as $client)
+                                <tr class="hover:bg-gray-50/50 transition-colors">
+                                    <td class="px-6 py-4">
+                                        <div class="text-sm font-medium text-gray-900">{{ $client->nombre }}</div>
+                                    </td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                        <button wire:click="edit({{ $client->id }})" class="text-orange-600 hover:text-orange-900 mr-3">Editar</button>
+                                        <button wire:click="delete({{ $client->id }})" class="text-red-400 hover:text-red-600" onclick="confirm('¿Estás seguro?') || event.stopImmediatePropagation()">Eliminar</button>
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="2" class="px-6 py-12 text-center">
+                                        <div class="flex flex-col items-center justify-center">
+                                            <svg class="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                                            </svg>
+                                            <p class="text-gray-500 text-sm font-medium">No se encontraron clientes.</p>
+                                            @if(count($unresolvedClients) > 0)
+                                                <p class="text-orange-500 text-xs mt-2">Hay {{ count($unresolvedClients) }} clientes detectados sin registrar. <button wire:click="$set('activeTab', 'resolution')" class="underline font-bold">Ver Resolución</button></p>
+                                            @endif
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                <div class="px-6 py-4 border-t border-gray-200">
+                    {{ $clients->links() }}
                 </div>
             </div>
 
-            <!-- Table -->
-            <div class="overflow-x-auto">
+            <!-- RESOLUTION TAB -->
+            <div x-show="$wire.activeTab === 'resolution'" class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 transition-all duration-300">
+                <div class="p-6 border-b border-gray-100 bg-yellow-50/50">
+                    <h3 class="text-lg font-bold text-yellow-800">Clientes Detectados no Registrados</h3>
+                    <p class="text-sm text-yellow-600">Nombres de clientes encontrados en Tableros y Automatización que aún no han sido dados de alta en el catálogo maestro.</p>
+                </div>
+                
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Nombre del Cliente</th>
-                            <th scope="col" class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Acciones</th>
+                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Nombre Detectado</th>
+                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Fuente(s)</th>
+                            <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Registros Afectados</th>
+                            <th class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Acción</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
-                        @forelse($clients as $client)
-                            <tr class="hover:bg-gray-50/50 transition-colors">
+                        @forelse($unresolvedClients as $client)
+                            <tr class="hover:bg-gray-50/50">
                                 <td class="px-6 py-4">
-                                    <div class="text-sm font-medium text-gray-900">{{ $client->nombre }}</div>
+                                    <span class="text-sm font-medium text-gray-800">
+                                        {{ $client['name'] }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ $client['sources'] }}
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                                    {{ $client['total_count'] }} registro(s)
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                    <button wire:click="edit({{ $client->id }})" class="text-orange-600 hover:text-orange-900 mr-3">Editar</button>
-                                    <button wire:click="delete({{ $client->id }})" class="text-red-400 hover:text-red-600" onclick="confirm('¿Estás seguro?') || event.stopImmediatePropagation()">Eliminar</button>
+                                    <button wire:click="resolveClient('{{ addslashes($client['name']) }}')" class="text-orange-600 hover:text-orange-900 font-bold">
+                                        + Registrar
+                                    </button>
                                 </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="2" class="px-6 py-12 text-center">
-                                    <div class="flex flex-col items-center justify-center">
-                                        <svg class="w-12 h-12 text-gray-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-                                        </svg>
-                                        <p class="text-gray-500 text-sm font-medium">No se encontraron clientes.</p>
-                                        @if(count($unresolvedClients) > 0)
-                                            <p class="text-orange-500 text-xs mt-2">Hay {{ count($unresolvedClients) }} clientes detectados sin registrar. <button wire:click="$set('activeTab', 'resolution')" class="underline font-bold">Ver Resolución</button></p>
-                                        @endif
-                                    </div>
+                                <td colspan="4" class="px-6 py-12 text-center text-gray-500">
+                                    <svg class="w-12 h-12 text-green-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    ¡Todo al día! No hay clientes pendientes de resolución.
                                 </td>
                             </tr>
                         @endforelse
                     </tbody>
                 </table>
             </div>
-
-            <!-- Pagination -->
-            <div class="px-6 py-4 border-t border-gray-200">
-                {{ $clients->links() }}
-            </div>
-        </div>
-
-        <!-- RESOLUTION TAB -->
-        <div x-show="$wire.activeTab === 'resolution'" class="bg-white rounded-2xl shadow-xl overflow-hidden border border-gray-100 transition-all duration-300">
-            <div class="p-6 border-b border-gray-100 bg-yellow-50/50">
-                <h3 class="text-lg font-bold text-yellow-800">Clientes Detectados no Registrados</h3>
-                <p class="text-sm text-yellow-600">Nombres de clientes encontrados en Tableros y Automatización que aún no han sido dados de alta en el catálogo maestro.</p>
-            </div>
-            
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Nombre Detectado</th>
-                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Fuente(s)</th>
-                        <th class="px-6 py-3 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Registros Afectados</th>
-                        <th class="px-6 py-3 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Acción</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    @forelse($unresolvedClients as $client)
-                        <tr class="hover:bg-gray-50/50">
-                            <td class="px-6 py-4">
-                                <span class="text-sm font-medium text-gray-800">
-                                    {{ $client['name'] }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ $client['sources'] }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ $client['total_count'] }} registro(s)
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <button wire:click="resolveClient('{{ addslashes($client['name']) }}')" class="text-orange-600 hover:text-orange-900 font-bold">
-                                    + Registrar
-                                </button>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="4" class="px-6 py-12 text-center text-gray-500">
-                                <svg class="w-12 h-12 text-green-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                                </svg>
-                                ¡Todo al día! No hay clientes pendientes de resolución.
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
         </div>
     </div>
 

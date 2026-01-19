@@ -179,7 +179,7 @@ new class extends Component {
                                     @endif
                                     
                                     <td class="px-2 py-2 whitespace-nowrap">
-                                        <a href="{{ route('sales.edit', $sale) }}" class="text-indigo-600 hover:text-indigo-900 font-medium" wire:navigate>Editar</a>
+                                        <a href="{{ route(auth()->user()->hasRole('Manager') ? 'manager.sales.edit' : (auth()->user()->hasRole('Admin') ? 'admin.sales.edit' : 'sales.edit'), $sale) }}" class="text-indigo-600 hover:text-indigo-900 font-medium" wire:navigate>Editar</a>
                                     </td>
                                     
                                     <!-- Datos Secundarios Finales -->

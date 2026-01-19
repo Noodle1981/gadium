@@ -18,7 +18,9 @@ use Illuminate\Support\Facades\Log;
 
 class ExcelImportService
 {
+    protected $normalizationService;
     protected $employeeNormalizationService;
+    protected $supplierNormalizationService;
     protected $customDate = null;
 
     public function setCustomDate($date)
@@ -26,10 +28,15 @@ class ExcelImportService
         $this->customDate = $date;
     }
 
-    public function __construct(ClientNormalizationService $normalizationService, EmployeeNormalizationService $employeeNormalizationService)
+    public function __construct(
+        ClientNormalizationService $normalizationService, 
+        EmployeeNormalizationService $employeeNormalizationService,
+        SupplierNormalizationService $supplierNormalizationService
+    )
     {
         $this->normalizationService = $normalizationService;
         $this->employeeNormalizationService = $employeeNormalizationService;
+        $this->supplierNormalizationService = $supplierNormalizationService;
     }
 
     // ... (rest of methods)
@@ -90,6 +97,7 @@ class ExcelImportService
             $validCount = 0;
             $errors = [];
             $unknownClients = [];
+            $unknownSuppliers = [];
             $rowIndex = 2; // 1-based, start after header
 
             // 2. Escanear filas
@@ -123,6 +131,15 @@ class ExcelImportService
                         $unknownClients[$clientName] = true;
                     }
 
+                    // Verificar Proveedor si es Detalle de Compras
+                    if ($type === 'purchase_detail') {
+                        $supplierName = trim($row['Empresa'] ?? '');
+                        $supplier = $this->supplierNormalizationService->resolveSupplierByAlias($supplierName);
+                        if (!$supplier) {
+                            $unknownSuppliers[$supplierName] = true;
+                        }
+                    }
+
                     $validCount++;
                 }
 
@@ -134,6 +151,7 @@ class ExcelImportService
                 'valid_rows' => $validCount,
                 'errors' => $errors,
                 'unknown_clients' => array_keys($unknownClients),
+                'unknown_suppliers' => array_keys($unknownSuppliers),
             ];
 
         } catch (Exception $e) {
@@ -644,11 +662,14 @@ class ExcelImportService
                     continue;
                 }
 
+                $supplier = $this->supplierNormalizationService->resolveSupplierByAlias($empresa);
+
                 \App\Models\PurchaseDetail::create([
                     'moneda' => trim($row['Moneda'] ?? 'USD'),
                     'cc' => $cc,
                     'ano' => $ano,
-                    'empresa' => $empresa,
+                    'empresa' => $supplier ? $supplier->name : $empresa,
+                    'supplier_id' => $supplier ? $supplier->id : null,
                     'descripcion' => $descripcion,
                     'materiales_presupuestados' => $this->parsePurchaseAmount($row['Materiales presupuestados'] ?? '0'),
                     'materiales_comprados' => $this->parsePurchaseAmount($row['Materiales comprados'] ?? '0'),
@@ -795,6 +816,56 @@ class ExcelImportService
                 // Recalculate Stats for the month
                 $calculator = app(StaffSatisfactionCalculator::class);
                 $calculator->updateMonthlyStats($fecha ? \Carbon\Carbon::parse($fecha)->format('Y-m') : null);
+            } elseif ($type === 'hour_detail') {
+                $fecha = $this->extractDate($row, $type);
+                $personal = trim($row['Personal'] ?? '');
+                $proyecto = trim($row['Proyecto'] ?? '');
+                $hs = is_numeric($row['Hs'] ?? null) ? (float)$row['Hs'] : 0.0;
+
+                $hash = \App\Models\HourDetail::generateHash($fecha, $personal, $proyecto, $hs);
+
+                if (\App\Models\HourDetail::existsByHash($hash)) {
+                    $skipped++;
+                    continue;
+                }
+
+                $user = $this->employeeNormalizationService->resolveUser($personal);
+                $jobFunction = $this->employeeNormalizationService->resolveJobFunction($row['Funcion'] ?? '');
+                
+                // Intentar resolver Guardia si existe la columna
+                // En el excel de muestra no se ve columna explícita de guardia, pero a veces viene en 'Hs. pernoctada' como texto o numero
+                // Por ahora dejaremos guardia null a menos que identifiquemos la columna
+                
+                // Resolver Proyecto (intento básico de búsqueda por nombre)
+                $project = \App\Models\Project::where('name', $proyecto)->first();
+
+                \App\Models\HourDetail::create([
+                    'dia' => trim($row['Dia'] ?? ''),
+                    'fecha' => $fecha,
+                    'ano' => (int)($row['Año'] ?? date('Y')),
+                    'mes' => (int)($row['Mes'] ?? date('m')),
+                    'personal' => $personal,
+                    'user_id' => $user ? $user->id : null,
+                    'funcion' => trim($row['Funcion'] ?? ''),
+                    'job_function_id' => $jobFunction ? $jobFunction->id : null,
+                    'proyecto' => $proyecto,
+                    'project_id' => $project ? $project->id : null,
+                    'horas_ponderadas' => is_numeric($row['Horas ponderadas'] ?? null) ? (float)$row['Horas ponderadas'] : 0,
+                    'ponderador' => is_numeric($row['Ponderador'] ?? null) ? (float)$row['Ponderador'] : 1,
+                    'hs' => $hs,
+                    'hash' => $hash,
+                    
+                    // Extra fields
+                    'hs_comun' => $this->normalizeAmount($row['Hs comun'] ?? '0'),
+                    'hs_50' => $this->normalizeAmount($row['Hs (50%)'] ?? '0'),
+                    'hs_100' => $this->normalizeAmount($row['Hs (100%)'] ?? '0'),
+                    'hs_viaje' => $this->normalizeAmount($row['Hs de viaje'] ?? '0'),
+                    'hs_pernoctada' => trim($row['Hs pernoctada'] ?? 'No'),
+                    'hs_adeudadas' => $this->normalizeAmount($row['Hs adeudadas'] ?? '0'),
+                    'vianda' => trim($row['Vianda'] ?? '0'),
+                    'observacion' => trim($row['Observación'] ?? ''),
+                    'programacion' => trim($row['Programación'] ?? ''),
+                ]);
             }
 
             $inserted++;
