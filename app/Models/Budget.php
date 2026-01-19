@@ -17,7 +17,9 @@ class Budget extends Model
         'hash',
         // Columnas adicionales de Presupuestos
         'centro_costo',
+        'cost_center_id',
         'nombre_proyecto',
+        'project_id',
         'fecha_oc',
         'fecha_estimada_culminacion',
         'estado_proyecto_dias',
@@ -47,6 +49,22 @@ class Budget extends Model
     public function client(): BelongsTo
     {
         return $this->belongsTo(Client::class);
+    }
+
+    /**
+     * Relación con proyecto
+     */
+    public function project()
+    {
+        return $this->belongsTo(Project::class, 'project_id', 'id');
+    }
+
+    /**
+     * Relación con centro de costo
+     */
+    public function costCenter()
+    {
+        return $this->belongsTo(CostCenter::class);
     }
 
     /**

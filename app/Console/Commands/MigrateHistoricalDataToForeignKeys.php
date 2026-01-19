@@ -13,7 +13,7 @@ use Illuminate\Console\Command;
 
 class MigrateHistoricalDataToForeignKeys extends Command
 {
-    protected $signature = 'migrate:historical-data-to-fks {--table=all : Tabla específica (board_details, automation_projects, purchase_details, hour_details, all)}';
+    protected $signature = 'migrate:historical-data-to-fks {--table=all : Tabla específica (board_details, automation_projects, purchase_details, hour_details, budgets, all)}';
     protected $description = 'Migra datos históricos TEXT a columnas FK (project_id, client_id, cost_center_id)';
 
     public function handle()
@@ -37,6 +37,10 @@ class MigrateHistoricalDataToForeignKeys extends Command
         
         if ($table === 'all' || $table === 'hour_details') {
             $this->migrateHourDetails();
+        }
+        
+        if ($table === 'all' || $table === 'budgets') {
+            $this->migrateBudgets();
         }
         
         $this->newLine();
@@ -189,5 +193,51 @@ class MigrateHistoricalDataToForeignKeys extends Command
         $bar->finish();
         $this->newLine();
         $this->info('  ✅ hour_details migrado');
+    }
+    
+    private function migrateBudgets()
+    {
+        $this->info('💼 Migrando budgets...');
+        
+        $budgets = \App\Models\Budget::whereNull('project_id')
+                                     ->orWhereNull('cost_center_id')
+                                     ->get();
+        
+        if ($budgets->isEmpty()) {
+            $this->warn('  ⏭️  No hay registros pendientes de migrar');
+            return;
+        }
+        
+        $bar = $this->output->createProgressBar($budgets->count());
+        $bar->start();
+        
+        foreach ($budgets as $budget) {
+            // Migrar project_id
+            if (!$budget->project_id && $budget->nombre_proyecto) {
+                $project = Project::where('id', trim($budget->nombre_proyecto))->first();
+                if (!$project) {
+                    // Intentar buscar por nombre
+                    $project = Project::where('name', 'LIKE', '%' . trim($budget->nombre_proyecto) . '%')->first();
+                }
+                if ($project) {
+                    $budget->project_id = $project->id;
+                }
+            }
+            
+            // Migrar cost_center_id
+            if (!$budget->cost_center_id && $budget->centro_costo) {
+                $costCenter = CostCenter::where('code', trim($budget->centro_costo))->first();
+                if ($costCenter) {
+                    $budget->cost_center_id = $costCenter->id;
+                }
+            }
+            
+            $budget->save();
+            $bar->advance();
+        }
+        
+        $bar->finish();
+        $this->newLine();
+        $this->info('  ✅ budgets migrado');
     }
 }
