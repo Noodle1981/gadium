@@ -232,19 +232,7 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
 
         // --- GESTIÓN DE CATÁLOGOS MAESTROS ---
         Route::prefix('catalogo')->group(function () {
-            // Proyectos
-            Volt::route('proyectos', 'pages.manager.catalogs.projects.index')->name('manager.catalogs.projects.index');
-            
-            // Clientes
-            Volt::route('clientes', 'pages.manager.catalogs.clients.index')->name('manager.catalogs.clients.index');
-            
-            // Personal & Alias
-            Volt::route('personal', 'pages.manager.catalogs.employees.index')->name('manager.catalogs.employees.index');
-
-            // Proveedores
-            Volt::route('proveedores', 'pages.manager.catalogs.suppliers.index')->name('manager.catalogs.suppliers.index');
-
-            // Centros de Costo
+            // Centros de Costo (único catálogo que permanece en gerente)
             Volt::route('centros-costo', 'pages.manager.catalogs.cost-centers.index')->name('manager.catalogs.cost-centers.index');
         });
     });
@@ -270,7 +258,7 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
             Volt::route('historial-ventas', 'pages.sales.history')->name('sales.historial.ventas');
             
             // Catálogo de Clientes
-            Volt::route('catalogo/clientes', 'pages.manager.catalogs.clients.index')->name('sales.catalogs.clients.index');
+            Volt::route('catalogo/clientes', 'pages.sales.catalogs.clients.index')->name('sales.catalogs.clients.index');
         });
     });
 
@@ -311,7 +299,7 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
             Volt::route('historial_importacion', 'pages.hours.index')->name('hours.historial.importacion');
             
             // Catálogo de Personal
-            Volt::route('catalogo/personal', 'pages.manager.catalogs.employees.index')->name('hours.catalogs.employees.index');
+            Volt::route('catalogo/personal', 'pages.hours.catalogs.employees.index')->name('hours.catalogs.employees.index');
         });
     });
 
@@ -334,7 +322,7 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
             })->name('purchases.historial.importacion');
             
             // Catálogo de Proveedores
-            Volt::route('catalogo/proveedores', 'pages.manager.catalogs.suppliers.index')->name('purchases.catalogs.suppliers.index');
+            Volt::route('catalogo/proveedores', 'pages.purchases.catalogs.suppliers.index')->name('purchases.catalogs.suppliers.index');
         });
     });
 
@@ -385,7 +373,7 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
             })->name('automation_projects.historial.importacion');
             
             // Catálogo de Proyectos
-            Volt::route('catalogo/proyectos', 'pages.manager.catalogs.projects.index')->name('automation_projects.catalogs.projects.index');
+            Volt::route('catalogo/proyectos', 'pages.automation-projects.catalogs.projects.index')->name('automation_projects.catalogs.projects.index');
         });
     });
 
