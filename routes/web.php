@@ -268,6 +268,9 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
             
             // Historial de Ventas
             Volt::route('historial-ventas', 'pages.sales.history')->name('sales.historial.ventas');
+            
+            // Catálogo de Clientes
+            Volt::route('catalogo/clientes', 'pages.manager.catalogs.clients.index')->name('sales.catalogs.clients.index');
         });
     });
 
@@ -306,6 +309,9 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
             Volt::route('editar/{hourDetail}', 'pages.hours.manual-edit')->name('hours.edit');
             
             Volt::route('historial_importacion', 'pages.hours.index')->name('hours.historial.importacion');
+            
+            // Catálogo de Personal
+            Volt::route('catalogo/personal', 'pages.manager.catalogs.employees.index')->name('hours.catalogs.employees.index');
         });
     });
 
@@ -326,6 +332,9 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
                 $purchases = \App\Models\PurchaseDetail::latest()->take(50)->get();
                 return view('historial-compras', ['purchases' => $purchases]);
             })->name('purchases.historial.importacion');
+            
+            // Catálogo de Proveedores
+            Volt::route('catalogo/proveedores', 'pages.manager.catalogs.suppliers.index')->name('purchases.catalogs.suppliers.index');
         });
     });
 
@@ -374,6 +383,9 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
                 $projects = \App\Models\AutomationProject::latest()->take(50)->get();
                 return view('historial-automation-projects', ['projects' => $projects]);
             })->name('automation_projects.historial.importacion');
+            
+            // Catálogo de Proyectos
+            Volt::route('catalogo/proyectos', 'pages.manager.catalogs.projects.index')->name('automation_projects.catalogs.projects.index');
         });
     });
 

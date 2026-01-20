@@ -45,7 +45,8 @@
                         <table class="min-w-full divide-y divide-gray-200">
                             <thead class="bg-gray-50">
                                 <tr>
-                                    <th scope="col" class="px-3 py-2 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">CC / Año</th>
+                                    <th scope="col" class="px-3 py-2 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">CC</th>
+                                    <th scope="col" class="px-3 py-2 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Año</th>
                                     <th scope="col" class="px-3 py-2 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Empresa</th>
                                     <th scope="col" class="px-3 py-2 text-left text-xs font-bold text-gray-500 uppercase tracking-wider">Descripción</th>
                                     <th scope="col" class="px-3 py-2 text-right text-xs font-bold text-gray-500 uppercase tracking-wider">Presupuesto</th>
@@ -59,7 +60,10 @@
                                 @forelse($purchases as $item)
                                     <tr class="hover:bg-gray-50 transition-colors">
                                         <td class="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
-                                            {{ $item->cc }} <span class="text-gray-400 mx-1">/</span> {{ $item->ano }}
+                                            {{ $item->cc }}
+                                        </td>
+                                        <td class="px-3 py-2 whitespace-nowrap text-sm font-medium text-gray-900">
+                                            {{ $item->ano }}
                                         </td>
                                         <td class="px-3 py-2 whitespace-nowrap text-sm text-gray-600">
                                             {{ Str::limit($item->empresa, 20) }}
@@ -85,7 +89,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="8" class="px-6 py-12 text-center text-gray-500">
+                                        <td colspan="9" class="px-6 py-12 text-center text-gray-500">
                                             <div class="flex flex-col items-center justify-center">
                                                 <svg class="w-12 h-12 text-gray-300 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />

@@ -17,7 +17,9 @@ new #[Layout('layouts.app')] class extends Component {
     <div class="space-y-8">
 
     
-        <!-- Catálogos Maestros -->
+    
+        {{-- Catálogos Maestros - Comentado temporalmente, las rutas siguen activas para otros roles --}}
+        {{-- 
         <div class="mt-8">
             <h3 class="text-xl font-bold text-gray-800 mb-4">Gestión de Catálogos</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -74,6 +76,7 @@ new #[Layout('layouts.app')] class extends Component {
                 </a>
             </div>
         </div>
+        --}}
 
         <!-- Administración de Accesos -->
         <div class="mt-8">

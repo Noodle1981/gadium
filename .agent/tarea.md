@@ -1,3 +1,15 @@
 ## Auditoria DB
 
-Hola necesito una auditoria de la base de datos para ver si hay tablas que no se usan y si hay tablas que se usan pero no estan en el codigo. Necesito ver la trazabilidad, si bien el proyecto esta dividido en diferentes modulos, que tienen diferentes tabla de excel cargados, con la finalidad de que se puede mostrar en grafana, despues me di cuenta que estaba perdiendo lo "relacional" de las graficas de grafana, por lo que tuve que crear datos y eloquent nuevos en las tablas. tenemos un archivo en donde se trato de arreglar esa estructura, que se llama diagrama_base_de_datos.md, que te lo voy a incluir en el prompt, necesito una auditoría en profundidad y revelante, con un buen criterio de analista de base de datos, y me guardas esa informacion en adutoria.md que tambien te lo adjunto.
+http://127.0.0.1:8000/ventas/historial-ventas
+
+http://127.0.0.1:8000/presupuesto/historial_importacion
+
+http://127.0.0.1:8000/detalle_horas/historial_importacion
+
+http://127.0.0.1:8000/compras/historial_importacion
+
+http://127.0.0.1:8000/tableros/historial_importacion
+
+http://127.0.0.1:8000/proyectos_automatizacion/historial_importacion
+
+
