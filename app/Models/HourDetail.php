@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use OwenIt\Auditing\Contracts\Auditable;
 
-class HourDetail extends Model
+class HourDetail extends Model implements Auditable
 {
+    use HasFactory, \OwenIt\Auditing\Auditable;
     /**
      * The table associated with the model.
      *

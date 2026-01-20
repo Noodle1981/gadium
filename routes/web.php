@@ -235,6 +235,9 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
             // Centros de Costo (único catálogo que permanece en gerente)
             Volt::route('centros-costo', 'pages.manager.catalogs.cost-centers.index')->name('manager.catalogs.cost-centers.index');
         });
+        
+        // --- BITÁCORA DEL SISTEMA ---
+        Volt::route('bitacora', 'audit-log')->name('manager.audit.log');
     });
 
 

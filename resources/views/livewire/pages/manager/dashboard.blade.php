@@ -4,8 +4,21 @@ use Livewire\Attributes\Layout;
 
 
 new #[Layout('layouts.app')] class extends Component {
-
-}; ?>
+    public function with()
+    {
+        // Get recent edits and deletions (last 7 days) for alert badge
+        $recentEdits = \OwenIt\Auditing\Models\Audit::where('created_at', '>=', now()->subDays(7))
+            ->where('event', 'updated')
+            ->count();
+        
+        $recentDeletes = \OwenIt\Auditing\Models\Audit::where('created_at', '>=', now()->subDays(7))
+            ->where('event', 'deleted')
+            ->count();
+        
+        return [
+            'auditAlerts' => $recentEdits + $recentDeletes,
+        ];
+    }}; ?>
 
 <div>
     <x-slot name="header">
@@ -106,6 +119,30 @@ new #[Layout('layouts.app')] class extends Component {
                     </div>
                     <h4 class="text-lg font-bold text-gray-900">Roles y Permisos</h4>
                     <p class="text-sm text-gray-500 mt-1">Configurar vistas y accesos</p>
+                </a>
+
+                <!-- Bitácora del Sistema -->
+                <a href="{{ route('manager.audit.log') }}" class="block bg-white p-6 rounded-3xl border border-gray-200 shadow-sm hover:shadow-md transition-all group relative">
+                    @if($auditAlerts > 0)
+                        <div class="absolute -top-2 -right-2 px-3 py-1 bg-red-500 text-white text-xs font-bold rounded-full shadow-lg animate-pulse">
+                            {{ $auditAlerts }}
+                        </div>
+                    @endif
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="p-3 bg-indigo-50 text-indigo-600 rounded-xl group-hover:bg-indigo-100 transition-colors">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <h4 class="text-lg font-bold text-gray-900">Bitácora</h4>
+                    <p class="text-sm text-gray-500 mt-1">
+                        @if($auditAlerts > 0)
+                            <span class="text-red-600 font-medium">⚠️ {{ $auditAlerts }} cambios recientes</span>
+                        @else
+                            Registro de operaciones
+                        @endif
+                    </p>
                 </a>
             </div>
         </div>
