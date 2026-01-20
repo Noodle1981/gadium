@@ -36,11 +36,11 @@ class ClientSatisfactionImportTest extends TestCase
         $otherUser = User::factory()->create();
         
         $this->actingAs($otherUser)
-             ->get(route('client-satisfaction.dashboard'))
+             ->get(route('client-satisfaction.historial.importacion'))
              ->assertForbidden();
 
         $this->actingAs($this->user)
-             ->get(route('client-satisfaction.dashboard'))
+             ->get(route('client-satisfaction.historial.importacion'))
              ->assertOk();
     }
 
@@ -60,7 +60,7 @@ class ClientSatisfactionImportTest extends TestCase
             ])
             ->call('save')
             ->assertHasNoErrors()
-            ->assertRedirect(route('client-satisfaction.dashboard'));
+            ->assertRedirect(route('client-satisfaction.historial.importacion'));
 
         $this->assertDatabaseHas('client_satisfaction_responses', [
              'proyecto' => 'Project X',

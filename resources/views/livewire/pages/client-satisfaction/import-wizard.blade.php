@@ -197,23 +197,54 @@ new class extends Component {
     }
 }; ?>
 
-<div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-    <div class="mb-8">
-        <div class="flex items-center justify-between w-full">
-            @foreach([1 => 'Carga', 2 => 'Resolución', 3 => 'Confirmación', 4 => 'Resultado'] as $s => $label)
-                <div class="flex flex-col items-center {{ $step >= $s ? 'text-indigo-600' : 'text-gray-400' }}">
-                    <div class="flex items-center justify-center w-10 h-10 rounded-full border-2 
-                        {{ $step >= $s ? 'border-indigo-600 bg-indigo-50' : 'border-gray-300' }} font-bold">
-                        {{ $s }}
+<div>
+    <x-slot name="header">
+        <div class="bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 rounded-xl shadow-2xl overflow-hidden -mx-6 sm:-mx-8">
+            <div class="px-8 py-6 relative overflow-hidden">
+                <div class="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
+                <div class="absolute bottom-0 left-0 -ml-16 -mb-16 w-64 h-64 bg-orange-900/10 rounded-full blur-3xl"></div>
+                
+                <div class="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div>
+                        <div class="inline-flex items-center px-3 py-1 rounded-full bg-white/20 text-white text-xs font-medium backdrop-blur-md mb-2 border border-white/20">
+                            <svg class="w-3 h-3 mr-2" fill="currentColor" viewBox="0 0 20 20"><path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z"/></svg>
+                            Importación Masiva
+                        </div>
+                        <h1 class="text-2xl font-bold text-white mb-1">Importar Satisfacción Clientes</h1>
+                        <p class="text-orange-100 text-sm">Carga automática de encuestas desde archivos Excel</p>
                     </div>
-                    <span class="text-sm mt-1">{{ $label }}</span>
+                    
+                    <div class="flex flex-wrap gap-3">
+                        <a href="{{ route('client-satisfaction.historial.importacion') }}" class="inline-flex items-center px-4 py-2 bg-orange-700/30 text-white font-bold rounded-lg hover:bg-orange-700/40 transition-all border border-white/20 backdrop-blur-sm text-sm">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            Ver Historial
+                        </a>
+                    </div>
                 </div>
-                @if($s < 4) <div class="flex-1 h-1 bg-gray-200 mx-4 {{ $step > $s ? 'bg-indigo-600' : '' }}"></div> @endif
-            @endforeach
+            </div>
         </div>
-    </div>
+    </x-slot>
 
-    <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
+    <div class="py-10">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
+            
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+                <div class="px-8 py-6 border-b border-gray-100">
+                    <div class="flex items-center justify-between w-full">
+                        @foreach([1 => 'Carga', 2 => 'Resolución', 3 => 'Confirmación', 4 => 'Resultado'] as $s => $label)
+                            <div class="flex flex-col items-center {{ $step >= $s ? 'text-orange-600' : 'text-gray-400' }}">
+                                <div class="flex items-center justify-center w-10 h-10 rounded-full border-2 
+                                    {{ $step >= $s ? 'border-orange-600 bg-orange-50' : 'border-gray-300 shadow-inner' }} font-bold transition-all duration-300">
+                                    {{ $s }}
+                                </div>
+                                <span class="text-[10px] font-bold uppercase tracking-widest mt-2">{{ $label }}</span>
+                            </div>
+                            @if($s < 4) <div class="flex-1 h-0.5 bg-gray-100 mx-4 {{ $step > $s ? 'bg-orange-600' : '' }} transition-all duration-500"></div> @endif
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="p-8">
         
         @if($step === 1)
             <div class="space-y-6">
@@ -318,7 +349,7 @@ new class extends Component {
                 </table>
                 
                 <div class="flex justify-end">
-                    <button wire:click="nextStep" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none">
+                    <button wire:click="nextStep" class="inline-flex items-center px-6 py-3 border border-transparent text-sm font-bold rounded-xl shadow-md text-white bg-orange-600 hover:bg-orange-700 focus:outline-none transition-all hover:scale-105 active:scale-95">
                         Continuar
                     </button>
                 </div>
@@ -341,7 +372,8 @@ new class extends Component {
                 </div>
                 
                 <div class="mt-6">
-                    <button wire:click="startImport" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none">
+                    <button wire:click="startImport" class="inline-flex items-center px-8 py-4 border border-transparent text-base font-bold rounded-2xl shadow-xl text-white bg-orange-600 hover:bg-orange-700 focus:outline-none transition-all hover:scale-105 active:scale-95">
+                        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
                         Iniciar Importación
                     </button>
                 </div>
@@ -373,11 +405,11 @@ new class extends Component {
                 </div>
                 
                 <div class="mt-6 flex justify-center space-x-4">
-                    <button wire:click="resetWizard" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200">
+                    <button wire:click="resetWizard" class="inline-flex items-center px-4 py-2 border border-orange-200 text-sm font-bold rounded-xl text-orange-700 bg-orange-50 hover:bg-orange-100 transition-all">
                         Importar otro archivo
                     </button>
-                    <a href="{{ route('client-satisfaction.dashboard') }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
-                        Ir al Dashboard
+                    <a href="{{ route('client-satisfaction.historial.importacion') }}" class="inline-flex items-center px-6 py-2 border border-transparent text-sm font-bold rounded-xl text-white bg-orange-600 hover:bg-orange-700 shadow-md transition-all hover:scale-105">
+                        Ir al Historial
                     </a>
                 </div>
             </div>

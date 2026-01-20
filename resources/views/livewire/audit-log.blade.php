@@ -69,6 +69,8 @@ new class extends Component {
             'App\Models\HourDetail' => 'Horas',
             'App\Models\BoardDetail' => 'Tableros',
             'App\Models\AutomationProject' => 'Proyectos',
+            'App\Models\ClientSatisfactionResponse' => 'Sat. Clientes',
+            'App\Models\StaffSatisfactionResponse' => 'Sat. Personal',
         ];
         return $modules;
     }

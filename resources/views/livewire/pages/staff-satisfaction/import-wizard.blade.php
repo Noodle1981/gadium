@@ -95,12 +95,8 @@ new class extends Component {
                 return;
             }
             
-            // Skip resolution step for generic staff imports usually, but logic remains
-            if (!empty($this->unknownClients)) {
-                $this->step = 2; // Resolution
-            } else {
-                $this->step = 3; // Confirmation
-            }
+            // Always go to step 2 to show validation results
+            $this->step = 2; 
             
             $this->analyzing = false;
 
@@ -167,31 +163,62 @@ new class extends Component {
     }
 }; ?>
 
-<div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
-    <div class="mb-8">
-        <div class="flex items-center justify-between w-full">
-            @foreach([1 => 'Carga', 2 => 'Resolución', 3 => 'Confirmación', 4 => 'Resultado'] as $s => $label)
-                <div class="flex flex-col items-center {{ $step >= $s ? 'text-indigo-600' : 'text-gray-400' }}">
-                    <div class="flex items-center justify-center w-10 h-10 rounded-full border-2 
-                        {{ $step >= $s ? 'border-indigo-600 bg-indigo-50' : 'border-gray-300' }} font-bold">
-                        {{ $s }}
+<div>
+    <x-slot name="header">
+        <div class="bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 rounded-xl shadow-2xl overflow-hidden -mx-6 sm:-mx-8">
+            <div class="px-8 py-6 relative overflow-hidden">
+                <div class="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
+                <div class="absolute bottom-0 left-0 -ml-16 -mb-16 w-64 h-64 bg-orange-900/10 rounded-full blur-3xl"></div>
+                
+                <div class="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div>
+                        <div class="inline-flex items-center px-3 py-1 rounded-full bg-white/20 text-white text-xs font-medium backdrop-blur-md mb-2 border border-white/20">
+                            <svg class="w-3 h-3 mr-2" fill="currentColor" viewBox="0 0 20 20"><path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z"/></svg>
+                            Importación Masiva
+                        </div>
+                        <h1 class="text-2xl font-bold text-white mb-1">Importar Satisfacción</h1>
+                        <p class="text-orange-100 text-sm">Carga automática de encuestas desde archivos Excel</p>
                     </div>
-                    <span class="text-sm mt-1">{{ $label }}</span>
+                    
+                    <div class="flex flex-wrap gap-3">
+                        <a href="{{ route('staff-satisfaction.historial.importacion') }}" class="inline-flex items-center px-4 py-2 bg-orange-700/30 text-white font-bold rounded-lg hover:bg-orange-700/40 transition-all border border-white/20 backdrop-blur-sm text-sm">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            Ver Historial
+                        </a>
+                    </div>
                 </div>
-                @if($s < 4) <div class="flex-1 h-1 bg-gray-200 mx-4 {{ $step > $s ? 'bg-indigo-600' : '' }}"></div> @endif
-            @endforeach
+            </div>
         </div>
-    </div>
+    </x-slot>
 
-    <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
+    <div class="py-10">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-8">
+            
+            <div class="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+                <div class="px-8 py-6 border-b border-gray-100">
+                    <div class="flex items-center justify-between w-full">
+                        @foreach([1 => 'Carga', 2 => 'Resolución', 3 => 'Confirmación', 4 => 'Resultado'] as $s => $label)
+                            <div class="flex flex-col items-center {{ $step >= $s ? 'text-orange-600' : 'text-gray-400' }}">
+                                <div class="flex items-center justify-center w-10 h-10 rounded-full border-2 
+                                    {{ $step >= $s ? 'border-orange-600 bg-orange-50' : 'border-gray-300 shadow-inner' }} font-bold transition-all duration-300">
+                                    {{ $s }}
+                                </div>
+                                <span class="text-[10px] font-bold uppercase tracking-widest mt-2">{{ $label }}</span>
+                            </div>
+                            @if($s < 4) <div class="flex-1 h-0.5 bg-gray-100 mx-4 {{ $step > $s ? 'bg-orange-600' : '' }} transition-all duration-500"></div> @endif
+                        @endforeach
+                    </div>
+                </div>
+
+                <div class="p-8">
         
         @if($step === 1)
             <div class="space-y-6">
                 <!-- Date Selector Step 1 -->
-                <div class="bg-blue-50 p-4 rounded-md border border-blue-100">
+                <div class="bg-orange-50 p-4 rounded-md border border-orange-100">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Período de la Encuesta</label>
-                    <p class="text-xs text-gray-500 mb-3">El archivo Excel no contiene fechas. Seleccione el mes al que corresponden estos datos.</p>
-                    <input type="month" wire:model="customDate" class="shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md" max="{{ now()->format('Y-m') }}">
+                    <p class="text-xs text-orange-800/70 mb-3">El archivo Excel no contiene fechas. Seleccione el mes al que corresponden estos datos.</p>
+                    <input type="month" wire:model="customDate" class="shadow-sm focus:ring-orange-500 focus:border-orange-500 block w-full sm:text-sm border-gray-300 rounded-md" max="{{ now()->format('Y-m') }}">
                     @error('customDate') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
                 </div>
 
@@ -258,11 +285,34 @@ new class extends Component {
         @endif
 
         @if($step === 2)
-            {{-- Skipping UI for generic client resolution as mostly not used for staff --}}
-             <div class="space-y-6">
-                 <p>Paso de resolución... (Si ves esto, hay personal desconocido mapeado como cliente, contacte soporte)</p>
-                 <button wire:click="$set('step', 3)">Saltar</button>
-             </div>
+            <div class="text-center space-y-8 py-12">
+                <div class="relative inline-block">
+                    <div class="absolute inset-0 bg-green-100 rounded-full animate-ping opacity-25"></div>
+                    <div class="relative flex items-center justify-center h-24 w-24 rounded-full bg-green-50 border-4 border-green-100 mx-auto">
+                        <svg class="h-12 w-12 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+                
+                <div class="space-y-4">
+                    <h2 class="text-2xl font-bold text-gray-900">Validación Exitosa</h2>
+                    <p class="text-gray-500 max-w-md mx-auto">
+                        El archivo ha pasado todas las validaciones de estructura y formato. No se detectaron errores en los datos.
+                    </p>
+                </div>
+
+                <div class="flex flex-col items-center gap-4">
+                    <div class="inline-flex items-center px-4 py-2 bg-green-50 text-green-700 rounded-lg text-sm font-medium border border-green-100">
+                        <svg class="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                        Banderas Verdes: Estructura Correcta
+                    </div>
+                    
+                    <button wire:click="$set('step', 3)" class="mt-4 px-8 py-3 bg-orange-600 text-white font-bold rounded-xl shadow-lg hover:bg-orange-700 transition-all hover:scale-105 active:scale-95">
+                        Continuar a Confirmación
+                    </button>
+                </div>
+            </div>
         @endif
 
         @if($step === 3)
@@ -280,7 +330,8 @@ new class extends Component {
                 </div>
                 
                 <div class="mt-6">
-                    <button wire:click="startImport" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none">
+                    <button wire:click="startImport" class="inline-flex items-center px-8 py-4 border border-transparent text-base font-bold rounded-2xl shadow-xl text-white bg-orange-600 hover:bg-orange-700 focus:outline-none transition-all hover:scale-105 active:scale-95">
+                        <svg class="w-6 h-6 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
                         Iniciar Importación
                     </button>
                 </div>
@@ -312,11 +363,11 @@ new class extends Component {
                 </div>
                 
                 <div class="mt-6 flex justify-center space-x-4">
-                    <button wire:click="resetWizard" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-indigo-700 bg-indigo-100 hover:bg-indigo-200">
+                    <button wire:click="resetWizard" class="inline-flex items-center px-4 py-2 border border-orange-200 text-sm font-bold rounded-xl text-orange-700 bg-orange-50 hover:bg-orange-100 transition-all">
                         Importar otro archivo
                     </button>
-                    <a href="{{ route('staff-satisfaction.dashboard') }}" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
-                        Ir al Dashboard
+                    <a href="{{ route('staff-satisfaction.historial.importacion') }}" class="inline-flex items-center px-6 py-2 border border-transparent text-sm font-bold rounded-xl text-white bg-orange-600 hover:bg-orange-700 shadow-md transition-all hover:scale-105">
+                        Ir al Historial
                     </a>
                 </div>
             </div>

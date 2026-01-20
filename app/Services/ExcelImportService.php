@@ -123,12 +123,14 @@ class ExcelImportService
                 if (!empty($rowErrors)) {
                     $errors = array_merge($errors, $rowErrors);
                 } else {
-                    // Verificar Cliente
-                    $clientName = $this->extractClientName($row, $type);
-                    $client = $this->normalizationService->resolveClientByAlias($clientName);
+                    // Verificar Cliente (Solo si no es satisfacción personal)
+                    if ($type !== 'staff_satisfaction') {
+                        $clientName = $this->extractClientName($row, $type);
+                        $client = $this->normalizationService->resolveClientByAlias($clientName);
 
-                    if (!$client) {
-                        $unknownClients[$clientName] = true;
+                        if (!$client && !empty($clientName)) {
+                            $unknownClients[$clientName] = true;
+                        }
                     }
 
                     // Verificar Proveedor si es Detalle de Compras
@@ -386,7 +388,7 @@ class ExcelImportService
 
         // Validar Cliente
         $clientName = $this->extractClientName($row, $type);
-        if (empty($clientName) && $type !== 'hour_detail' && $type !== 'purchase_detail' && $type !== 'board_detail' && $type !== 'automation_project') {
+        if (empty($clientName) && !in_array($type, ['hour_detail', 'purchase_detail', 'board_detail', 'automation_project', 'staff_satisfaction'])) {
             $clientField = $type === 'sale' ? 'RAZON_SOCI' : 'Empresa';
             $errors[] = "Fila {$rowIndex}: Cliente vacío";
         }
@@ -447,8 +449,11 @@ class ExcelImportService
             // O mejor, confiamos en la extracción posterior.
             // Aquí solo validamos campos obligatorios críticos.
         } elseif ($type === 'staff_satisfaction') {
+            // No error if Personal is empty, it might be a legend row, we'll just skip it in import
+            // if we want to be strict, we keep it, but here it seems to be blocking Row 2 (Legend)
             if (empty($row['Personal'])) {
-                $errors[] = "Fila {$rowIndex}: Personal vacío";
+                // $errors[] = "Fila {$rowIndex}: Personal vacío"; 
+                // Let's not add error here, it will be skipped by total_valid counting or we can just ignore it
             }
         }
 
@@ -777,6 +782,11 @@ class ExcelImportService
                 $fecha = $this->extractDate($row, $type); // Will get customDate
                 $personal = trim($row['Personal'] ?? '');
                 
+                if (empty($personal)) {
+                    $skipped++;
+                    continue;
+                }
+                
                 // Get boolean responses (columns 2 to 13, 0-indexed is Personal)
                 // array_slice preserves keys? No.
                 // $row is associative. We need positional access or explicit keys.
@@ -784,23 +794,26 @@ class ExcelImportService
                 // But $row keys come from Excel header row.
                 // Let's assume the order is fixed as per requirement.
                 $values = array_values($row);
-                // Index 0 is Personal. Indices 1-12 are the 12 options.
+                
+                // Determine shift: where is 'Personal'?
+                $personalIdx = array_search('Personal', array_keys($row));
+                if ($personalIdx === false) $personalIdx = 0; // Fallback
                 
                 $data = [
                     'personal' => $personal,
                     'fecha' => $fecha,
-                    'p1_mal' => !empty($values[1]),
-                    'p1_normal' => !empty($values[2]),
-                    'p1_bien' => !empty($values[3]),
-                    'p2_mal' => !empty($values[4]),
-                    'p2_normal' => !empty($values[5]),
-                    'p2_bien' => !empty($values[6]),
-                    'p3_mal' => !empty($values[7]),
-                    'p3_normal' => !empty($values[8]),
-                    'p3_bien' => !empty($values[9]),
-                    'p4_mal' => !empty($values[10]),
-                    'p4_normal' => !empty($values[11]),
-                    'p4_bien' => !empty($values[12]),
+                    'p1_mal' => !empty($values[$personalIdx + 1] ?? null),
+                    'p1_normal' => !empty($values[$personalIdx + 2] ?? null),
+                    'p1_bien' => !empty($values[$personalIdx + 3] ?? null),
+                    'p2_mal' => !empty($values[$personalIdx + 4] ?? null),
+                    'p2_normal' => !empty($values[$personalIdx + 5] ?? null),
+                    'p2_bien' => !empty($values[$personalIdx + 6] ?? null),
+                    'p3_mal' => !empty($values[$personalIdx + 7] ?? null),
+                    'p3_normal' => !empty($values[$personalIdx + 8] ?? null),
+                    'p3_bien' => !empty($values[$personalIdx + 9] ?? null),
+                    'p4_mal' => !empty($values[$personalIdx + 10] ?? null),
+                    'p4_normal' => !empty($values[$personalIdx + 11] ?? null),
+                    'p4_bien' => !empty($values[$personalIdx + 12] ?? null),
                 ];
                 
                 $hash = StaffSatisfactionResponse::generateHash($data);
@@ -890,6 +903,20 @@ class ExcelImportService
         // Primera fila son headers
         $headers = array_shift($rows);
         $headers = array_map('trim', $headers);
+        
+        // Handle non-unique headers (common in Staff Satisfaction)
+        $uniqueHeaders = [];
+        $counts = [];
+        foreach ($headers as $h) {
+            if (empty($h)) $h = 'Empty';
+            if (!isset($counts[$h])) {
+                $counts[$h] = 0;
+                $uniqueHeaders[] = $h;
+            } else {
+                $counts[$h]++;
+                $uniqueHeaders[] = $h . '_' . $counts[$h];
+            }
+        }
 
         $result = [];
         foreach ($rows as $data) {
@@ -898,8 +925,8 @@ class ExcelImportService
                 continue;
             }
 
-            if (count($data) === count($headers)) {
-                $result[] = array_combine($headers, $data);
+            if (count($data) === count($uniqueHeaders)) {
+                $result[] = array_combine($uniqueHeaders, $data);
             }
         }
 

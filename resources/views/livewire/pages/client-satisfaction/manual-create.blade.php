@@ -158,7 +158,7 @@ new #[Layout('layouts.app')] class extends Component {
         }
 
         session()->flash('message', 'Datos guardados correctamente.');
-        return redirect()->route('client-satisfaction.dashboard');
+        return redirect()->route('client-satisfaction.historial.importacion');
     }
     
     // Helper para opciones de rating 1-5
@@ -170,33 +170,63 @@ new #[Layout('layouts.app')] class extends Component {
 
 <div>
     <x-slot name="header">
-        <h2 class="font-bold text-xl text-gray-800 leading-tight">
-            {{ __('Entrada Manual de Satisfacción') }}
-        </h2>
+        <div class="bg-gradient-to-r from-orange-600 via-orange-500 to-amber-500 rounded-xl shadow-2xl overflow-hidden -mx-6 sm:-mx-8">
+            <div class="px-8 py-6 relative overflow-hidden">
+                <div class="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
+                <div class="absolute bottom-0 left-0 -ml-16 -mb-16 w-64 h-64 bg-orange-900/10 rounded-full blur-3xl"></div>
+                
+                <div class="relative flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div>
+                        <div class="inline-flex items-center px-3 py-1 rounded-full bg-white/20 text-white text-xs font-medium backdrop-blur-md mb-2 border border-white/20">
+                            <svg class="w-3 h-3 mr-2" fill="currentColor" viewBox="0 0 20 20"><path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z"/></svg>
+                            Entrada Manual
+                        </div>
+                        <h1 class="text-2xl font-bold text-white mb-1">Cargar Satisfacción Clientes</h1>
+                        <p class="text-orange-100 text-sm">Registro manual de encuestas de calidad</p>
+                    </div>
+                    
+                    <div class="flex flex-wrap gap-3">
+                        <a href="{{ route('client-satisfaction.historial.importacion') }}" class="inline-flex items-center px-4 py-2 bg-orange-700/30 text-white font-bold rounded-lg hover:bg-orange-700/40 transition-all border border-white/20 backdrop-blur-sm text-sm">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                            Volver al Listado
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </x-slot>
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+    <div class="py-10">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8 space-y-6">
             
-            <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
-                
-                <div class="mb-6">
-                    <h3 class="text-lg font-medium text-gray-900">Formulario de Entrada Rápida</h3>
-                    <p class="text-sm text-gray-500">Complete los datos directamente en la tabla. Puede agregar múltiples filas y guardar todas a la vez.</p>
+            <div class="bg-white rounded-3xl shadow-xl border border-gray-100 overflow-hidden">
+                <!-- Form Header -->
+                <div class="px-8 py-6 border-b border-gray-100 bg-gray-50/50 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                    <div>
+                        <h3 class="text-xl font-black text-gray-900">Formulario de Entrada Rápida</h3>
+                        <p class="text-sm text-gray-500 font-medium">Complete los datos directamente en la tabla para carga masiva.</p>
+                    </div>
+                    <div>
+                        <a href="{{ route('client-satisfaction.import') }}" class="inline-flex items-center px-6 py-3 bg-indigo-950 border border-transparent rounded-2xl font-bold text-sm text-white shadow-xl hover:bg-indigo-900 transition-all hover:scale-105 active:scale-95">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                            Importación Automática Excel
+                        </a>
+                    </div>
                 </div>
 
-                <div class="mb-4 flex space-x-2">
-                    <button wire:click="addRow" class="inline-flex items-center px-4 py-2 bg-orange-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-orange-500 active:bg-orange-700 focus:outline-none focus:border-orange-700 focus:ring focus:ring-orange-200 disabled:opacity-25 transition">
+                <!-- Bulk Actions -->
+                <div class="mb-6 flex items-center space-x-3">
+                    <button wire:click="addRow" class="inline-flex items-center px-4 py-2 bg-orange-600 border border-transparent rounded-xl font-bold text-xs text-white uppercase tracking-widest hover:bg-orange-500 transition-all shadow-md active:scale-95">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                         Agregar Fila
                     </button>
-                    <button wire:click="clearAll" class="inline-flex items-center px-4 py-2 bg-gray-100 border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest hover:bg-gray-200 focus:outline-none focus:ring focus:ring-gray-300 disabled:opacity-25 transition">
+                    <button wire:click="clearAll" class="inline-flex items-center px-4 py-2 bg-white border border-gray-200 rounded-xl font-bold text-xs text-gray-400 uppercase tracking-widest hover:bg-gray-50 transition-all">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                         Limpiar Todo
                     </button>
                 </div>
 
-                <div class="overflow-x-auto">
+                <div class="overflow-x-auto pb-60">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-indigo-900 text-white">
                             <tr>
@@ -288,7 +318,7 @@ new #[Layout('layouts.app')] class extends Component {
                         Guardar Datos
                     </button>
                     
-                    <a href="{{ route('client-satisfaction.dashboard') }}" class="ml-4 inline-flex justify-center items-center px-6 py-3 border border-gray-300 shadow-sm text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    <a href="{{ route('client-satisfaction.historial.importacion') }}" class="ml-4 inline-flex justify-center items-center px-6 py-3 border border-gray-300 shadow-sm text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                         Cancelar
                     </a>
                 </div>

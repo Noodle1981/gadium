@@ -334,7 +334,9 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
 
     // --- SATISFACCIÓN PERSONAL (Gestor de Satisfacción Personal) ---
     Route::prefix('satisfaccion_personal')->middleware(['role:Gestor de Satisfacción Personal'])->group(function () {
-        Volt::route('dashboard', 'pages.staff-satisfaction.dashboard')->name('staff-satisfaction.dashboard');
+        Route::get('/', function () {
+            return redirect()->route('staff-satisfaction.historial.importacion');
+        });
         Route::view('perfil', 'profile')->name('staff-satisfaction.profile');
 
         Route::middleware(['can:view_staff_satisfaction'])->group(function () {
@@ -346,7 +348,9 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
 
     // --- SATISFACCIÓN CLIENTES (Gestor de Satisfacción Clientes) ---
     Route::prefix('satisfaccion_clientes')->middleware(['role:Gestor de Satisfacción Clientes'])->group(function () {
-    Volt::route('dashboard', 'pages.client-satisfaction.dashboard')->name('client-satisfaction.dashboard');
+    Route::get('/', function () {
+        return redirect()->route('client-satisfaction.historial.importacion');
+    });
     Route::view('perfil', 'profile')->name('client-satisfaction.profile');
 
     Route::middleware(['can:view_client_satisfaction'])->group(function () {

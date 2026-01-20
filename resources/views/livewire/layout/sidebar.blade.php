@@ -37,8 +37,8 @@ new class extends Component
     elseif ($isPresupuestador) $dashboardRoute = 'budget.historial.importacion';
     elseif ($isHours) $dashboardRoute = 'hours.historial.importacion';
     elseif ($isPurchases) $dashboardRoute = 'purchases.historial.importacion';
-    elseif ($isStaffSat) $dashboardRoute = 'staff-satisfaction.dashboard';
-    elseif ($isClientSat) $dashboardRoute = 'client-satisfaction.dashboard';
+    elseif ($isStaffSat) $dashboardRoute = 'staff-satisfaction.historial.importacion';
+    elseif ($isClientSat) $dashboardRoute = 'client-satisfaction.historial.importacion';
     elseif ($isBoards) $dashboardRoute = 'boards.historial.importacion';
     elseif ($isAutomation) $dashboardRoute = 'automation_projects.historial.importacion';
 

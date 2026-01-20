@@ -5,8 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class ClientSatisfactionResponse extends Model
+use OwenIt\Auditing\Contracts\Auditable;
+
+class ClientSatisfactionResponse extends Model implements Auditable
 {
+    use \OwenIt\Auditing\Auditable;
     /**
      * The table associated with the model.
      *

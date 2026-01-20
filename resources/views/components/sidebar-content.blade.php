@@ -243,12 +243,6 @@
 
 {{-- Sidebar para Safisfacción Personal --}}
 @if(auth()->user()->hasRole('Gestor de Satisfacción Personal'))
-    <x-sidebar-link :href="route('staff-satisfaction.dashboard')" :active="request()->routeIs('staff-satisfaction.dashboard')" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'>
-        Dashboard
-    </x-sidebar-link>
-    <x-sidebar-link :href="route('staff-satisfaction.import')" :active="request()->routeIs('staff-satisfaction.import')" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>'>
-        Importación Automática
-    </x-sidebar-link>
     <x-sidebar-link :href="route('staff-satisfaction.create')" :active="request()->routeIs('staff-satisfaction.create')" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>'>
         Importación Manual
     </x-sidebar-link>
@@ -259,12 +253,6 @@
 
 {{-- Sidebar para Safisfacción Clientes --}}
 @if(auth()->user()->hasRole('Gestor de Satisfacción Clientes'))
-    <x-sidebar-link :href="route('client-satisfaction.dashboard')" :active="request()->routeIs('client-satisfaction.dashboard')" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>'>
-        Dashboard
-    </x-sidebar-link>
-    <x-sidebar-link :href="route('client-satisfaction.import')" :active="request()->routeIs('client-satisfaction.import')" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>'>
-        Importación Automática
-    </x-sidebar-link>
     <x-sidebar-link :href="route('client-satisfaction.create')" :active="request()->routeIs('client-satisfaction.create')" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>'>
         Importación Manual
     </x-sidebar-link>
