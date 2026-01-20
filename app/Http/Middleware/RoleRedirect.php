@@ -39,7 +39,23 @@ class RoleRedirect
             }
 
             if ($path === 'dashboard') {
-                return redirect()->route("$rolePrefix.dashboard");
+                // Roles sin dashboard propio - redirigir a su vista principal
+                if ($rolePrefix === 'sales') {
+                    return redirect()->route('sales.historial.ventas');
+                } elseif ($rolePrefix === 'budget') {
+                    return redirect()->route('budget.historial.importacion');
+                } elseif ($rolePrefix === 'hours') {
+                    return redirect()->route('hours.historial.importacion');
+                } elseif ($rolePrefix === 'purchases') {
+                    return redirect()->route('purchases.historial.importacion');
+                } elseif ($rolePrefix === 'boards') {
+                    return redirect()->route('boards.historial.importacion');
+                } elseif ($rolePrefix === 'automation_projects') {
+                    return redirect()->route('automation_projects.historial.importacion');
+                } else {
+                    // Admin, Manager, Staff/Client Satisfaction tienen dashboard
+                    return redirect()->route("$rolePrefix.dashboard");
+                }
             }
 
             if ($path === 'sales/import') {

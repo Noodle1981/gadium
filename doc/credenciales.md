@@ -51,21 +51,26 @@
 - **Password:** `password`
 - **Rol:** Vendedor
 - **Acceso:** Solo módulo de ventas
+- **Ruta al Login:** `/ventas/historial-ventas` (Historial de Ventas)
 - **Rutas principales:**
-  - Dashboard: `/ventas/dashboard`
+  - Crear Venta: `/ventas/crear`
   - Importación: `/ventas/importacion`
-  - Clientes: `/ventas/resolucion-clientes`
   - Historial Ventas: `/ventas/historial-ventas`
+  - Editar Venta: `/ventas/editar/{id}`
+  - Perfil: `/ventas/perfil`
 
 ### Presupuestador (Usuario de Presupuestos)
 - **Email:** `presupuesto@gaudium.com`
 - **Password:** `password`
 - **Rol:** Presupuestador
 - **Acceso:** Solo módulo de presupuestos
+- **Ruta al Login:** `/presupuesto/historial_importacion` (Historial de Presupuestos)
 - **Rutas principales:**
-  - Dashboard: `/presupuesto/dashboard`
+  - Crear Presupuesto: `/presupuesto/crear`
   - Importación: `/presupuesto/importacion`
   - Historial Importación: `/presupuesto/historial_importacion`
+  - Editar Presupuesto: `/presupuesto/editar/{id}`
+  - Perfil: `/presupuesto/perfil`
 
 ---
 
@@ -75,13 +80,25 @@
 - **Email:** `horas@gaudium.com`
 - **Password:** `password`
 - **Rol:** Gestor de Horas
-- **Ruta:** `/detalle_horas/dashboard`
+- **Ruta al Login:** `/detalle_horas/historial_importacion` (Historial de Horas)
+- **Rutas principales:**
+  - Crear Registro: `/detalle_horas/crear`
+  - Importación: `/detalle_horas/importacion`
+  - Historial: `/detalle_horas/historial_importacion`
+  - Editar: `/detalle_horas/editar/{id}`
+  - Perfil: `/detalle_horas/perfil`
 
 ### Compras de Materiales
 - **Email:** `compras@gaudium.com`
 - **Password:** `password`
 - **Rol:** Gestor de Compras
-- **Ruta:** `/compras/dashboard`
+- **Ruta al Login:** `/compras/historial_importacion` (Historial de Compras)
+- **Rutas principales:**
+  - Crear Compra: `/compras/crear`
+  - Importación: `/compras/importacion`
+  - Historial: `/compras/historial_importacion`
+  - Editar: `/compras/editar/{id}`
+  - Perfil: `/compras/perfil`
 
 ### Satisfacción del Personal
 - **Email:** `satisfaccion_personal@gaudium.com`
@@ -99,13 +116,25 @@
 - **Email:** `tableros@gaudium.com`
 - **Password:** `password`
 - **Rol:** Gestor de Tableros
-- **Ruta:** `/tableros/dashboard`
+- **Ruta al Login:** `/tableros/historial_importacion` (Historial de Tableros)
+- **Rutas principales:**
+  - Crear Tablero: `/tableros/crear`
+  - Importación: `/tableros/importacion`
+  - Historial: `/tableros/historial_importacion`
+  - Editar: `/tableros/editar/{id}`
+  - Perfil: `/tableros/perfil`
 
 ### Proyecto de Automatización
 - **Email:** `proyectos@gaudium.com`
 - **Password:** `password`
 - **Rol:** Gestor de Proyectos
-- **Ruta:** `/proyectos_automatizacion/dashboard`
+- **Ruta al Login:** `/proyectos_automatizacion/historial_importacion` (Historial de Proyectos)
+- **Rutas principales:**
+  - Crear Proyecto: `/proyectos_automatizacion/crear`
+  - Importación: `/proyectos_automatizacion/importacion`
+  - Historial: `/proyectos_automatizacion/historial_importacion`
+  - Editar: `/proyectos_automatizacion/editar/{id}`
+  - Perfil: `/proyectos_automatizacion/perfil`
 
 ---
 

@@ -205,7 +205,7 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
 
         // Rutas de Tableros para Manager
         Route::middleware(['can:view_boards'])->group(function () {
-             Volt::route('tableros-control', 'pages.boards.dashboard')->name('manager.boards.dashboard'); // Optional dashboard view
+
              // Manager uses same views but different route names if needed, or share?
              // Usually Manager has their own prefix. Let's redirect or use same components.
              // Following pattern:
@@ -386,7 +386,7 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
 
 // Grupo para Gestor de Tableros
 Route::prefix('tableros')->middleware(['role:Gestor de Tableros'])->group(function () {
-    // Volt::route('dashboard', 'pages.boards.dashboard')->name('boards.dashboard');
+
     Route::get('/', function () {
         return redirect()->route('boards.historial.importacion');
     });
