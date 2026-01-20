@@ -238,6 +238,9 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
         
         // --- BITÁCORA DEL SISTEMA ---
         Volt::route('bitacora', 'audit-log')->name('manager.audit.log');
+
+        // --- INTELIGENCIA DE NEGOCIO ---
+        Volt::route('inteligencia', 'pages.manager.intelligence')->name('manager.intelligence.dashboard');
     });
 
 
