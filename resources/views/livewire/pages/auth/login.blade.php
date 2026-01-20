@@ -20,7 +20,21 @@ new #[Layout('layouts.guest')] class extends Component
 
         Session::regenerate();
 
-        $this->redirect(route('dashboard', absolute: false), navigate: true);
+        if (auth()->user()->hasRole('Vendedor')) {
+            $this->redirect(route('sales.historial.ventas', absolute: false), navigate: true);
+        } elseif (auth()->user()->hasRole('Presupuestador')) {
+            $this->redirect(route('budget.historial.importacion', absolute: false), navigate: true);
+        } elseif (auth()->user()->hasRole('Gestor de Compras')) {
+            $this->redirect(route('purchases.historial.importacion', absolute: false), navigate: true);
+        } elseif (auth()->user()->hasRole('Gestor de Tableros')) {
+            $this->redirect(route('boards.historial.importacion', absolute: false), navigate: true);
+        } elseif (auth()->user()->hasRole('Gestor de Horas')) {
+            $this->redirect(route('hours.historial.importacion', absolute: false), navigate: true);
+        } elseif (auth()->user()->hasRole('Gestor de Proyectos')) {
+            $this->redirect(route('automation_projects.historial.importacion', absolute: false), navigate: true);
+        } else {
+            $this->redirect(route('dashboard', absolute: false), navigate: true);
+        }
     }
 }; ?>
 

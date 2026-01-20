@@ -9,6 +9,12 @@ new class extends Component {
 
     public $search = '';
     public $perPage = 50;
+    public $expanded = false;
+
+    public function toggleExpanded()
+    {
+        $this->expanded = !$this->expanded;
+    }
 
     public function updatingSearch()
     {
@@ -85,6 +91,21 @@ new class extends Component {
 
                         <div class="flex items-center gap-4">
                              <span class="text-sm text-gray-500">Mostrando {{ $budgets->count() }} registros</span>
+                            <button wire:click="toggleExpanded" 
+                                    class="inline-flex items-center px-3 py-1 bg-orange-100 border border-orange-200 rounded-md font-semibold text-xs text-orange-800 uppercase tracking-widest hover:bg-orange-200 active:bg-orange-300 focus:outline-none transition ease-in-out duration-150"
+                                    title="Alternar vista en pantalla scompleta">
+                                @if(!$expanded)
+                                    <span class="flex items-center">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+                                        Expandir
+                                    </span>
+                                @else
+                                    <span class="flex items-center">
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                        Contraer
+                                    </span>
+                                @endif
+                            </button>
                         </div>
                     </div>
 
@@ -97,6 +118,20 @@ new class extends Component {
                                     <th class="px-3 py-3 text-left font-bold text-orange-800 uppercase tracking-wider">Orden Pedido</th>
                                     <th class="px-3 py-3 text-right font-bold text-orange-800 uppercase tracking-wider">Monto</th>
                                     <th class="px-3 py-3 text-left font-bold text-orange-800 uppercase tracking-wider">Moneda</th>
+                                    
+                                    @if($expanded)
+                                        <th class="px-3 py-3 text-left font-bold text-orange-800 uppercase tracking-wider">Centro Costo</th>
+                                        <th class="px-3 py-3 text-left font-bold text-orange-800 uppercase tracking-wider">Fecha OC</th>
+                                        <th class="px-3 py-3 text-left font-bold text-orange-800 uppercase tracking-wider">F. Est. Culmin.</th>
+                                        <th class="px-3 py-3 text-left font-bold text-orange-800 uppercase tracking-wider">F. Real Culmin.</th>
+                                        <th class="px-3 py-3 text-left font-bold text-orange-800 uppercase tracking-wider">Días Proy.</th>
+                                        <th class="px-3 py-3 text-left font-bold text-orange-800 uppercase tracking-wider">Env. Facturar</th>
+                                        <th class="px-3 py-3 text-left font-bold text-orange-800 uppercase tracking-wider">N° Factura</th>
+                                        <th class="px-3 py-3 text-left font-bold text-orange-800 uppercase tracking-wider">% Fact.</th>
+                                        <th class="px-3 py-3 text-left font-bold text-orange-800 uppercase tracking-wider">Saldo</th>
+                                        <th class="px-3 py-3 text-left font-bold text-orange-800 uppercase tracking-wider">H. Ponderadas</th>
+                                    @endif
+
                                     <th class="px-3 py-3 text-left font-bold text-orange-800 uppercase tracking-wider hidden md:table-cell">Proyecto</th>
                                     <th class="px-3 py-3 text-center font-bold text-orange-800 uppercase tracking-wider">Estado</th>
                                     <th class="px-3 py-3 text-center font-bold text-orange-800 uppercase tracking-wider">Acciones</th>
@@ -110,6 +145,19 @@ new class extends Component {
                                     <td class="px-3 py-3 whitespace-nowrap text-gray-500">{{ $budget->comprobante }}</td>
                                     <td class="px-3 py-3 text-right font-mono font-bold text-gray-900">{{ number_format($budget->monto, 2, ',', '.') }}</td>
                                     <td class="px-3 py-3 text-gray-500">{{ $budget->moneda }}</td>
+
+                                    @if($expanded)
+                                        <td class="px-3 py-3 text-gray-500">{{ $budget->centro_costo ?? '-' }}</td>
+                                        <td class="px-3 py-3 text-gray-500 whitespace-nowrap">{{ $budget->fecha_oc ? $budget->fecha_oc->format('d/m/Y') : '-' }}</td>
+                                        <td class="px-3 py-3 text-gray-500 whitespace-nowrap">{{ $budget->fecha_estimada_culminacion ? $budget->fecha_estimada_culminacion->format('d/m/Y') : '-' }}</td>
+                                        <td class="px-3 py-3 text-gray-500 whitespace-nowrap">{{ $budget->fecha_culminacion_real ? $budget->fecha_culminacion_real->format('d/m/Y') : '-' }}</td>
+                                        <td class="px-3 py-3 text-gray-500">{{ $budget->estado_proyecto_dias ?? '-' }}</td>
+                                        <td class="px-3 py-3 text-gray-500">{{ $budget->enviado_facturar ?? '-' }}</td>
+                                        <td class="px-3 py-3 text-gray-500">{{ $budget->nro_factura ?? '-' }}</td>
+                                        <td class="px-3 py-3 text-gray-500">{{ $budget->porc_facturacion ?? '-' }}</td>
+                                        <td class="px-3 py-3 text-gray-500 font-mono">{{ $budget->saldo ? number_format($budget->saldo, 2, ',', '.') : '-' }}</td>
+                                        <td class="px-3 py-3 text-gray-500">{{ $budget->horas_ponderadas ?? '-' }}</td>
+                                    @endif
                                     <td class="px-3 py-3 text-gray-500 hidden md:table-cell truncate max-w-xs" title="{{ $budget->nombre_proyecto }}">{{ $budget->nombre_proyecto ?? '-' }}</td>
                                     <td class="px-3 py-3 text-center">
                                         <span class="px-2 py-1 inline-flex text-[10px] leading-4 font-bold rounded-full uppercase tracking-wide
@@ -124,7 +172,7 @@ new class extends Component {
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="8" class="px-6 py-12 text-center text-gray-400">
+                                    <td colspan="{{ $expanded ? 18 : 8 }}" class="px-6 py-12 text-center text-gray-400">
                                         <div class="flex flex-col items-center">
                                             <div class="bg-orange-50 p-4 rounded-full mb-3">
                                                 <svg class="w-8 h-8 text-orange-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

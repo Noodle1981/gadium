@@ -8,12 +8,18 @@ new class extends Component {
     use WithPagination;
 
     public $search = '';
+    public $dateFilter = '';
+    public $clientCodeFilter = '';
+    public $articleCodeFilter = '';
+    public $remitoFilter = '';
     public $perPage = 50;
     public $expanded = false;
 
-    public function updatingSearch()
+    public function updated($property)
     {
-        $this->resetPage();
+        if (in_array($property, ['search', 'dateFilter', 'clientCodeFilter', 'articleCodeFilter', 'remitoFilter'])) {
+            $this->resetPage();
+        }
     }
 
     public function with()
@@ -28,6 +34,22 @@ new class extends Component {
                   ->orWhere('cod_cli', 'like', '%' . $this->search . '%')
                   ->orWhere('n_remito', 'like', '%' . $this->search . '%');
             });
+        }
+        
+        if ($this->dateFilter) {
+            $query->whereDate('fecha', $this->dateFilter);
+        }
+
+        if ($this->clientCodeFilter) {
+            $query->where('cod_cli', 'like', '%' . $this->clientCodeFilter . '%');
+        }
+        
+        if ($this->articleCodeFilter) {
+            $query->where('cod_articu', 'like', '%' . $this->articleCodeFilter . '%');
+        }
+
+        if ($this->remitoFilter) {
+            $query->where('n_remito', 'like', '%' . $this->remitoFilter . '%');
         }
 
         return [
@@ -76,38 +98,67 @@ new class extends Component {
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
                     
-                    <!-- Controls: Search & Expand -->
-                    <div class="mb-6 flex flex-col md:flex-row justify-between items-center gap-4">
-                        <div class="w-full md:w-1/3">
-                            <div class="relative rounded-md shadow-sm">
-                                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                                    <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                        <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" />
-                                    </svg>
+                    <!-- Controls: Search & Filters -->
+                    <div class="mb-6 space-y-4">
+                        <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                            <div class="w-full md:w-1/3">
+                                <div class="relative rounded-md shadow-sm">
+                                    <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                                        <svg class="h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                                            <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <input type="text" wire:model.live.debounce.300ms="search" 
+                                        class="block w-full rounded-md border-gray-300 pl-10 focus:border-orange-500 focus:ring-orange-500 sm:text-sm" 
+                                        placeholder="Buscar por comprobante, cliente...">
                                 </div>
-                                <input type="text" wire:model.live.debounce.300ms="search" 
-                                    class="block w-full rounded-md border-gray-300 pl-10 focus:border-orange-500 focus:ring-orange-500 sm:text-sm" 
-                                    placeholder="Buscar por comprobante, cliente...">
+                            </div>
+
+                            <div class="flex items-center gap-4">
+                                <span class="text-sm text-gray-500">Mostrando {{ $sales->count() }} operaciones</span>
+                                <button wire:click="toggleExpanded" 
+                                        class="inline-flex items-center px-3 py-1 bg-orange-100 border border-orange-200 rounded-md font-semibold text-xs text-orange-800 uppercase tracking-widest hover:bg-orange-200 active:bg-orange-300 focus:outline-none transition ease-in-out duration-150"
+                                        title="Alternar vista en pantalla scompleta">
+                                    @if(!$expanded)
+                                        <span class="flex items-center">
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+                                            Expandir
+                                        </span>
+                                    @else
+                                        <span class="flex items-center">
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                            Contraer
+                                        </span>
+                                    @endif
+                                </button>
                             </div>
                         </div>
 
-                        <div class="flex items-center gap-4">
-                             <span class="text-sm text-gray-500">Mostrando {{ $sales->count() }} operaciones</span>
-                            <button wire:click="toggleExpanded" 
-                                    class="inline-flex items-center px-3 py-1 bg-orange-100 border border-orange-200 rounded-md font-semibold text-xs text-orange-800 uppercase tracking-widest hover:bg-orange-200 active:bg-orange-300 focus:outline-none transition ease-in-out duration-150"
-                                    title="Alternar vista en pantalla scompleta">
-                                @if(!$expanded)
-                                    <span class="flex items-center">
-                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
-                                        Expandir
-                                    </span>
-                                @else
-                                    <span class="flex items-center">
-                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                        Contraer
-                                    </span>
-                                @endif
-                            </button>
+                        <!-- Advanced Filters -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 bg-gray-50 p-4 rounded-lg border border-gray-100 shadow-sm">
+                            <!-- Fecha -->
+                            <div>
+                                <label for="dateFilter" class="block text-xs font-medium text-gray-500 uppercase mb-1">Fecha Registro</label>
+                                <input type="date" wire:model.live="dateFilter" id="dateFilter" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-xs">
+                            </div>
+                            
+                            <!-- Cod Cliente -->
+                            <div>
+                                <label for="clientCodeFilter" class="block text-xs font-medium text-gray-500 uppercase mb-1">Cód. Cliente</label>
+                                <input type="text" wire:model.live.debounce.300ms="clientCodeFilter" id="clientCodeFilter" placeholder="Ej: CLI-001" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-xs">
+                            </div>
+
+                            <!-- Cod Articulo -->
+                            <div>
+                                <label for="articleCodeFilter" class="block text-xs font-medium text-gray-500 uppercase mb-1">Cód. Artículo</label>
+                                <input type="text" wire:model.live.debounce.300ms="articleCodeFilter" id="articleCodeFilter" placeholder="Ej: ART-123" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-xs">
+                            </div>
+
+                            <!-- N Remito -->
+                            <div>
+                                <label for="remitoFilter" class="block text-xs font-medium text-gray-500 uppercase mb-1">N° Remito</label>
+                                <input type="text" wire:model.live.debounce.300ms="remitoFilter" id="remitoFilter" placeholder="Ej: R-0001-00000001" class="block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-xs">
+                            </div>
                         </div>
                     </div>
 

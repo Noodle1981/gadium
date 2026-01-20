@@ -253,7 +253,10 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
     // --- VENTAS (Vendedor) ---
     Route::prefix('ventas')->middleware(['role:Vendedor'])->group(function () {
         
-        Volt::route('dashboard', 'pages.sales.dashboard')->name('sales.dashboard');
+        // Volt::route('dashboard', 'pages.sales.dashboard')->name('sales.dashboard'); // Removed
+        Route::get('/', function () {
+            return redirect()->route('sales.historial.ventas');
+        });
         Route::view('perfil', 'profile')->name('sales.profile');
         
         // Módulo Ventas
@@ -261,7 +264,7 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
             Volt::route('importacion', 'pages.sales.import-wizard')->name('sales.import');
             Volt::route('crear', 'pages.sales.manual-create')->name('sales.create');
             Volt::route('editar/{sale}', 'pages.sales.manual-edit')->name('sales.edit');
-            Volt::route('resolucion-clientes', 'pages.clients.resolution')->name('sales.clients.resolve');
+
             
             // Historial de Ventas
             Volt::route('historial-ventas', 'pages.sales.history')->name('sales.historial.ventas');
@@ -272,7 +275,10 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
     // --- PRESUPUESTO (Presupuestador) ---
     Route::prefix('presupuesto')->middleware(['role:Presupuestador'])->group(function () {
         
-        Volt::route('dashboard', 'pages.budget.dashboard')->name('budget.dashboard');
+        // Volt::route('dashboard', 'pages.budget.dashboard')->name('budget.dashboard'); // Removed
+        Route::get('/', function () {
+            return redirect()->route('budget.historial.importacion');
+        });
         Route::view('perfil', 'profile')->name('budget.profile');
         
         // Módulo Presupuesto
@@ -288,7 +294,10 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
 
     // --- DETALLE DE HORAS (Gestor de Horas) ---
     Route::prefix('detalle_horas')->middleware(['role:Gestor de Horas'])->group(function () {
-        Volt::route('dashboard', 'pages.hours.dashboard')->name('hours.dashboard');
+        // Volt::route('dashboard', 'pages.hours.dashboard')->name('hours.dashboard');
+        Route::get('/', function () {
+            return redirect()->route('hours.historial.importacion');
+        });
         Route::view('perfil', 'profile')->name('hours.profile');
         
         Route::middleware(['can:view_hours'])->group(function () {
@@ -302,7 +311,10 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
 
     // --- COMPRAS (Gestor de Compras) ---
     Route::prefix('compras')->middleware(['role:Gestor de Compras'])->group(function () {
-        Volt::route('dashboard', 'pages.purchases.dashboard')->name('purchases.dashboard');
+        // Volt::route('dashboard', 'pages.purchases.dashboard')->name('purchases.dashboard'); // Removed
+        Route::get('/', function () {
+            return redirect()->route('purchases.historial.importacion');
+        });
         Route::view('perfil', 'profile')->name('purchases.profile');
         
         Route::middleware(['can:view_purchases'])->group(function () {
@@ -347,7 +359,10 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
 
     // --- PROYECTOS DE AUTOMATIZACIÓN (Gestor de Proyectos) ---
     Route::prefix('proyectos_automatizacion')->middleware(['role:Gestor de Proyectos'])->group(function () {
-        Volt::route('dashboard', 'pages.automation-projects.dashboard')->name('automation_projects.dashboard');
+    // Volt::route('dashboard', 'pages.automation-projects.dashboard')->name('automation_projects.dashboard');
+    Route::get('/', function () {
+        return redirect()->route('automation_projects.historial.importacion');
+    });
         Route::view('perfil', 'profile')->name('automation_projects.profile');
         
         Route::middleware(['can:view_automation'])->group(function () {
@@ -371,7 +386,10 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
 
 // Grupo para Gestor de Tableros
 Route::prefix('tableros')->middleware(['role:Gestor de Tableros'])->group(function () {
-    Volt::route('dashboard', 'pages.boards.dashboard')->name('boards.dashboard');
+    // Volt::route('dashboard', 'pages.boards.dashboard')->name('boards.dashboard');
+    Route::get('/', function () {
+        return redirect()->route('boards.historial.importacion');
+    });
     Route::view('perfil', 'profile')->name('boards.profile');
     
     Route::middleware(['can:view_boards'])->group(function () {

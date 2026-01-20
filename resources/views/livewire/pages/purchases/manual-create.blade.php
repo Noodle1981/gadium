@@ -130,13 +130,37 @@ new #[Layout('layouts.app')] class extends Component {
     }
 }; ?>
 
+<x-slot name="header">
+    <div class="bg-gradient-to-r from-orange-600 to-orange-800 rounded-xl shadow-2xl overflow-hidden -mx-6 sm:-mx-8">
+        <div class="px-8 py-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-2xl font-bold text-white mb-1">Registrar Compra de Materiales</h1>
+                    <p class="text-orange-100 text-sm">Ingrese los detalles de la compra manualmente</p>
+                </div>
+                <div class="hidden md:block">
+                    <svg class="w-12 h-12 text-orange-300 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+</x-slot>
+
 <div class="py-12">
     <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
             <div class="p-6 text-gray-900">
-                <div class="mb-6">
-                    <h2 class="text-2xl font-bold text-gray-800">Registrar Compra de Materiales</h2>
-                    <p class="text-gray-600">Ingrese los detalles de la compra manualmente.</p>
+                <!-- CTA Importación Masiva -->
+                <div class="mb-8 flex justify-end">
+                    <a href="{{ route('purchases.import') }}" 
+                       class="inline-flex items-center px-4 py-2 bg-orange-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-orange-700 focus:bg-orange-700 active:bg-orange-900 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition ease-in-out duration-150 shadow-md">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
+                        </svg>
+                        Importación Automática Excel
+                    </a>
                 </div>
 
                 @if($errors->has('duplicate'))

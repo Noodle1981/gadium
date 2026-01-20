@@ -33,14 +33,14 @@ new class extends Component
     $dashboardRoute = 'dashboard';
     if ($isAdmin) $dashboardRoute = 'admin.dashboard';
     elseif ($isManager) $dashboardRoute = 'manager.dashboard';
-    elseif ($isVendedor) $dashboardRoute = 'sales.dashboard';
-    elseif ($isPresupuestador) $dashboardRoute = 'budget.dashboard';
-    elseif ($isHours) $dashboardRoute = 'hours.dashboard';
-    elseif ($isPurchases) $dashboardRoute = 'purchases.dashboard';
+    elseif ($isVendedor) $dashboardRoute = 'sales.historial.ventas';
+    elseif ($isPresupuestador) $dashboardRoute = 'budget.historial.importacion';
+    elseif ($isHours) $dashboardRoute = 'hours.historial.importacion';
+    elseif ($isPurchases) $dashboardRoute = 'purchases.historial.importacion';
     elseif ($isStaffSat) $dashboardRoute = 'staff-satisfaction.dashboard';
     elseif ($isClientSat) $dashboardRoute = 'client-satisfaction.dashboard';
-    elseif ($isBoards) $dashboardRoute = 'boards.dashboard';
-    elseif ($isAutomation) $dashboardRoute = 'automation_projects.dashboard';
+    elseif ($isBoards) $dashboardRoute = 'boards.historial.importacion';
+    elseif ($isAutomation) $dashboardRoute = 'automation_projects.historial.importacion';
 
     $profileRoute = 'admin.profile'; // Default
     if ($isManager) $profileRoute = 'manager.profile';

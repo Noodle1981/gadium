@@ -8,6 +8,12 @@ new class extends Component {
     use WithPagination;
 
     public $search = '';
+    public $expanded = false;
+
+    public function toggleExpanded()
+    {
+        $this->expanded = !$this->expanded;
+    }
 
     public function with()
     {
@@ -60,11 +66,11 @@ new class extends Component {
         </div>
     </x-slot>
 
-    <div class="max-w-full mx-auto sm:px-6 lg:px-8">
+    <div class="py-6">
+        <div class="mx-auto sm:px-6 lg:px-8 transition-all duration-300" :class="$wire.expanded ? 'max-w-full' : 'max-w-7xl'">
         <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-            <div class="p-6 text-gray-900">
+            <div class="p-4 text-gray-900">
                 
-                <!-- Controls Bar -->
                 <div class="mb-4 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
                     <div class="w-full sm:w-1/3">
                         <div class="relative rounded-md shadow-sm">
@@ -76,10 +82,26 @@ new class extends Component {
                             <input wire:model.live.debounce.300ms="search" type="text" class="block w-full rounded-md border-gray-300 pl-10 focus:border-orange-500 focus:ring-orange-500 sm:text-sm" placeholder="Buscar por personal, función, proyecto...">
                         </div>
                     </div>
-                    <div>
-                         @if($hours->total() > 0)
+                    <div class="flex items-center gap-4">
+                        <button wire:click="toggleExpanded" 
+                                class="inline-flex items-center px-3 py-1 bg-orange-100 border border-orange-200 rounded-md font-semibold text-xs text-orange-800 uppercase tracking-widest hover:bg-orange-200 active:bg-orange-300 focus:outline-none transition ease-in-out duration-150"
+                                title="Alternar vista en pantalla completa">
+                            @if(!$expanded)
+                                <span class="flex items-center">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path></svg>
+                                    Expandir
+                                </span>
+                            @else
+                                <span class="flex items-center">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    Contraer
+                                </span>
+                            @endif
+                        </button>
+                        
+                        @if($hours->total() > 0)
                             <span class="text-xs font-medium text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
-                                Mostrando {{ $hours->firstItem() }} - {{ $hours->lastItem() }} de {{ $hours->total() }} registros
+                                Mostrando {{ $hours->firstItem() }} - {{ $hours->lastItem() }} de {{ $hours->total() }}
                             </span>
                         @endif
                     </div>
@@ -89,16 +111,24 @@ new class extends Component {
                     <table class="min-w-full divide-y divide-gray-200 text-xs">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-4 py-3 text-left font-bold text-gray-500 uppercase tracking-wider">Fecha</th>
-                                <th class="px-4 py-3 text-left font-bold text-gray-500 uppercase tracking-wider">Día</th>
-                                <th class="px-4 py-3 text-left font-bold text-gray-500 uppercase tracking-wider">Personal</th>
-                                <th class="px-4 py-3 text-left font-bold text-gray-500 uppercase tracking-wider">Función</th>
-                                <th class="px-4 py-3 text-left font-bold text-gray-500 uppercase tracking-wider">Proyecto</th>
-                                <th class="px-4 py-3 text-left font-bold text-gray-500 uppercase tracking-wider">Detalle</th>
-                                <th class="px-4 py-3 text-left font-bold text-gray-500 uppercase tracking-wider">Hs</th>
-                                <th class="px-4 py-3 text-left font-bold text-gray-500 uppercase tracking-wider">Pond.</th>
-                                <th class="px-4 py-3 text-left font-bold text-gray-500 uppercase tracking-wider">Hs Pond.</th>
-                                <th class="px-4 py-3 text-left font-bold text-gray-500 uppercase tracking-wider">Acciones</th>
+                                <th class="px-4 py-3 text-left font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">Fecha</th>
+                                <th class="px-4 py-3 text-left font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">Día</th>
+                                <th class="px-4 py-3 text-left font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[200px]">Personal</th>
+                                <th class="px-4 py-3 text-left font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">Función</th>
+                                <th class="px-4 py-3 text-left font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[150px]">Proyecto</th>
+                                <th class="px-4 py-3 text-left font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">Hs</th>
+                                <th class="px-4 py-3 text-left font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">Hs Com</th>
+                                <th class="px-4 py-3 text-left font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">Hs 50%</th>
+                                <th class="px-4 py-3 text-left font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">Hs 100%</th>
+                                <th class="px-4 py-3 text-left font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">Viaje</th>
+                                <th class="px-4 py-3 text-left font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">Pernoc.</th>
+                                <th class="px-4 py-3 text-left font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">Deuda</th>
+                                <th class="px-4 py-3 text-left font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">Vianda</th>
+                                <th class="px-4 py-3 text-left font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">Pond.</th>
+                                <th class="px-4 py-3 text-left font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">Hs Totales</th>
+                                <th class="px-4 py-3 text-left font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap min-w-[200px]">Observación</th>
+                                <th class="px-4 py-3 text-left font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap">Programación</th>
+                                <th class="px-4 py-3 text-left font-bold text-gray-500 uppercase tracking-wider whitespace-nowrap sticky right-0 bg-gray-50 z-10 shadow-l">Acciones</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
@@ -107,22 +137,30 @@ new class extends Component {
                             @endphp
 
                             @forelse($hours as $hour)
-                            <tr class="hover:bg-orange-50 transition-colors">
+                            <tr class="hover:bg-orange-50 transition-colors group">
                                 <td class="px-4 py-3 whitespace-nowrap font-medium text-gray-900">{{ $hour->fecha->format('d/m/Y') }}</td>
-                                <td class="px-4 py-3 text-gray-600">{{ $hour->dia }}</td>
-                                <td class="px-4 py-3 font-semibold text-gray-800">{{ $hour->personal }}</td>
-                                <td class="px-4 py-3 text-gray-600">{{ $hour->funcion }}</td>
-                                <td class="px-4 py-3">
+                                <td class="px-4 py-3 text-gray-600 whitespace-nowrap">{{ $hour->dia }}</td>
+                                <td class="px-4 py-3 font-semibold text-gray-800 whitespace-nowrap">{{ $hour->personal }}</td>
+                                <td class="px-4 py-3 text-gray-600 whitespace-nowrap">{{ $hour->funcion }}</td>
+                                <td class="px-4 py-3 whitespace-nowrap">
                                     <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800 border border-orange-200">
-                                        {{ $hour->proyecto }}
+                                        {{ Str::limit($hour->proyecto, 20) }}
                                     </span>
                                 </td>
-                                <td class="px-4 py-3 text-gray-500 max-w-xs truncate" title="{{ $hour->tarea }} / {{ $hour->ot }}">{{ $hour->tarea }} {{ $hour->ot ? '('.$hour->ot.')' : '' }}</td>
                                 <td class="px-4 py-3 font-bold text-gray-900">{{ number_format($hour->hs, 2) }}</td>
+                                <td class="px-4 py-3 text-gray-600">{{ number_format($hour->hs_comun, 2) }}</td>
+                                <td class="px-4 py-3 text-gray-600">{{ number_format($hour->hs_50, 2) }}</td>
+                                <td class="px-4 py-3 text-gray-600">{{ number_format($hour->hs_100, 2) }}</td>
+                                <td class="px-4 py-3 text-gray-600">{{ number_format($hour->hs_viaje, 2) }}</td>
+                                <td class="px-4 py-3 text-gray-600">{{ $hour->hs_pernoctada }}</td>
+                                <td class="px-4 py-3 text-red-600 font-medium">{{ number_format($hour->hs_adeudadas, 2) }}</td>
+                                <td class="px-4 py-3 text-gray-600">{{ $hour->vianda }}</td>
                                 <td class="px-4 py-3 text-gray-600">{{ number_format($hour->ponderador, 4) }}</td>
-                                <td class="px-4 py-3 font-medium text-gray-900">{{ number_format($hour->horas_ponderadas, 2) }}</td>
-                                <td class="px-4 py-3 whitespace-nowrap">
-                                    <a href="{{ route($editRouteName, $hour) }}" class="text-orange-600 hover:text-orange-900 font-bold transition-colors flex items-center">
+                                <td class="px-4 py-3 font-black text-orange-600 bg-orange-50">{{ number_format($hour->horas_ponderadas, 2) }}</td>
+                                <td class="px-4 py-3 text-gray-500 text-xs max-w-xs truncate" title="{{ $hour->observacion }}">{{ $hour->observacion }}</td>
+                                <td class="px-4 py-3 text-gray-500 text-xs whitespace-nowrap">{{ $hour->programacion }}</td>
+                                <td class="px-4 py-3 whitespace-nowrap sticky right-0 bg-white group-hover:bg-orange-50 z-10 shadow-l border-l border-gray-100">
+                                    <a href="{{ route($editRouteName, $hour) }}" class="text-orange-600 hover:text-orange-900 font-bold transition-colors flex items-center justify-center">
                                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                                         Editar
                                     </a>
@@ -130,7 +168,7 @@ new class extends Component {
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="10" class="px-6 py-12 text-center text-gray-400">
+                                <td colspan="18" class="px-6 py-12 text-center text-gray-400">
                                     <div class="flex flex-col items-center">
                                         <div class="bg-gray-100 p-4 rounded-full mb-3">
                                             <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">

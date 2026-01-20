@@ -584,7 +584,7 @@ new class extends Component {
 
                     <!-- Buttons -->
                     <div class="flex justify-end space-x-3 pt-6 border-t">
-                        <a href="{{ route('sales.dashboard') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none">
+                        <a href="{{ route('sales.historial.ventas') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none">
                             Cancelar
                         </a>
                         <button 

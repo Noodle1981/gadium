@@ -35,8 +35,7 @@ new class extends Component {
     public $showClientSearch = false;
     public $isNewClient = false;
     
-    // Sections state
-    public $showMoreDetails = false;
+
 
     public function mount()
     {
@@ -113,10 +112,7 @@ new class extends Component {
         $this->searchResults = [];
     }
     
-    public function toggleDetails()
-    {
-        $this->showMoreDetails = !$this->showMoreDetails;
-    }
+
 
     public function save()
     {
@@ -176,7 +172,7 @@ new class extends Component {
             'enviado_facturar', 'nro_factura', 'porc_facturacion', 'saldo', 'horas_ponderadas'
         ]);
         $this->fecha = date('Y-m-d');
-        $this->showMoreDetails = false;
+
     }
 }; ?>
 
@@ -387,21 +383,10 @@ new class extends Component {
                         </div>
                     </div>
                     
-                    <!-- Botón para mostrar/ocultar detalles -->
-                    <div class="flex justify-center">
-                        <button type="button" wire:click="toggleDetails" class="text-sm flex items-center text-gray-500 hover:text-orange-600 focus:outline-none">
-                            @if($showMoreDetails)
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
-                                Ocultar Detalles Avanzados
-                            @else
-                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
-                                Mostrar Detalles (Proyecto, Fechas, Facturación)
-                            @endif
-                        </button>
-                    </div>
+
 
                     <!-- SECCIONES AVANZADAS -->
-                    <div x-show="$wire.showMoreDetails" x-transition class="space-y-8">
+                    <div class="space-y-8">
                         
                         <!-- 2. DETALLES DEL PROYECTO -->
                         <div class="bg-white p-4 rounded-lg border border-gray-200">
@@ -475,7 +460,7 @@ new class extends Component {
 
                     <!-- Buttons -->
                     <div class="flex justify-end space-x-3 pt-6 border-t">
-                        <a href="{{ route('budget.dashboard') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none">
+                        <a href="{{ route('budget.historial.importacion') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none">
                             Cancelar
                         </a>
                         <button 

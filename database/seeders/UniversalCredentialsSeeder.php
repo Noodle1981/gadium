@@ -190,6 +190,12 @@ class UniversalCredentialsSeeder extends Seeder
                 'permissions_extra' => ['view_boards', 'create_boards', 'edit_boards']
             ],
             [
+                'name' => 'Gestor de Tareas',
+                'email' => 'tareas@gaudium.com',
+                'role' => 'Gestor de Tableros',
+                'permissions_extra' => ['view_boards', 'create_boards', 'edit_boards']
+            ],
+            [
                 'name' => 'Gestor de Proyectos',
                 'email' => 'proyectos@gaudium.com',
                 'role' => 'Gestor de Proyectos',
