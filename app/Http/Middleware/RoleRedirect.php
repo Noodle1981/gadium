@@ -55,7 +55,7 @@ class RoleRedirect
                 } elseif ($rolePrefix === 'client-satisfaction') {
                     return redirect()->route('client-satisfaction.historial.importacion');
                 } elseif ($rolePrefix === 'staff-satisfaction') {
-                    return redirect()->route('staff-satisfaction.historial.importacion');
+                    return redirect()->route('staff-satisfaction.encuesta');
                 } else {
                     // Admin, Manager tiene dashboard
                     return redirect()->route("$rolePrefix.dashboard");

@@ -335,14 +335,14 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
     // --- SATISFACCIÓN PERSONAL (Gestor de Satisfacción Personal) ---
     Route::prefix('satisfaccion_personal')->middleware(['role:Gestor de Satisfacción Personal'])->group(function () {
         Route::get('/', function () {
-            return redirect()->route('staff-satisfaction.historial.importacion');
+            return redirect()->route('staff-satisfaction.encuesta');
         });
         Route::view('perfil', 'profile')->name('staff-satisfaction.profile');
 
         Route::middleware(['can:view_staff_satisfaction'])->group(function () {
             Volt::route('importacion', 'pages.staff-satisfaction.import-wizard')->name('staff-satisfaction.import');
             Volt::route('crear', 'pages.staff-satisfaction.manual-create')->name('staff-satisfaction.create');
-            Volt::route('historial_importacion', 'pages.staff-satisfaction.history')->name('staff-satisfaction.historial.importacion');
+            Volt::route('encuesta', 'pages.staff-satisfaction.survey-list')->name('staff-satisfaction.encuesta');
         });
     });
 

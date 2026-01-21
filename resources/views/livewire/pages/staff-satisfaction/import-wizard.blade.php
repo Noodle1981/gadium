@@ -181,7 +181,7 @@ new class extends Component {
                     </div>
                     
                     <div class="flex flex-wrap gap-3">
-                        <a href="{{ route('staff-satisfaction.historial.importacion') }}" class="inline-flex items-center px-4 py-2 bg-orange-700/30 text-white font-bold rounded-lg hover:bg-orange-700/40 transition-all border border-white/20 backdrop-blur-sm text-sm">
+                        <a href="{{ route('staff-satisfaction.encuesta') }}" class="inline-flex items-center px-4 py-2 bg-orange-700/30 text-white font-bold rounded-lg hover:bg-orange-700/40 transition-all border border-white/20 backdrop-blur-sm text-sm">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                             Ver Historial
                         </a>
@@ -366,7 +366,7 @@ new class extends Component {
                     <button wire:click="resetWizard" class="inline-flex items-center px-4 py-2 border border-orange-200 text-sm font-bold rounded-xl text-orange-700 bg-orange-50 hover:bg-orange-100 transition-all">
                         Importar otro archivo
                     </button>
-                    <a href="{{ route('staff-satisfaction.historial.importacion') }}" class="inline-flex items-center px-6 py-2 border border-transparent text-sm font-bold rounded-xl text-white bg-orange-600 hover:bg-orange-700 shadow-md transition-all hover:scale-105">
+                    <a href="{{ route('staff-satisfaction.encuesta') }}" class="inline-flex items-center px-6 py-2 border border-transparent text-sm font-bold rounded-xl text-white bg-orange-600 hover:bg-orange-700 shadow-md transition-all hover:scale-105">
                         Ir al Historial
                     </a>
                 </div>

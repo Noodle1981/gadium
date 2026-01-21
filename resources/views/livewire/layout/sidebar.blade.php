@@ -37,7 +37,7 @@ new class extends Component
     elseif ($isPresupuestador) $dashboardRoute = 'budget.historial.importacion';
     elseif ($isHours) $dashboardRoute = 'hours.historial.importacion';
     elseif ($isPurchases) $dashboardRoute = 'purchases.historial.importacion';
-    elseif ($isStaffSat) $dashboardRoute = 'staff-satisfaction.historial.importacion';
+    elseif ($isStaffSat) $dashboardRoute = 'staff-satisfaction.encuesta';
     elseif ($isClientSat) $dashboardRoute = 'client-satisfaction.historial.importacion';
     elseif ($isBoards) $dashboardRoute = 'boards.historial.importacion';
     elseif ($isAutomation) $dashboardRoute = 'automation_projects.historial.importacion';
@@ -122,7 +122,7 @@ new class extends Component
             </div>
             
             <!-- Profile Link -->
-            <a href="{{ route($profileRoute) }}" 
+            <!-- <a href="{{ route($profileRoute) }}" 
                class="mt-4 flex items-center justify-center rounded-lg transition-colors duration-200 text-gray-500 hover:text-white hover:bg-gray-800"
                :class="sidebarCollapsed ? 'w-10 h-10 mx-auto' : 'w-full px-4 py-2 text-xs font-semibold'"
                wire:navigate
@@ -131,7 +131,7 @@ new class extends Component
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                 </svg>
                 <span x-show="!sidebarCollapsed">Perfil</span>
-            </a>
+            </a> -->
 
             <!-- Logout Button -->
             <button wire:click="logout" 
