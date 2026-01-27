@@ -467,7 +467,7 @@ new class extends Component {
                 </div>
                 
                 <div class="mt-8 flex justify-center">
-                    <a href="{{ route('sales.historial.ventas') }}" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none transition-colors duration-200">
+                    <a href="{{ route(auth()->user()->hasRole('Manager') ? 'manager.historial.ventas' : (auth()->user()->hasRole('Vendedor') ? 'sales.historial.ventas' : 'admin.historial.ventas')) }}" class="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none transition-colors duration-200">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                         Ir al Historial de Ventas
                     </a>

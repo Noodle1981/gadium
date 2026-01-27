@@ -43,14 +43,17 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
             Route::middleware(['can:view_sales'])->group(function () {
                 Volt::route('importacion', 'pages.sales.import-wizard')->name('admin.sales.import');
                 Volt::route('clientes', 'pages.clients.resolution')->name('admin.clients.resolve'); // clientes
-                
-                
+
+
                 // Historial de Ventas y Presupuestos
                 Volt::route('historial-ventas', 'pages.sales.history')->name('admin.historial.ventas');
+                Volt::route('ventas/crear', 'pages.sales.manual-create')->name('admin.sales.create');
                 Volt::route('ventas/editar/{sale}', 'pages.sales.manual-edit')->name('admin.sales.edit');
-                
+
                 Volt::route('historial-presupuestos', 'pages.budget.history')->name('admin.historial.presupuesto');
                 Volt::route('presupuestos/importacion', 'pages.budget.import-wizard')->name('admin.budget.import');
+                Volt::route('presupuestos/crear', 'pages.budget.manual-create')->name('admin.budget.create');
+                Volt::route('presupuestos/editar/{budget}', 'pages.budget.manual-edit')->name('admin.budget.edit');
             });
 
             // Módulo Producción
@@ -102,11 +105,15 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
             // Módulo Satisfacción Personal
             Route::middleware(['can:view_staff_satisfaction'])->group(function () {
                 Volt::route('satisfaccion-personal', 'pages.staff-satisfaction.index')->name('admin.staff-satisfaction.index');
+                Volt::route('satisfaccion-personal/crear', 'pages.staff-satisfaction.manual-create')->name('admin.staff-satisfaction.create');
+                Volt::route('satisfaccion-personal/importacion', 'pages.staff-satisfaction.import-wizard')->name('admin.staff-satisfaction.import');
             });
 
             // Módulo Satisfacción Clientes
             Route::middleware(['can:view_client_satisfaction'])->group(function () {
                 Volt::route('satisfaccion-clientes', 'pages.client-satisfaction.index')->name('admin.client-satisfaction.index');
+                Volt::route('satisfaccion-clientes/crear', 'pages.client-satisfaction.manual-create')->name('admin.client-satisfaction.create');
+                Volt::route('satisfaccion-clientes/importacion', 'pages.client-satisfaction.import-wizard')->name('admin.client-satisfaction.import');
             });
 
             // Módulo Tableros
@@ -118,12 +125,15 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
             Route::middleware(['can:view_automation'])->group(function () {
                 Volt::route('automatizacion', 'pages.automation-projects.index')->name('admin.automation.index');
                 Volt::route('automatizacion/importacion', 'pages.automation-projects.import-wizard')->name('admin.automation.import');
-                
+
                 Route::get('automatizacion/historial', function () {
                     $projects = \App\Models\AutomationProject::latest()->take(50)->get();
                     return view('historial-automation-projects', ['projects' => $projects]);
                 })->name('admin.automation.historial');
             });
+
+            // Bitácora del Sistema
+            Volt::route('bitacora', 'audit-log')->name('admin.audit.log');
         });
     });
 
@@ -178,10 +188,13 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
         
         // Historial de Ventas y Presupuestos (permanecen en /gerente)
         Volt::route('historial-ventas', 'pages.sales.history')->name('manager.historial.ventas');
+        Volt::route('ventas/crear', 'pages.sales.manual-create')->name('manager.sales.create');
         Volt::route('ventas/editar/{sale}', 'pages.sales.manual-edit')->name('manager.sales.edit');
-        
+
         Volt::route('historial-presupuestos', 'pages.budget.history')->name('manager.historial.presupuesto');
         Volt::route('presupuestos/importacion', 'pages.budget.import-wizard')->name('manager.budget.import');
+        Volt::route('presupuestos/crear', 'pages.budget.manual-create')->name('manager.budget.create');
+        Volt::route('presupuestos/editar/{budget}', 'pages.budget.manual-edit')->name('manager.budget.edit');
 
         // Nuevos Módulos para Manager
         Volt::route('detalles-horas', 'pages.hours.index')->name('manager.hours.index');
@@ -200,7 +213,11 @@ Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
             return view('historial-compras', ['purchases' => $purchases]);
         })->name('manager.historial.compras');
         Volt::route('satisfaccion-personal', 'pages.staff-satisfaction.index')->name('manager.staff-satisfaction.index');
+        Volt::route('satisfaccion-personal/crear', 'pages.staff-satisfaction.manual-create')->name('manager.staff-satisfaction.create');
+        Volt::route('satisfaccion-personal/importacion', 'pages.staff-satisfaction.import-wizard')->name('manager.staff-satisfaction.import');
         Volt::route('satisfaccion-clientes', 'pages.client-satisfaction.index')->name('manager.client-satisfaction.index');
+        Volt::route('satisfaccion-clientes/crear', 'pages.client-satisfaction.manual-create')->name('manager.client-satisfaction.create');
+        Volt::route('satisfaccion-clientes/importacion', 'pages.client-satisfaction.import-wizard')->name('manager.client-satisfaction.import');
         Volt::route('tableros', 'pages.boards.index')->name('manager.boards.index');
 
         // Rutas de Tableros para Manager

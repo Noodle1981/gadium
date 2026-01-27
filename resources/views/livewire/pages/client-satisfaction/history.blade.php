@@ -154,7 +154,7 @@ new #[Layout('layouts.app')] class extends Component {
                     </div>
                     
                     <div class="flex gap-3">
-                        <a href="{{ route('client-satisfaction.create') }}" 
+                        <a href="{{ route(auth()->user()->hasRole('Manager') ? 'manager.client-satisfaction.create' : (auth()->user()->hasRole('Gestor de Satisfacción Clientes') ? 'client-satisfaction.create' : 'admin.client-satisfaction.create')) }}"
                            class="inline-flex items-center px-4 py-2 bg-white text-orange-700 rounded-lg font-bold shadow-md hover:bg-orange-50 transition-colors wire:navigate">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                             Nueva Encuesta

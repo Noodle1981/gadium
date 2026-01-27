@@ -74,7 +74,7 @@ new class extends Component {
                     </div>
                     
                     <div class="flex gap-3">
-                        <a href="{{ route(auth()->user()->hasRole('Manager') ? 'admin.sales.import' : 'sales.import') }}" 
+                        <a href="{{ route(auth()->user()->hasRole('Manager') ? 'admin.sales.import' : (auth()->user()->hasRole('Vendedor') ? 'sales.import' : 'admin.sales.import')) }}"
                            class="inline-flex items-center px-4 py-2 bg-white text-orange-700 rounded-lg font-bold shadow-md hover:bg-orange-50 transition-colors wire:navigate">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
@@ -82,7 +82,7 @@ new class extends Component {
                             Importar Ventas
                         </a>
                         
-                         <a href="{{ route('sales.create') }}" 
+                         <a href="{{ route(auth()->user()->hasRole('Manager') ? 'manager.sales.create' : (auth()->user()->hasRole('Vendedor') ? 'sales.create' : 'admin.sales.create')) }}"
                            class="inline-flex items-center px-4 py-2 bg-orange-900 bg-opacity-30 text-white border border-orange-400 border-opacity-30 rounded-lg font-bold shadow-sm hover:bg-opacity-50 transition-colors wire:navigate">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                             Nueva Venta

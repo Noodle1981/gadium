@@ -285,7 +285,7 @@ new class extends Component {
                             </div>
                             
                             <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse gap-2">
-                                <a href="{{ route('sales.historial.ventas') }}" 
+                                <a href="{{ route(auth()->user()->hasRole('Manager') ? 'manager.historial.ventas' : (auth()->user()->hasRole('Vendedor') ? 'sales.historial.ventas' : 'admin.historial.ventas')) }}"
                                    class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:w-auto sm:text-sm">
                                     Ir al Historial
                                 </a>
@@ -363,12 +363,13 @@ new class extends Component {
                 <div class="mb-8 flex justify-end">
                     @php
                         $importRoute = 'admin.sales.import';
-                        if (auth()->user()->hasRole('Vendedor')) {
+                        if (auth()->user()->hasRole('Manager')) {
+                            $importRoute = 'manager.sales.import';
+                        } elseif (auth()->user()->hasRole('Vendedor')) {
                             $importRoute = 'sales.import';
                         }
-                        // Managers share admin.sales.import route (defined in shared middleware group)
                     @endphp
-                    
+
                     <a href="{{ route($importRoute) }}" 
                        class="inline-flex items-center px-4 py-2 bg-orange-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-orange-700 focus:bg-orange-700 active:bg-orange-900 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition ease-in-out duration-150 shadow-md">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -584,7 +585,7 @@ new class extends Component {
 
                     <!-- Buttons -->
                     <div class="flex justify-end space-x-3 pt-6 border-t">
-                        <a href="{{ route('sales.historial.ventas') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none">
+                        <a href="{{ route(auth()->user()->hasRole('Manager') ? 'manager.historial.ventas' : (auth()->user()->hasRole('Vendedor') ? 'sales.historial.ventas' : 'admin.historial.ventas')) }}" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none">
                             Cancelar
                         </a>
                         <button 

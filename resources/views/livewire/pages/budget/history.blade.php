@@ -58,7 +58,7 @@ new class extends Component {
                             Importar Presupuesto
                         </a>
 
-                        <a href="{{ route('budget.create') }}" 
+                        <a href="{{ route(auth()->user()->hasRole('Manager') ? 'manager.budget.create' : (auth()->user()->hasRole('Presupuestador') ? 'budget.create' : 'admin.budget.create')) }}"
                            class="inline-flex items-center px-4 py-2 bg-orange-900 bg-opacity-30 text-white border border-orange-400 border-opacity-30 rounded-lg font-bold shadow-sm hover:bg-opacity-50 transition-colors wire:navigate">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                             Crear Presupuesto
@@ -167,7 +167,7 @@ new class extends Component {
                                         </span>
                                     </td>
                                     <td class="px-3 py-3 text-center whitespace-nowrap">
-                                        <a href="{{ route('budget.edit', $budget) }}" class="text-orange-600 hover:text-orange-900 font-bold hover:underline" wire:navigate>Editar</a>
+                                        <a href="{{ route(auth()->user()->hasRole('Manager') ? 'manager.budget.edit' : (auth()->user()->hasRole('Presupuestador') ? 'budget.edit' : 'admin.budget.edit'), $budget) }}" class="text-orange-600 hover:text-orange-900 font-bold hover:underline" wire:navigate>Editar</a>
                                     </td>
                                 </tr>
                                 @empty
