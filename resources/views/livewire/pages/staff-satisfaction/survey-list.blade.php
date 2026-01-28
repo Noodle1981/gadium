@@ -70,7 +70,7 @@ new class extends Component {
                     </div>
                     
                     <div class="flex flex-wrap gap-3">
-                        <a href="{{ route(auth()->user()->hasRole('Manager') ? 'manager.staff-satisfaction.create' : (auth()->user()->hasRole('Gestor de Satisfacción Personal') ? 'staff-satisfaction.create' : 'admin.staff-satisfaction.create')) }}" class="inline-flex items-center px-4 py-2 bg-white text-orange-600 font-bold rounded-lg hover:bg-orange-50 transition-all shadow-md active:scale-95 text-sm">
+                        <a href="{{ route('app.staff-satisfaction.create') }}" class="inline-flex items-center px-4 py-2 bg-white text-orange-600 font-bold rounded-lg hover:bg-orange-50 transition-all shadow-md active:scale-95 text-sm">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                             Nueva Encuesta
                         </a>

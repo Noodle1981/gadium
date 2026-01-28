@@ -159,13 +159,7 @@ new #[Layout('layouts.app')] class extends Component {
 
         session()->flash('message', 'Datos guardados correctamente.');
 
-        $historyRoute = 'admin.client-satisfaction.index';
-        if (auth()->user()->hasRole('Manager')) {
-            $historyRoute = 'manager.client-satisfaction.index';
-        } elseif (auth()->user()->hasRole('Gestor de Satisfacción Clientes')) {
-            $historyRoute = 'client-satisfaction.historial.importacion';
-        }
-        return redirect()->route($historyRoute);
+        return redirect()->route('app.client-satisfaction.index');
     }
     
     // Helper para opciones de rating 1-5
@@ -193,7 +187,7 @@ new #[Layout('layouts.app')] class extends Component {
                     </div>
                     
                     <div class="flex flex-wrap gap-3">
-                        <a href="{{ route(auth()->user()->hasRole('Manager') ? 'manager.client-satisfaction.index' : (auth()->user()->hasRole('Gestor de Satisfacción Clientes') ? 'client-satisfaction.historial.importacion' : 'admin.client-satisfaction.index')) }}" class="inline-flex items-center px-4 py-2 bg-orange-700/30 text-white font-bold rounded-lg hover:bg-orange-700/40 transition-all border border-white/20 backdrop-blur-sm text-sm">
+                        <a href="{{ route('app.client-satisfaction.index') }}" class="inline-flex items-center px-4 py-2 bg-orange-700/30 text-white font-bold rounded-lg hover:bg-orange-700/40 transition-all border border-white/20 backdrop-blur-sm text-sm">
                             <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
                             Volver al Listado
                         </a>
@@ -214,7 +208,7 @@ new #[Layout('layouts.app')] class extends Component {
                         <p class="text-sm text-gray-500 font-medium">Complete los datos directamente en la tabla para carga masiva.</p>
                     </div>
                     <div>
-                        <a href="{{ route(auth()->user()->hasRole('Manager') ? 'manager.client-satisfaction.import' : (auth()->user()->hasRole('Gestor de Satisfacción Clientes') ? 'client-satisfaction.import' : 'admin.client-satisfaction.import')) }}" class="inline-flex items-center px-6 py-3 bg-indigo-950 border border-transparent rounded-2xl font-bold text-sm text-white shadow-xl hover:bg-indigo-900 transition-all hover:scale-105 active:scale-95">
+                        <a href="{{ route('app.client-satisfaction.import') }}" class="inline-flex items-center px-6 py-3 bg-indigo-950 border border-transparent rounded-2xl font-bold text-sm text-white shadow-xl hover:bg-indigo-900 transition-all hover:scale-105 active:scale-95">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
                             Importación Automática Excel
                         </a>
@@ -325,7 +319,7 @@ new #[Layout('layouts.app')] class extends Component {
                         Guardar Datos
                     </button>
                     
-                    <a href="{{ route(auth()->user()->hasRole('Manager') ? 'manager.client-satisfaction.index' : (auth()->user()->hasRole('Gestor de Satisfacción Clientes') ? 'client-satisfaction.historial.importacion' : 'admin.client-satisfaction.index')) }}" class="ml-4 inline-flex justify-center items-center px-6 py-3 border border-gray-300 shadow-sm text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    <a href="{{ route('app.client-satisfaction.index') }}" class="ml-4 inline-flex justify-center items-center px-6 py-3 border border-gray-300 shadow-sm text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                         Cancelar
                     </a>
                 </div>

@@ -17,6 +17,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
+            'permission.redirect' => \App\Http\Middleware\PermissionRedirect::class,
+            // Mantener el antiguo para compatibilidad durante la transición
             'role.redirect' => \App\Http\Middleware\RoleRedirect::class,
         ]);
     })

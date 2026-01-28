@@ -323,7 +323,7 @@ new class extends Component {
                     <button wire:click="resetWizard" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-orange-700 bg-orange-100 hover:bg-orange-200 focus:outline-none">
                         Importar otro archivo
                     </button>
-                    <a href="{{ route(auth()->user()->hasRole('Manager') ? 'manager.historial.horas' : (auth()->user()->hasRole('Gestor de Horas') ? 'hours.historial.importacion' : 'admin.historial.horas')) }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none">
+                    <a href="{{ route('app.hours.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none">
                         Ver Historial
                     </a>
                 </div>

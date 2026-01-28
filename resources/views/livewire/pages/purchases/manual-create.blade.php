@@ -125,8 +125,7 @@ new #[Layout('layouts.app')] class extends Component {
             'hash' => $hash,
         ]);
 
-        $redirectRoute = auth()->user()->hasRole('Manager') ? 'manager.historial.compras' : (auth()->user()->hasRole('Gestor de Compras') ? 'purchases.historial.importacion' : 'admin.historial.compras');
-        return redirect()->route($redirectRoute)->with('status', 'Compra registrada correctamente.');
+        return redirect()->route('app.purchases.index')->with('status', 'Compra registrada correctamente.');
     }
 }; ?>
 
@@ -154,7 +153,7 @@ new #[Layout('layouts.app')] class extends Component {
             <div class="p-6 text-gray-900">
                 <!-- CTA Importación Masiva -->
                 <div class="mb-8 flex justify-end">
-                    <a href="{{ route('purchases.import') }}" 
+                    <a href="{{ route('app.purchases.import') }}" 
                        class="inline-flex items-center px-4 py-2 bg-orange-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-orange-700 focus:bg-orange-700 active:bg-orange-900 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition ease-in-out duration-150 shadow-md">
                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
@@ -313,7 +312,7 @@ new #[Layout('layouts.app')] class extends Component {
                     </div>
 
                     <div class="flex justify-end gap-4 mt-6 pt-6 border-t border-gray-200">
-                        <a href="{{ route(auth()->user()->hasRole('Manager') ? 'manager.historial.compras' : (auth()->user()->hasRole('Gestor de Compras') ? 'purchases.historial.importacion' : 'admin.historial.compras')) }}" class="px-4 py-2 bg-white border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                        <a href="{{ route('app.purchases.index') }}" class="px-4 py-2 bg-white border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
                             Cancelar
                         </a>
                         <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">

@@ -56,7 +56,7 @@ class UserController extends Controller
         // Managers no pueden asignar rol Super Admin
         if (auth()->user()->hasRole('Manager') && !auth()->user()->hasRole('Super Admin')) {
             if ($validated['role'] === 'Super Admin') {
-                return redirect()->route('users.create')
+                return redirect()->route('app.users.create')
                     ->with('error', 'No tiene permisos para asignar el rol Super Admin.');
             }
         }
@@ -74,7 +74,7 @@ class UserController extends Controller
         // Enviar email de invitación
         $user->notify(new \App\Notifications\UserInvitation());
         
-        return redirect()->route('users.index')
+        return redirect()->route('app.users.index')
             ->with('success', 'Usuario creado exitosamente. Se ha enviado un email de invitación a ' . $user->email);
     }
 
@@ -94,7 +94,7 @@ class UserController extends Controller
         // Managers no pueden editar Super Admins
         if (auth()->user()->hasRole('Manager') && !auth()->user()->hasRole('Super Admin')) {
             if ($user->hasRole('Super Admin')) {
-                return redirect()->route('users.index')
+                return redirect()->route('app.users.index')
                     ->with('error', 'No tiene permisos para editar un Super Admin.');
             }
         }
@@ -118,13 +118,13 @@ class UserController extends Controller
         // Managers no pueden editar Super Admins
         if (auth()->user()->hasRole('Manager') && !auth()->user()->hasRole('Super Admin')) {
             if ($user->hasRole('Super Admin')) {
-                return redirect()->route('users.index')
+                return redirect()->route('app.users.index')
                     ->with('error', 'No tiene permisos para editar un Super Admin.');
             }
             
             // Managers no pueden asignar rol Super Admin
             if ($request->input('role') === 'Super Admin') {
-                return redirect()->route('users.edit', $user)
+                return redirect()->route('app.users.edit', $user)
                     ->with('error', 'No tiene permisos para asignar el rol Super Admin.');
             }
         }
@@ -143,7 +143,7 @@ class UserController extends Controller
         // Sincronizar rol (elimina roles anteriores y asigna el nuevo)
         $user->syncRoles([$validated['role']]);
 
-        return redirect()->route('users.index')
+        return redirect()->route('app.users.index')
             ->with('success', 'Usuario actualizado exitosamente.');
     }
 
@@ -154,13 +154,13 @@ class UserController extends Controller
     {
         // Proteger contra eliminación del Super Admin
         if ($user->hasRole('Super Admin')) {
-            return redirect()->route('users.index')
+            return redirect()->route('app.users.index')
                 ->with('error', 'No se puede eliminar al Super Administrador.');
         }
 
         $user->delete(); // Soft delete
 
-        return redirect()->route('users.index')
+        return redirect()->route('app.users.index')
             ->with('success', 'Usuario eliminado exitosamente.');
     }
 }

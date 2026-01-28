@@ -31,16 +31,7 @@ new class extends Component
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    @php
-                        $dashboardRoute = 'dashboard';
-                        if (auth()->user()->hasAnyRole(['Super Admin', 'Admin'])) $dashboardRoute = 'admin.dashboard';
-                        elseif (auth()->user()->hasRole('Manager')) $dashboardRoute = 'manager.dashboard';
-
-                        $profileRoute = 'admin.profile';
-                        if (auth()->user()->hasRole('Manager')) $profileRoute = 'manager.profile';
-                        elseif (auth()->user()->hasAnyRole(['Super Admin', 'Admin'])) $profileRoute = 'admin.profile';
-                    @endphp
-                    <x-nav-link :href="route($dashboardRoute)" :active="request()->routeIs($dashboardRoute)" wire:navigate>
+                    <x-nav-link :href="route('app.dashboard')" :active="request()->routeIs('app.dashboard')" wire:navigate>
                         {{ __('Dashboard') }}
                     </x-nav-link>
                 </div>
@@ -62,7 +53,7 @@ new class extends Component
                     </x-slot>
 
                     <x-slot name="content">
-                        <x-dropdown-link :href="route($profileRoute)" wire:navigate>
+                        <x-dropdown-link :href="route('app.profile')" wire:navigate>
                             {{ __('Profile') }}
                         </x-dropdown-link>
 
@@ -91,16 +82,7 @@ new class extends Component
     <!-- Responsive Navigation Menu -->
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
-            @php
-                $dashboardRoute = 'dashboard';
-                if (auth()->user()->hasAnyRole(['Super Admin', 'Admin'])) $dashboardRoute = 'admin.dashboard';
-                elseif (auth()->user()->hasRole('Manager')) $dashboardRoute = 'manager.dashboard';
-
-                $profileRoute = 'admin.profile';
-                if (auth()->user()->hasRole('Manager')) $profileRoute = 'manager.profile';
-                elseif (auth()->user()->hasAnyRole(['Super Admin', 'Admin'])) $profileRoute = 'admin.profile';
-            @endphp
-            <x-responsive-nav-link :href="route($dashboardRoute)" :active="request()->routeIs($dashboardRoute)" wire:navigate>
+            <x-responsive-nav-link :href="route('app.dashboard')" :active="request()->routeIs('app.dashboard')" wire:navigate>
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
         </div>
@@ -113,7 +95,7 @@ new class extends Component
             </div>
 
             <div class="mt-3 space-y-1">
-                <x-responsive-nav-link :href="route($profileRoute)" wire:navigate>
+                <x-responsive-nav-link :href="route('app.profile')" wire:navigate>
                     {{ __('Profile') }}
                 </x-responsive-nav-link>
 

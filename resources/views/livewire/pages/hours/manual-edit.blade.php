@@ -144,14 +144,7 @@ new class extends Component {
     
     public function cancel()
     {
-        // Determine redirect route based on role
-        if (auth()->user()->hasRole('Manager')) {
-            return redirect()->route('manager.historial.horas');
-        } elseif (auth()->user()->hasRole('Gestor de Horas')) {
-             return redirect()->route('hours.historial.importacion');
-        } else {
-             return redirect()->route('admin.historial.horas');
-        }
+        return redirect()->route('app.hours.index');
     }
 }; ?>
 

@@ -46,7 +46,7 @@ class RoleController extends Controller
             'name' => $validated['name'],
         ]);
 
-        return redirect()->route('roles.permissions', $role)
+        return redirect()->route('app.roles.permissions', $role)
             ->with('success', 'Rol creado exitosamente. Ahora asigne los permisos.');
     }
 
@@ -66,7 +66,7 @@ class RoleController extends Controller
     {
         // Proteger Super Admin
         if ($role->name === 'Super Admin') {
-            return redirect()->route('roles.index')
+            return redirect()->route('app.roles.index')
                 ->with('error', 'El rol Super Admin no puede ser editado.');
         }
 
@@ -80,7 +80,7 @@ class RoleController extends Controller
     {
         // Proteger Super Admin
         if ($role->name === 'Super Admin') {
-            return redirect()->route('roles.index')
+            return redirect()->route('app.roles.index')
                 ->with('error', 'El rol Super Admin no puede ser modificado.');
         }
 
@@ -93,7 +93,7 @@ class RoleController extends Controller
             'name' => $validated['name'],
         ]);
 
-        return redirect()->route('roles.index')
+        return redirect()->route('app.roles.index')
             ->with('success', 'Rol actualizado exitosamente.');
     }
 
@@ -104,19 +104,19 @@ class RoleController extends Controller
     {
         // Proteger Super Admin
         if ($role->name === 'Super Admin') {
-            return redirect()->route('roles.index')
+            return redirect()->route('app.roles.index')
                 ->with('error', 'El rol Super Admin no puede ser eliminado.');
         }
 
         // Verificar si tiene usuarios asignados
         if ($role->users()->count() > 0) {
-            return redirect()->route('roles.index')
+            return redirect()->route('app.roles.index')
                 ->with('error', 'No se puede eliminar un rol con usuarios asignados.');
         }
 
         $role->delete();
 
-        return redirect()->route('roles.index')
+        return redirect()->route('app.roles.index')
             ->with('success', 'Rol eliminado exitosamente.');
     }
 
@@ -147,7 +147,7 @@ class RoleController extends Controller
     {
         // Proteger Super Admin
         if ($role->name === 'Super Admin') {
-            return redirect()->route('roles.index')
+            return redirect()->route('app.roles.index')
                 ->with('error', 'Los permisos del Super Admin no pueden ser modificados.');
         }
 
@@ -156,7 +156,7 @@ class RoleController extends Controller
         // Sincronizar permisos
         $role->syncPermissions($permissions);
 
-        return redirect()->route('roles.index')
+        return redirect()->route('app.roles.index')
             ->with('success', 'Permisos actualizados exitosamente.');
     }
 }

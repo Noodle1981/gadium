@@ -42,20 +42,15 @@ new class extends Component {
                         <p class="text-orange-100 text-lg font-medium opacity-90">Registro completo y auditoría de tiempos</p>
                     </div>
                     <div class="flex space-x-3">
-                         @php
-                            $createRoute = auth()->user()->hasRole('Manager') ? 'manager.hours.create' : (auth()->user()->hasRole('Gestor de Horas') ? 'hours.create' : 'admin.hours.create');
-                            $importRoute = auth()->user()->hasRole('Manager') ? 'manager.hours.import' : (auth()->user()->hasRole('Gestor de Horas') ? 'hours.import' : 'admin.hours.import');
-                        @endphp
-
                          <!-- Botón Manual -->
-                         <a href="{{ route($createRoute) }}" 
+                         <a href="{{ route('app.hours.create') }}"
                            class="inline-flex items-center px-4 py-2 bg-white bg-opacity-20 border border-white border-opacity-30 rounded-lg font-semibold text-xs text-white uppercase tracking-widest hover:bg-opacity-30 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-orange-600 transition ease-in-out duration-150 backdrop-blur-sm shadow-sm group">
                             <svg class="w-5 h-5 mr-2 group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
                             Cargar Manualmente
                         </a>
-                        
+
                         <!-- Botón Importar -->
-                        <a href="{{ route($importRoute) }}" 
+                        <a href="{{ route('app.hours.import') }}" 
                            class="inline-flex items-center px-4 py-2 bg-white text-orange-600 rounded-lg font-bold text-xs uppercase tracking-widest hover:bg-orange-50 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-orange-600 transition ease-in-out duration-150 shadow-lg transform hover:-translate-y-0.5">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path></svg>
                             Importación Automática
@@ -132,10 +127,6 @@ new class extends Component {
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200">
-                            @php
-                                $editRouteName = auth()->user()->hasRole('Manager') ? 'manager.hours.edit' : (auth()->user()->hasRole('Gestor de Horas') ? 'hours.edit' : 'admin.hours.edit');
-                            @endphp
-
                             @forelse($hours as $hour)
                             <tr class="hover:bg-orange-50 transition-colors group">
                                 <td class="px-4 py-3 whitespace-nowrap font-medium text-gray-900">{{ $hour->fecha->format('d/m/Y') }}</td>
@@ -160,7 +151,7 @@ new class extends Component {
                                 <td class="px-4 py-3 text-gray-500 text-xs max-w-xs truncate" title="{{ $hour->observacion }}">{{ $hour->observacion }}</td>
                                 <td class="px-4 py-3 text-gray-500 text-xs whitespace-nowrap">{{ $hour->programacion }}</td>
                                 <td class="px-4 py-3 whitespace-nowrap sticky right-0 bg-white group-hover:bg-orange-50 z-10 shadow-l border-l border-gray-100">
-                                    <a href="{{ route($editRouteName, $hour) }}" class="text-orange-600 hover:text-orange-900 font-bold transition-colors flex items-center justify-center">
+                                    <a href="{{ route('app.hours.edit', $hour) }}" class="text-orange-600 hover:text-orange-900 font-bold transition-colors flex items-center justify-center">
                                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                                         Editar
                                     </a>

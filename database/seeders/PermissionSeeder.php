@@ -39,6 +39,12 @@ class PermissionSeeder extends Seeder
         Permission::firstOrCreate(['name' => 'edit_production']);
         Permission::firstOrCreate(['name' => 'delete_production']);
 
+        // Permisos de Presupuestos
+        Permission::firstOrCreate(['name' => 'view_budgets']);
+        Permission::firstOrCreate(['name' => 'create_budgets']);
+        Permission::firstOrCreate(['name' => 'edit_budgets']);
+        Permission::firstOrCreate(['name' => 'delete_budgets']);
+
         // Permisos de RRHH
         Permission::firstOrCreate(['name' => 'view_hr']);
         Permission::firstOrCreate(['name' => 'create_hr']);

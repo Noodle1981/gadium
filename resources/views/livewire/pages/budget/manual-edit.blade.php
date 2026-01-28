@@ -173,7 +173,7 @@ new class extends Component {
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 {{ __('Editar Presupuesto') }} <span class="text-gray-500 text-sm ml-2">#{{ $budget->id }}</span>
             </h2>
-            <a href="{{ route(auth()->user()->hasRole('Manager') ? 'manager.historial.presupuesto' : (auth()->user()->hasRole('Presupuestador') ? 'budget.historial.importacion' : 'admin.historial.presupuesto')) }}" class="text-green-600 hover:text-green-900 text-sm font-medium">Volver al Historial</a>
+            <a href="{{ route('app.budgets.history') }}" class="text-green-600 hover:text-green-900 text-sm font-medium">Volver al Historial</a>
         </div>
     </x-slot>
 
@@ -228,7 +228,7 @@ new class extends Component {
                             </div>
                             
                             <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                                <a href="{{ route(auth()->user()->hasRole('Manager') ? 'manager.historial.presupuesto' : (auth()->user()->hasRole('Presupuestador') ? 'budget.historial.importacion' : 'admin.historial.presupuesto')) }}"
+                                <a href="{{ route('app.budgets.history') }}"
                                    class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-green-600 text-base font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 sm:ml-3 sm:w-auto sm:text-sm">
                                     Aceptar
                                 </a>
@@ -398,7 +398,7 @@ new class extends Component {
 
                     <!-- Buttons -->
                     <div class="flex justify-end space-x-3 pt-6 border-t">
-                        <a href="{{ route(auth()->user()->hasRole('Manager') ? 'manager.historial.presupuesto' : (auth()->user()->hasRole('Presupuestador') ? 'budget.historial.importacion' : 'admin.historial.presupuesto')) }}" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none">
+                        <a href="{{ route('app.budgets.history') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none">
                             Cancelar
                         </a>
                         <button 

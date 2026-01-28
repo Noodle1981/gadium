@@ -23,6 +23,7 @@ class RoleSeeder extends Seeder
             'view_users', 'create_users', 'edit_users', 'delete_users',
             'view_roles', 'create_roles', 'edit_roles', 'delete_roles', // Gestión de Roles
             'view_sales', 'create_sales', 'edit_sales',
+            'view_budgets', 'create_budgets', 'edit_budgets', // Presupuestos
             'view_production', 'create_production', 'edit_production',
             'view_hr', 'create_hr', 'edit_hr',
             'view_dashboards',
@@ -41,6 +42,7 @@ class RoleSeeder extends Seeder
             'view_users', 'create_users', 'edit_users', 'delete_users', // Gestión de Usuarios completa
             'view_roles', 'create_roles', 'edit_roles', 'delete_roles', // Gestión de Roles completa
             'view_sales', 'create_sales', 'edit_sales',
+            'view_budgets', 'create_budgets', 'edit_budgets', // Presupuestos
             'view_production', 'create_production', 'edit_production',
             'view_hr',
             'view_dashboards',

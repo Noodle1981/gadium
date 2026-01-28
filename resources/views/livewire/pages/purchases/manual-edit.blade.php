@@ -85,15 +85,13 @@ new #[Layout('layouts.app')] class extends Component {
             'hash' => $newHash,
         ]);
 
-        $redirectRoute = auth()->user()->hasRole('Manager') ? 'manager.historial.compras' : (auth()->user()->hasRole('Gestor de Compras') ? 'purchases.historial.importacion' : 'admin.historial.compras');
-        return redirect()->route($redirectRoute)->with('status', 'Registro actualizado correctamente.');
+        return redirect()->route('app.purchases.index')->with('status', 'Registro actualizado correctamente.');
     }
     
     public function delete()
     {
         $this->purchaseDetail->delete();
-        $redirectRoute = auth()->user()->hasRole('Manager') ? 'manager.historial.compras' : (auth()->user()->hasRole('Gestor de Compras') ? 'purchases.historial.importacion' : 'admin.historial.compras');
-        return redirect()->route($redirectRoute)->with('status', 'Registro eliminado correctamente.');
+        return redirect()->route('app.purchases.index')->with('status', 'Registro eliminado correctamente.');
     }
 }; ?>
 
@@ -211,7 +209,7 @@ new #[Layout('layouts.app')] class extends Component {
                     </div>
 
                     <div class="flex justify-end gap-4 mt-6 pt-6 border-t border-gray-200">
-                        <a href="{{ route(auth()->user()->hasRole('Manager') ? 'manager.historial.compras' : (auth()->user()->hasRole('Gestor de Compras') ? 'purchases.historial.importacion' : 'admin.historial.compras')) }}" class="px-4 py-2 bg-white border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                        <a href="{{ route('app.purchases.index') }}" class="px-4 py-2 bg-white border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
                             Cancelar
                         </a>
                         <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">

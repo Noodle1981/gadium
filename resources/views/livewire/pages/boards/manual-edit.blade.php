@@ -67,14 +67,14 @@ new class extends Component {
         $this->boardDetail->update(array_merge($validated, ['hash' => $hash]));
 
         session()->flash('message', 'Registro actualizado correctamente.');
-        $this->redirect(route(auth()->user()->hasRole('Manager') ? 'manager.historial.tableros' : (auth()->user()->hasRole('Gestor de Tableros') ? 'boards.historial.importacion' : 'admin.historial.tableros')));
+        $this->redirect(route('app.boards.index'));
     }
 
     public function destroy()
     {
         $this->boardDetail->delete();
         session()->flash('message', 'Registro eliminado correctamente.');
-        $this->redirect(route(auth()->user()->hasRole('Manager') ? 'manager.historial.tableros' : (auth()->user()->hasRole('Gestor de Tableros') ? 'boards.historial.importacion' : 'admin.historial.tableros')));
+        $this->redirect(route('app.boards.index'));
     }
 }; ?>
 
@@ -158,7 +158,7 @@ new class extends Component {
             </div>
 
             <div class="flex justify-end space-x-3">
-                <a href="{{ route(auth()->user()->hasRole('Manager') ? 'manager.historial.tableros' : (auth()->user()->hasRole('Gestor de Tableros') ? 'boards.historial.importacion' : 'admin.historial.tableros')) }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none">
+                <a href="{{ route('app.boards.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none">
                     Cancelar
                 </a>
                 <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">

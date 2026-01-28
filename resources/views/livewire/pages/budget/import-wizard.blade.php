@@ -486,7 +486,7 @@ new class extends Component {
                     <button wire:click="resetWizard" class="inline-flex items-center px-4 py-2 border border-green-200 text-sm font-medium rounded-md text-green-700 bg-green-100 hover:bg-green-200 focus:outline-none">
                         Importar otro archivo
                     </button>
-                    <a href="{{ route(auth()->user()->hasRole('Manager') ? 'manager.historial.presupuesto' : (auth()->user()->hasRole('Presupuestador') ? 'budget.historial.importacion' : 'admin.historial.presupuesto')) }}" class="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 shadow-sm">
+                    <a href="{{ route('app.budgets.history') }}" class="inline-flex items-center px-6 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 shadow-sm">
                         Ir al Historial de Presupuestos
                     </a>
                 </div>

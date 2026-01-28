@@ -74,15 +74,15 @@ new class extends Component {
                     </div>
                     
                     <div class="flex gap-3">
-                        <a href="{{ route(auth()->user()->hasRole('Manager') ? 'admin.sales.import' : (auth()->user()->hasRole('Vendedor') ? 'sales.import' : 'admin.sales.import')) }}"
+                        <a href="{{ route('app.sales.import') }}"
                            class="inline-flex items-center px-4 py-2 bg-white text-orange-700 rounded-lg font-bold shadow-md hover:bg-orange-50 transition-colors wire:navigate">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
                             </svg>
                             Importar Ventas
                         </a>
-                        
-                         <a href="{{ route(auth()->user()->hasRole('Manager') ? 'manager.sales.create' : (auth()->user()->hasRole('Vendedor') ? 'sales.create' : 'admin.sales.create')) }}"
+
+                         <a href="{{ route('app.sales.create') }}"
                            class="inline-flex items-center px-4 py-2 bg-orange-900 bg-opacity-30 text-white border border-orange-400 border-opacity-30 rounded-lg font-bold shadow-sm hover:bg-opacity-50 transition-colors wire:navigate">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                             Nueva Venta
@@ -230,7 +230,7 @@ new class extends Component {
                                     @endif
                                     
                                     <td class="px-2 py-2 whitespace-nowrap">
-                                        <a href="{{ route(auth()->user()->hasRole('Manager') ? 'manager.sales.edit' : (auth()->user()->hasRole('Admin') ? 'admin.sales.edit' : 'sales.edit'), $sale) }}" class="text-indigo-600 hover:text-indigo-900 font-medium" wire:navigate>Editar</a>
+                                        <a href="{{ route('app.sales.edit', $sale) }}" class="text-indigo-600 hover:text-indigo-900 font-medium" wire:navigate>Editar</a>
                                     </td>
                                     
                                     <!-- Datos Secundarios Finales -->

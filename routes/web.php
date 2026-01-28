@@ -14,421 +14,328 @@ Route::get('/setup-password', [PasswordSetupController::class, 'show'])
 Route::post('/setup-password', [PasswordSetupController::class, 'store'])
     ->name('password.setup.store');
 
-Route::middleware(['auth', 'verified', 'role.redirect'])->group(function () {
-    Route::view('dashboard', 'dashboard')->name('dashboard');
-    
-    // --- ADMINISTRACIÓN ---
-    Route::prefix('admin')->group(function () {
-        
-        // Super Admin, Admin & Manager (Gestión de Usuarios y Roles)
-        Route::middleware(['role:Super Admin|Admin|Manager'])->group(function () {
-            Volt::route('dashboard', 'pages.admin.dashboard')->name('admin.dashboard');
-            Route::view('profile', 'profile')->name('admin.profile');
-            
-            // Gestión de Usuarios
-            Route::middleware(['can:view_users'])->group(function () {
-                Route::resource('users', UserController::class);
-            });
+// ============================================================================
+// RUTAS UNIFICADAS - BASADAS EN PERMISOS
+// ============================================================================
+// Todas las rutas usan el prefijo /app y son controladas por permisos,
+// no por nombres de rol. Esto elimina duplicación y simplifica el mantenimiento.
+// ============================================================================
 
-            // Gestión de Roles
-            Route::middleware(['can:view_roles'])->group(function () {
-                Route::resource('roles', RoleController::class);
-                Route::get('roles/{role}/permissions', [RoleController::class, 'permissions'])
-                    ->name('roles.permissions');
-                Route::post('roles/{role}/permissions', [RoleController::class, 'updatePermissions'])
-                    ->name('roles.permissions.update');
-            });
+Route::middleware(['auth', 'verified'])->prefix('app')->group(function () {
 
-            // Módulo Ventas
-            Route::middleware(['can:view_sales'])->group(function () {
-                Volt::route('importacion', 'pages.sales.import-wizard')->name('admin.sales.import');
-                Volt::route('clientes', 'pages.clients.resolution')->name('admin.clients.resolve'); // clientes
+    // ========================================
+    // DASHBOARD Y PERFIL
+    // ========================================
 
+    Route::middleware(['can:view_dashboards'])->group(function () {
+        Volt::route('dashboard', 'pages.admin.dashboard')->name('app.dashboard');
+        Volt::route('intelligence', 'pages.manager.intelligence')->name('app.intelligence');
+        Volt::route('audit', 'audit-log')->name('app.audit');
+    });
 
-                // Historial de Ventas y Presupuestos
-                Volt::route('historial-ventas', 'pages.sales.history')->name('admin.historial.ventas');
-                Volt::route('ventas/crear', 'pages.sales.manual-create')->name('admin.sales.create');
-                Volt::route('ventas/editar/{sale}', 'pages.sales.manual-edit')->name('admin.sales.edit');
+    // Perfil - todos los usuarios autenticados
+    Route::view('profile', 'profile')->name('app.profile');
 
-                Volt::route('historial-presupuestos', 'pages.budget.history')->name('admin.historial.presupuesto');
-                Volt::route('presupuestos/importacion', 'pages.budget.import-wizard')->name('admin.budget.import');
-                Volt::route('presupuestos/crear', 'pages.budget.manual-create')->name('admin.budget.create');
-                Volt::route('presupuestos/editar/{budget}', 'pages.budget.manual-edit')->name('admin.budget.edit');
-            });
+    // ========================================
+    // MÓDULO VENTAS
+    // ========================================
 
-            // Módulo Producción
-            Route::middleware(['can:view_production'])->group(function () {
-                Volt::route('produccion', 'pages.manufacturing.production-log')->name('admin.manufacturing.production.log'); // produccion
-            });
+    Route::prefix('sales')->middleware(['can:view_sales'])->group(function () {
+        Volt::route('/', 'pages.sales.history')->name('app.sales.index');
+        Volt::route('history', 'pages.sales.history')->name('app.sales.history');
+        Volt::route('import', 'pages.sales.import-wizard')->name('app.sales.import');
 
-            // Módulo RRHH
-            Route::middleware(['can:view_hr'])->group(function () {
-                Volt::route('rrhh', 'pages.hr.factor-manager')->name('admin.hr.factors'); // rrhh
-            });
+        Route::middleware(['can:create_sales'])->group(function () {
+            Volt::route('create', 'pages.sales.manual-create')->name('app.sales.create');
+        });
 
-            // Módulo Detalles Horas
-            Route::middleware(['can:view_hours'])->group(function () {
-                Volt::route('detalles-horas', 'pages.hours.index')->name('admin.hours.index');
-                Volt::route('detalles-horas/importacion', 'pages.hours.import-wizard')->name('admin.hours.import');
-                Volt::route('detalles-horas/crear', 'pages.hours.manual-create')->name('admin.hours.create');
-                Volt::route('detalles-horas/editar/{hourDetail}', 'pages.hours.manual-edit')->name('admin.hours.edit');
-                
-                Volt::route('historial-horas', 'pages.hours.index')->name('admin.historial.horas');
-            });
+        Route::middleware(['can:edit_sales'])->group(function () {
+            Volt::route('edit/{sale}', 'pages.sales.manual-edit')->name('app.sales.edit');
+        });
 
-            // Módulo Compras Materiales
-            Route::middleware(['can:view_purchases'])->group(function () {
-                Volt::route('compras-materiales', 'pages.purchases.index')->name('admin.purchases.index');
-                Volt::route('compras-materiales/importacion', 'pages.purchases.import-wizard')->name('admin.purchases.import');
-                Volt::route('compras-materiales/crear', 'pages.purchases.manual-create')->name('admin.purchases.create');
-                Volt::route('compras-materiales/editar/{purchaseDetail}', 'pages.purchases.manual-edit')->name('admin.purchases.edit');
-                
-                Route::get('historial-compras', function () {
-                    $purchases = \App\Models\PurchaseDetail::latest()->take(50)->get();
-                    return view('historial-compras', ['purchases' => $purchases]);
-                })->name('admin.historial.compras');
-            });
+        // Resolución de clientes
+        Volt::route('clients/resolve', 'pages.clients.resolution')->name('app.clients.resolve');
 
-            // Módulo Tableros
-            Route::middleware(['can:view_boards'])->group(function () {
-                Volt::route('tableros', 'pages.boards.index')->name('admin.boards.index');
-                Volt::route('tableros/importacion', 'pages.boards.import-wizard')->name('admin.boards.import');
-                Volt::route('tableros/crear', 'pages.boards.manual-create')->name('admin.boards.create');
-                Volt::route('tableros/editar/{boardDetail}', 'pages.boards.manual-edit')->name('admin.boards.edit');
-                
-                Route::get('historial-tableros', function () {
-                    $boards = \App\Models\BoardDetail::latest()->take(50)->get();
-                    return view('historial-tableros', ['boards' => $boards]);
-                })->name('admin.historial.tableros');
-            });
+        // Catálogo de clientes
+        Volt::route('catalogs/clients', 'pages.sales.catalogs.clients.index')->name('app.sales.catalogs.clients');
+    });
 
-            // Módulo Satisfacción Personal
-            Route::middleware(['can:view_staff_satisfaction'])->group(function () {
-                Volt::route('satisfaccion-personal', 'pages.staff-satisfaction.index')->name('admin.staff-satisfaction.index');
-                Volt::route('satisfaccion-personal/crear', 'pages.staff-satisfaction.manual-create')->name('admin.staff-satisfaction.create');
-                Volt::route('satisfaccion-personal/importacion', 'pages.staff-satisfaction.import-wizard')->name('admin.staff-satisfaction.import');
-            });
+    // ========================================
+    // MÓDULO PRESUPUESTOS
+    // ========================================
 
-            // Módulo Satisfacción Clientes
-            Route::middleware(['can:view_client_satisfaction'])->group(function () {
-                Volt::route('satisfaccion-clientes', 'pages.client-satisfaction.index')->name('admin.client-satisfaction.index');
-                Volt::route('satisfaccion-clientes/crear', 'pages.client-satisfaction.manual-create')->name('admin.client-satisfaction.create');
-                Volt::route('satisfaccion-clientes/importacion', 'pages.client-satisfaction.import-wizard')->name('admin.client-satisfaction.import');
-            });
+    Route::prefix('budgets')->middleware(['can:view_budgets'])->group(function () {
+        Volt::route('/', 'pages.budget.history')->name('app.budgets.index');
+        Volt::route('history', 'pages.budget.history')->name('app.budgets.history');
+        Volt::route('import', 'pages.budget.import-wizard')->name('app.budgets.import');
 
-            // Módulo Tableros
-            Route::middleware(['can:view_boards'])->group(function () {
-                Volt::route('tableros', 'pages.boards.index')->name('admin.boards.index');
-            });
+        Route::middleware(['can:create_budgets'])->group(function () {
+            Volt::route('create', 'pages.budget.manual-create')->name('app.budgets.create');
+        });
 
-            // Módulo Automatización
-            Route::middleware(['can:view_automation'])->group(function () {
-                Volt::route('automatizacion', 'pages.automation-projects.index')->name('admin.automation.index');
-                Volt::route('automatizacion/importacion', 'pages.automation-projects.import-wizard')->name('admin.automation.import');
-
-                Route::get('automatizacion/historial', function () {
-                    $projects = \App\Models\AutomationProject::latest()->take(50)->get();
-                    return view('historial-automation-projects', ['projects' => $projects]);
-                })->name('admin.automation.historial');
-            });
-
-            // Bitácora del Sistema
-            Volt::route('bitacora', 'audit-log')->name('admin.audit.log');
+        Route::middleware(['can:edit_budgets'])->group(function () {
+            Volt::route('edit/{budget}', 'pages.budget.manual-edit')->name('app.budgets.edit');
         });
     });
 
-    // --- GERENCIA (Manager) ---
-    // Manager tiene acceso a rutas /admin, este grupo mantiene rutas específicas de dashboard y reportes
-    Route::prefix('gerente')->middleware(['role:Manager'])->group(function () {
-        
-        Volt::route('dashboard', 'pages.manager.dashboard')->name('manager.dashboard');
-        Route::view('profile', 'profile')->name('manager.profile');
-        Volt::route('produccion', 'pages.manufacturing.production-log')->name('manager.manufacturing.production.log');
-        
-        // Agregar RRHH si tienen permiso
-        Volt::route('rrhh', 'pages.hr.factor-manager')->name('manager.hr.factors');
-        
+    // ========================================
+    // MÓDULO HORAS
+    // ========================================
 
-        // Gestión de Usuarios (Manager tiene acceso completo)
-        Route::middleware(['can:view_users'])->group(function () {
-            // Index uses Volt component (Visual Refactor)
-            Volt::route('users', 'pages.manager.users.index')->name('manager.users.index');
+    Route::prefix('hours')->middleware(['can:view_hours'])->group(function () {
+        Volt::route('/', 'pages.hours.index')->name('app.hours.index');
+        Volt::route('history', 'pages.hours.index')->name('app.hours.history');
+        Volt::route('import', 'pages.hours.import-wizard')->name('app.hours.import');
 
-            // CRUD Actions use Controller
-            Route::resource('users', UserController::class)->except(['index'])->names([
-                'create' => 'manager.users.create',
-                'store' => 'manager.users.store',
-                'show' => 'manager.users.show',
-                'edit' => 'manager.users.edit',
-                'update' => 'manager.users.update',
-                'destroy' => 'manager.users.destroy',
-            ]);
+        Route::middleware(['can:create_hours'])->group(function () {
+            Volt::route('create', 'pages.hours.manual-create')->name('app.hours.create');
         });
 
-
-        // Gestión de Roles (Manager tiene acceso completo)
-        Route::middleware(['can:view_roles'])->group(function () {
-            // Index uses Volt component (Visual Refactor)
-            Volt::route('roles', 'pages.manager.roles.index')->name('manager.roles.index');
-
-            // CRUD Actions use Controller
-            Route::resource('roles', RoleController::class)->except(['index'])->names([
-                'create' => 'manager.roles.create',
-                'store' => 'manager.roles.store',
-                'show' => 'manager.roles.show',
-                'edit' => 'manager.roles.edit',
-                'update' => 'manager.roles.update',
-                'destroy' => 'manager.roles.destroy',
-            ]);
-            Route::get('roles/{role}/permissions', [RoleController::class, 'permissions'])
-                ->name('manager.roles.permissions');
-            Route::post('roles/{role}/permissions', [RoleController::class, 'updatePermissions'])
-                ->name('manager.roles.permissions.update');
+        Route::middleware(['can:edit_hours'])->group(function () {
+            Volt::route('edit/{hourDetail}', 'pages.hours.manual-edit')->name('app.hours.edit');
         });
-        
-        // Historial de Ventas y Presupuestos (permanecen en /gerente)
-        Volt::route('historial-ventas', 'pages.sales.history')->name('manager.historial.ventas');
-        Volt::route('ventas/crear', 'pages.sales.manual-create')->name('manager.sales.create');
-        Volt::route('ventas/editar/{sale}', 'pages.sales.manual-edit')->name('manager.sales.edit');
 
-        Volt::route('historial-presupuestos', 'pages.budget.history')->name('manager.historial.presupuesto');
-        Volt::route('presupuestos/importacion', 'pages.budget.import-wizard')->name('manager.budget.import');
-        Volt::route('presupuestos/crear', 'pages.budget.manual-create')->name('manager.budget.create');
-        Volt::route('presupuestos/editar/{budget}', 'pages.budget.manual-edit')->name('manager.budget.edit');
+        // Catálogo de personal
+        Volt::route('catalogs/employees', 'pages.hours.catalogs.employees.index')->name('app.hours.catalogs.employees');
+    });
 
-        // Nuevos Módulos para Manager
-        Volt::route('detalles-horas', 'pages.hours.index')->name('manager.hours.index');
-        Volt::route('detalles-horas/importacion', 'pages.hours.import-wizard')->name('manager.hours.import');
-        Volt::route('detalles-horas/crear', 'pages.hours.manual-create')->name('manager.hours.create');
-        Volt::route('detalles-horas/editar/{hourDetail}', 'pages.hours.manual-edit')->name('manager.hours.edit');
-        
-        Volt::route('historial-horas', 'pages.hours.index')->name('manager.historial.horas');
-        Volt::route('compras-materiales', 'pages.purchases.index')->name('manager.purchases.index');
-        Volt::route('compras-materiales/importacion', 'pages.purchases.import-wizard')->name('manager.purchases.import');
-        Volt::route('compras-materiales/crear', 'pages.purchases.manual-create')->name('manager.purchases.create');
-        Volt::route('compras-materiales/editar/{purchaseDetail}', 'pages.purchases.manual-edit')->name('manager.purchases.edit');
-        
-        Route::get('historial-compras', function () {
+    // ========================================
+    // MÓDULO COMPRAS
+    // ========================================
+
+    Route::prefix('purchases')->middleware(['can:view_purchases'])->group(function () {
+        Volt::route('/', 'pages.purchases.index')->name('app.purchases.index');
+        Route::get('history', function () {
             $purchases = \App\Models\PurchaseDetail::latest()->take(50)->get();
             return view('historial-compras', ['purchases' => $purchases]);
-        })->name('manager.historial.compras');
-        Volt::route('satisfaccion-personal', 'pages.staff-satisfaction.index')->name('manager.staff-satisfaction.index');
-        Volt::route('satisfaccion-personal/crear', 'pages.staff-satisfaction.manual-create')->name('manager.staff-satisfaction.create');
-        Volt::route('satisfaccion-personal/importacion', 'pages.staff-satisfaction.import-wizard')->name('manager.staff-satisfaction.import');
-        Volt::route('satisfaccion-clientes', 'pages.client-satisfaction.index')->name('manager.client-satisfaction.index');
-        Volt::route('satisfaccion-clientes/crear', 'pages.client-satisfaction.manual-create')->name('manager.client-satisfaction.create');
-        Volt::route('satisfaccion-clientes/importacion', 'pages.client-satisfaction.import-wizard')->name('manager.client-satisfaction.import');
-        Volt::route('tableros', 'pages.boards.index')->name('manager.boards.index');
+        })->name('app.purchases.history');
+        Volt::route('import', 'pages.purchases.import-wizard')->name('app.purchases.import');
 
-        // Rutas de Tableros para Manager
-        Route::middleware(['can:view_boards'])->group(function () {
-
-             // Manager uses same views but different route names if needed, or share?
-             // Usually Manager has their own prefix. Let's redirect or use same components.
-             // Following pattern:
-             Volt::route('tableros/importacion', 'pages.boards.import-wizard')->name('manager.boards.import');
-             Volt::route('tableros/crear', 'pages.boards.manual-create')->name('manager.boards.create');
-             Volt::route('tableros/editar/{boardDetail}', 'pages.boards.manual-edit')->name('manager.boards.edit');
-             
-             Route::get('historial-tableros', function () {
-                $boards = \App\Models\BoardDetail::latest()->take(50)->get();
-                return view('historial-tableros', ['boards' => $boards]);
-            })->name('manager.historial.tableros');
+        Route::middleware(['can:create_purchases'])->group(function () {
+            Volt::route('create', 'pages.purchases.manual-create')->name('app.purchases.create');
         });
 
-        // Rutas de Automatización para Manager
-        Route::middleware(['can:view_automation'])->group(function () {
-            Volt::route('automatizacion', 'pages.automation-projects.index')->name('manager.automation.index');
-            Volt::route('automatizacion/importacion', 'pages.automation-projects.import-wizard')->name('manager.automation.import');
-
-            Route::get('automatizacion/historial', function () {
-                $projects = \App\Models\AutomationProject::latest()->take(50)->get();
-                return view('historial-automation-projects', ['projects' => $projects]);
-            })->name('manager.automation.historial');
+        Route::middleware(['can:edit_purchases'])->group(function () {
+            Volt::route('edit/{purchaseDetail}', 'pages.purchases.manual-edit')->name('app.purchases.edit');
         });
 
-        // --- GESTIÓN DE CATÁLOGOS MAESTROS ---
-        Route::prefix('catalogo')->group(function () {
-            // Centros de Costo (único catálogo que permanece en gerente)
-            Volt::route('centros-costo', 'pages.manager.catalogs.cost-centers.index')->name('manager.catalogs.cost-centers.index');
-        });
-        
-        // --- BITÁCORA DEL SISTEMA ---
-        Volt::route('bitacora', 'audit-log')->name('manager.audit.log');
-
-        // --- INTELIGENCIA DE NEGOCIO ---
-        Volt::route('inteligencia', 'pages.manager.intelligence')->name('manager.intelligence.dashboard');
+        // Catálogo de proveedores
+        Volt::route('catalogs/suppliers', 'pages.purchases.catalogs.suppliers.index')->name('app.purchases.catalogs.suppliers');
     });
 
+    // ========================================
+    // MÓDULO SATISFACCIÓN PERSONAL
+    // ========================================
 
-    // --- VENTAS (Vendedor) ---
-    Route::prefix('ventas')->middleware(['role:Vendedor'])->group(function () {
-        
-        // Volt::route('dashboard', 'pages.sales.dashboard')->name('sales.dashboard'); // Removed
-        Route::get('/', function () {
-            return redirect()->route('sales.historial.ventas');
-        });
-        Route::view('perfil', 'profile')->name('sales.profile');
-        
-        // Módulo Ventas
-        Route::middleware(['can:view_sales'])->group(function () {
-            Volt::route('importacion', 'pages.sales.import-wizard')->name('sales.import');
-            Volt::route('crear', 'pages.sales.manual-create')->name('sales.create');
-            Volt::route('editar/{sale}', 'pages.sales.manual-edit')->name('sales.edit');
+    Route::prefix('staff-satisfaction')->middleware(['can:view_staff_satisfaction'])->group(function () {
+        Volt::route('/', 'pages.staff-satisfaction.survey-list')->name('app.staff-satisfaction.index');
+        Volt::route('surveys', 'pages.staff-satisfaction.survey-list')->name('app.staff-satisfaction.surveys');
+        Volt::route('import', 'pages.staff-satisfaction.import-wizard')->name('app.staff-satisfaction.import');
 
-            
-            // Historial de Ventas
-            Volt::route('historial-ventas', 'pages.sales.history')->name('sales.historial.ventas');
-            
-            // Catálogo de Clientes
-            Volt::route('catalogo/clientes', 'pages.sales.catalogs.clients.index')->name('sales.catalogs.clients.index');
+        Route::middleware(['can:create_staff_satisfaction'])->group(function () {
+            Volt::route('create', 'pages.staff-satisfaction.manual-create')->name('app.staff-satisfaction.create');
         });
     });
 
+    // ========================================
+    // MÓDULO SATISFACCIÓN CLIENTES
+    // ========================================
 
-    // --- PRESUPUESTO (Presupuestador) ---
-    Route::prefix('presupuesto')->middleware(['role:Presupuestador'])->group(function () {
-        
-        // Volt::route('dashboard', 'pages.budget.dashboard')->name('budget.dashboard'); // Removed
-        Route::get('/', function () {
-            return redirect()->route('budget.historial.importacion');
-        });
-        Route::view('perfil', 'profile')->name('budget.profile');
-        
-        // Módulo Presupuesto
-        Route::middleware(['can:view_budgets'])->group(function () {
-            Volt::route('importacion', 'pages.budget.import-wizard')->name('budget.import');
-            Volt::route('crear', 'pages.budget.manual-create')->name('budget.create');
-            Volt::route('editar/{budget}', 'pages.budget.manual-edit')->name('budget.edit');
-            
-            Volt::route('historial_importacion', 'pages.budget.history')->name('budget.historial.importacion');
+    Route::prefix('client-satisfaction')->middleware(['can:view_client_satisfaction'])->group(function () {
+        Volt::route('/', 'pages.client-satisfaction.history')->name('app.client-satisfaction.index');
+        Volt::route('history', 'pages.client-satisfaction.history')->name('app.client-satisfaction.history');
+        Volt::route('import', 'pages.client-satisfaction.import-wizard')->name('app.client-satisfaction.import');
+
+        Route::middleware(['can:create_client_satisfaction'])->group(function () {
+            Volt::route('create', 'pages.client-satisfaction.manual-create')->name('app.client-satisfaction.create');
         });
     });
 
+    // ========================================
+    // MÓDULO TABLEROS
+    // ========================================
 
-    // --- DETALLE DE HORAS (Gestor de Horas) ---
-    Route::prefix('detalle_horas')->middleware(['role:Gestor de Horas'])->group(function () {
-        // Volt::route('dashboard', 'pages.hours.dashboard')->name('hours.dashboard');
-        Route::get('/', function () {
-            return redirect()->route('hours.historial.importacion');
-        });
-        Route::view('perfil', 'profile')->name('hours.profile');
-        
-        Route::middleware(['can:view_hours'])->group(function () {
-            Volt::route('importacion', 'pages.hours.import-wizard')->name('hours.import');
-            Volt::route('crear', 'pages.hours.manual-create')->name('hours.create');
-            Volt::route('editar/{hourDetail}', 'pages.hours.manual-edit')->name('hours.edit');
-            
-            Volt::route('historial_importacion', 'pages.hours.index')->name('hours.historial.importacion');
-            
-            // Catálogo de Personal
-            Volt::route('catalogo/personal', 'pages.hours.catalogs.employees.index')->name('hours.catalogs.employees.index');
-        });
-    });
-
-    // --- COMPRAS (Gestor de Compras) ---
-    Route::prefix('compras')->middleware(['role:Gestor de Compras'])->group(function () {
-        // Volt::route('dashboard', 'pages.purchases.dashboard')->name('purchases.dashboard'); // Removed
-        Route::get('/', function () {
-            return redirect()->route('purchases.historial.importacion');
-        });
-        Route::view('perfil', 'profile')->name('purchases.profile');
-        
-        Route::middleware(['can:view_purchases'])->group(function () {
-            Volt::route('importacion', 'pages.purchases.import-wizard')->name('purchases.import');
-            Volt::route('crear', 'pages.purchases.manual-create')->name('purchases.create');
-            Volt::route('editar/{purchaseDetail}', 'pages.purchases.manual-edit')->name('purchases.edit');
-            
-            Route::get('historial_importacion', function () {
-                $purchases = \App\Models\PurchaseDetail::latest()->take(50)->get();
-                return view('historial-compras', ['purchases' => $purchases]);
-            })->name('purchases.historial.importacion');
-            
-            // Catálogo de Proveedores
-            Volt::route('catalogo/proveedores', 'pages.purchases.catalogs.suppliers.index')->name('purchases.catalogs.suppliers.index');
-        });
-    });
-
-    // --- SATISFACCIÓN PERSONAL (Gestor de Satisfacción Personal) ---
-    Route::prefix('satisfaccion_personal')->middleware(['role:Gestor de Satisfacción Personal'])->group(function () {
-        Route::get('/', function () {
-            return redirect()->route('staff-satisfaction.encuesta');
-        });
-        Route::view('perfil', 'profile')->name('staff-satisfaction.profile');
-
-        Route::middleware(['can:view_staff_satisfaction'])->group(function () {
-            Volt::route('importacion', 'pages.staff-satisfaction.import-wizard')->name('staff-satisfaction.import');
-            Volt::route('crear', 'pages.staff-satisfaction.manual-create')->name('staff-satisfaction.create');
-            Volt::route('encuesta', 'pages.staff-satisfaction.survey-list')->name('staff-satisfaction.encuesta');
-        });
-    });
-
-    // --- SATISFACCIÓN CLIENTES (Gestor de Satisfacción Clientes) ---
-    Route::prefix('satisfaccion_clientes')->middleware(['role:Gestor de Satisfacción Clientes'])->group(function () {
-    Route::get('/', function () {
-        return redirect()->route('client-satisfaction.historial.importacion');
-    });
-    Route::view('perfil', 'profile')->name('client-satisfaction.profile');
-
-    Route::middleware(['can:view_client_satisfaction'])->group(function () {
-        Volt::route('importacion', 'pages.client-satisfaction.import-wizard')->name('client-satisfaction.import');
-        Volt::route('crear', 'pages.client-satisfaction.manual-create')->name('client-satisfaction.create');
-        // Volt::route('editar/{clientSatisfactionResponse}', 'pages.client-satisfaction.manual-edit')->name('client-satisfaction.edit'); // Future
-        
-        Volt::route('historial_importacion', 'pages.client-satisfaction.history')->name('client-satisfaction.historial.importacion');
-    });
-});
-
-
-
-    // --- PROYECTOS DE AUTOMATIZACIÓN (Gestor de Proyectos) ---
-    Route::prefix('proyectos_automatizacion')->middleware(['role:Gestor de Proyectos'])->group(function () {
-    // Volt::route('dashboard', 'pages.automation-projects.dashboard')->name('automation_projects.dashboard');
-    Route::get('/', function () {
-        return redirect()->route('automation_projects.historial.importacion');
-    });
-        Route::view('perfil', 'profile')->name('automation_projects.profile');
-        
-        Route::middleware(['can:view_automation'])->group(function () {
-            Volt::route('importacion', 'pages.automation-projects.import-wizard')->name('automation_projects.import');
-            Volt::route('crear', 'pages.automation-projects.manual-create')->name('automation_projects.create');
-            Volt::route('editar/{automationProject}', 'pages.automation-projects.manual-edit')->name('automation_projects.edit');
-            
-            Route::get('historial_importacion', function () {
-                $projects = \App\Models\AutomationProject::latest()->take(50)->get();
-                return view('historial-automation-projects', ['projects' => $projects]);
-            })->name('automation_projects.historial.importacion');
-            
-            // Catálogo de Proyectos
-            Volt::route('catalogo/proyectos', 'pages.automation-projects.catalogs.projects.index')->name('automation_projects.catalogs.projects.index');
-        });
-    });
-
-
-
-    // --- MÓDULOS DE SISTEMA (Rutas Amigables) - ELIMINADOS PARA USAR RUTAS POR ROL
-    // Las rutas genéricas han sido reemplazadas por rutas específicas dentro de los grupos Admin y Gerente.
-
-});
-
-// Grupo para Gestor de Tableros
-Route::prefix('tableros')->middleware(['role:Gestor de Tableros'])->group(function () {
-
-    Route::get('/', function () {
-        return redirect()->route('boards.historial.importacion');
-    });
-    Route::view('perfil', 'profile')->name('boards.profile');
-    
-    Route::middleware(['can:view_boards'])->group(function () {
-        Volt::route('importacion', 'pages.boards.import-wizard')->name('boards.import');
-        Volt::route('crear', 'pages.boards.manual-create')->name('boards.create');
-        Volt::route('editar/{boardDetail}', 'pages.boards.manual-edit')->name('boards.edit');
-        
-        Route::get('historial_importacion', function () {
+    Route::prefix('boards')->middleware(['can:view_boards'])->group(function () {
+        Volt::route('/', 'pages.boards.index')->name('app.boards.index');
+        Route::get('history', function () {
             $boards = \App\Models\BoardDetail::latest()->take(50)->get();
             return view('historial-tableros', ['boards' => $boards]);
-        })->name('boards.historial.importacion');
+        })->name('app.boards.history');
+        Volt::route('import', 'pages.boards.import-wizard')->name('app.boards.import');
+
+        Route::middleware(['can:create_boards'])->group(function () {
+            Volt::route('create', 'pages.boards.manual-create')->name('app.boards.create');
+        });
+
+        Route::middleware(['can:edit_boards'])->group(function () {
+            Volt::route('edit/{boardDetail}', 'pages.boards.manual-edit')->name('app.boards.edit');
+        });
     });
+
+    // ========================================
+    // MÓDULO AUTOMATIZACIÓN
+    // ========================================
+
+    Route::prefix('automation')->middleware(['can:view_automation'])->group(function () {
+        Volt::route('/', 'pages.automation-projects.index')->name('app.automation.index');
+        Route::get('history', function () {
+            $projects = \App\Models\AutomationProject::latest()->take(50)->get();
+            return view('historial-automation-projects', ['projects' => $projects]);
+        })->name('app.automation.history');
+        Volt::route('import', 'pages.automation-projects.import-wizard')->name('app.automation.import');
+
+        Route::middleware(['can:create_automation'])->group(function () {
+            Volt::route('create', 'pages.automation-projects.manual-create')->name('app.automation.create');
+        });
+
+        Route::middleware(['can:edit_automation'])->group(function () {
+            Volt::route('edit/{automationProject}', 'pages.automation-projects.manual-edit')->name('app.automation.edit');
+        });
+
+        // Catálogo de proyectos
+        Volt::route('catalogs/projects', 'pages.automation-projects.catalogs.projects.index')->name('app.automation.catalogs.projects');
+    });
+
+    // ========================================
+    // MÓDULO PRODUCCIÓN
+    // ========================================
+
+    Route::prefix('production')->middleware(['can:view_production'])->group(function () {
+        Volt::route('/', 'pages.manufacturing.production-log')->name('app.production.index');
+    });
+
+    // ========================================
+    // MÓDULO RRHH
+    // ========================================
+
+    Route::prefix('hr')->middleware(['can:view_hr'])->group(function () {
+        Volt::route('/', 'pages.hr.factor-manager')->name('app.hr.index');
+        Volt::route('factors', 'pages.hr.factor-manager')->name('app.hr.factors');
+    });
+
+    // ========================================
+    // GESTIÓN DE USUARIOS
+    // ========================================
+
+    Route::prefix('users')->middleware(['can:view_users'])->group(function () {
+        Route::get('/', [UserController::class, 'index'])->name('app.users.index');
+
+        Route::middleware(['can:create_users'])->group(function () {
+            Route::get('create', [UserController::class, 'create'])->name('app.users.create');
+            Route::post('/', [UserController::class, 'store'])->name('app.users.store');
+        });
+
+        Route::middleware(['can:edit_users'])->group(function () {
+            Route::get('{user}', [UserController::class, 'show'])->name('app.users.show');
+            Route::get('{user}/edit', [UserController::class, 'edit'])->name('app.users.edit');
+            Route::put('{user}', [UserController::class, 'update'])->name('app.users.update');
+        });
+
+        Route::middleware(['can:delete_users'])->group(function () {
+            Route::delete('{user}', [UserController::class, 'destroy'])->name('app.users.destroy');
+        });
+    });
+
+    // ========================================
+    // GESTIÓN DE ROLES
+    // ========================================
+
+    Route::prefix('roles')->middleware(['can:view_roles'])->group(function () {
+        Route::get('/', [RoleController::class, 'index'])->name('app.roles.index');
+        Route::get('{role}/permissions', [RoleController::class, 'permissions'])->name('app.roles.permissions');
+
+        Route::middleware(['can:create_roles'])->group(function () {
+            Route::get('create', [RoleController::class, 'create'])->name('app.roles.create');
+            Route::post('/', [RoleController::class, 'store'])->name('app.roles.store');
+        });
+
+        Route::middleware(['can:edit_roles'])->group(function () {
+            Route::get('{role}', [RoleController::class, 'show'])->name('app.roles.show');
+            Route::get('{role}/edit', [RoleController::class, 'edit'])->name('app.roles.edit');
+            Route::put('{role}', [RoleController::class, 'update'])->name('app.roles.update');
+            Route::post('{role}/permissions', [RoleController::class, 'updatePermissions'])->name('app.roles.permissions.update');
+        });
+
+        Route::middleware(['can:delete_roles'])->group(function () {
+            Route::delete('{role}', [RoleController::class, 'destroy'])->name('app.roles.destroy');
+        });
+    });
+
+    // ========================================
+    // CATÁLOGOS GENERALES
+    // ========================================
+
+    Route::prefix('catalogs')->middleware(['can:view_dashboards'])->group(function () {
+        Volt::route('cost-centers', 'pages.manager.catalogs.cost-centers.index')->name('app.catalogs.cost-centers');
+    });
+});
+
+// ============================================================================
+// REDIRECCIONES DE COMPATIBILIDAD
+// ============================================================================
+// Estas redirecciones mantienen compatibilidad con URLs antiguas.
+// Pueden eliminarse después de un período de transición.
+// ============================================================================
+
+Route::middleware(['auth'])->group(function () {
+    // Dashboard redirects
+    Route::redirect('dashboard', '/app/dashboard');
+    Route::redirect('admin/dashboard', '/app/dashboard');
+    Route::redirect('gerente/dashboard', '/app/dashboard');
+
+    // Ventas redirects
+    Route::redirect('admin/historial-ventas', '/app/sales/history');
+    Route::redirect('gerente/historial-ventas', '/app/sales/history');
+    Route::redirect('ventas/historial-ventas', '/app/sales/history');
+
+    // Presupuestos redirects
+    Route::redirect('admin/historial-presupuestos', '/app/budgets/history');
+    Route::redirect('gerente/historial-presupuestos', '/app/budgets/history');
+    Route::redirect('presupuesto/historial_importacion', '/app/budgets/history');
+
+    // Horas redirects
+    Route::redirect('admin/detalles-horas', '/app/hours');
+    Route::redirect('gerente/detalles-horas', '/app/hours');
+    Route::redirect('detalle_horas/historial_importacion', '/app/hours');
+
+    // Compras redirects
+    Route::redirect('admin/compras-materiales', '/app/purchases');
+    Route::redirect('gerente/compras-materiales', '/app/purchases');
+    Route::redirect('compras/historial_importacion', '/app/purchases/history');
+
+    // Satisfacción redirects
+    Route::redirect('admin/satisfaccion-personal', '/app/staff-satisfaction');
+    Route::redirect('gerente/satisfaccion-personal', '/app/staff-satisfaction');
+    Route::redirect('satisfaccion_personal/encuesta', '/app/staff-satisfaction/surveys');
+
+    Route::redirect('admin/satisfaccion-clientes', '/app/client-satisfaction');
+    Route::redirect('gerente/satisfaccion-clientes', '/app/client-satisfaction');
+    Route::redirect('satisfaccion_clientes/historial_importacion', '/app/client-satisfaction/history');
+
+    // Tableros redirects
+    Route::redirect('admin/tableros', '/app/boards');
+    Route::redirect('gerente/tableros', '/app/boards');
+    Route::redirect('tableros/historial_importacion', '/app/boards/history');
+
+    // Automatización redirects
+    Route::redirect('admin/automatizacion', '/app/automation');
+    Route::redirect('gerente/automatizacion', '/app/automation');
+    Route::redirect('proyectos_automatizacion/historial_importacion', '/app/automation/history');
+
+    // Usuarios y roles redirects
+    Route::redirect('admin/users', '/app/users');
+    Route::redirect('gerente/users', '/app/users');
+    Route::redirect('admin/roles', '/app/roles');
+    Route::redirect('gerente/roles', '/app/roles');
+
+    // Otros redirects
+    Route::redirect('admin/produccion', '/app/production');
+    Route::redirect('gerente/produccion', '/app/production');
+    Route::redirect('admin/rrhh', '/app/hr');
+    Route::redirect('gerente/rrhh', '/app/hr');
+    Route::redirect('admin/bitacora', '/app/audit');
+    Route::redirect('gerente/bitacora', '/app/audit');
+    Route::redirect('gerente/inteligencia', '/app/intelligence');
 });
 
 require __DIR__.'/auth.php';
