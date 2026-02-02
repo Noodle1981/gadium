@@ -2,7 +2,15 @@
   "permissions": {
     "allow": [
       "Bash(dir:*)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(php artisan cache:clear:*)",
+      "Bash(php artisan:*)",
+      "Bash(php artisan config:clear:*)",
+      "Bash(\"C:\\\\Users\\\\carlo\\\\AppData\\\\Local\\\\Programs\\\\Herd\\\\bin\\\\php.bat\" artisan cache:clear)",
+      "Bash(\"C:\\\\Users\\\\carlo\\\\AppData\\\\Local\\\\Programs\\\\Herd\\\\bin\\\\php.bat\" artisan route:clear)",
+      "Bash(\"C:\\\\Users\\\\carlo\\\\AppData\\\\Local\\\\Programs\\\\Herd\\\\bin\\\\php.bat\" artisan view:clear)",
+      "Bash(python:*)",
+      "Bash(php -r:*)"
     ]
   }
 }

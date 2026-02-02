@@ -61,7 +61,7 @@
                                 </div>
 
                                 <div class="flex gap-2">
-                                    <a href="{{ route('roles.permissions', $role) }}" class="flex-1 inline-flex justify-center items-center px-3 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                    <a href="{{ route('app.roles.permissions', $role) }}" class="flex-1 inline-flex justify-center items-center px-3 py-2 bg-gray-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                         Ver Permisos
                                     </a>
                                 </div>
@@ -77,7 +77,7 @@
                 
                 @if($sectorRoles->isEmpty())
                     <div class="bg-white dark:bg-gray-800 rounded-lg p-6 text-center text-gray-500">
-                        No hay roles personalizados aún. <a href="{{ route($createRoleRoute) }}" class="text-primary hover:underline">Crear nuevo rol</a>.
+                        No hay roles personalizados aún. <a href="{{ route('app.roles.create') }}" class="text-primary hover:underline">Crear nuevo rol</a>.
                     </div>
                 @else
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -109,18 +109,18 @@
                                     </div>
 
                                     <div class="flex gap-2">
-                                        <a href="{{ route('roles.permissions', $role) }}" class="flex-1 inline-flex justify-center items-center px-3 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                        <a href="{{ route('app.roles.permissions', $role) }}" class="flex-1 inline-flex justify-center items-center px-3 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
                                             Configurar
                                         </a>
                                         
-                                        <a href="{{ route('roles.edit', $role) }}" class="inline-flex justify-center items-center px-3 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-25 transition ease-in-out duration-150">
+                                        <a href="{{ route('app.roles.edit', $role) }}" class="inline-flex justify-center items-center px-3 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 uppercase tracking-widest shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-25 transition ease-in-out duration-150">
                                             <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
                                             </svg>
                                         </a>
 
                                         @if($role->users_count === 0)
-                                            <form action="{{ route('roles.destroy', $role) }}" method="POST" class="inline" onsubmit="return confirm('¿Está seguro de eliminar este sector?');">
+                                            <form action="{{ route('app.roles.destroy', $role) }}" method="POST" class="inline" onsubmit="return confirm('¿Está seguro de eliminar este sector?');">
                                                 @csrf
                                                 @method('DELETE')
                                                 <button type="submit" class="inline-flex justify-center items-center px-3 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-red-600 uppercase tracking-widest shadow-sm hover:bg-red-50 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 disabled:opacity-25 transition ease-in-out duration-150">

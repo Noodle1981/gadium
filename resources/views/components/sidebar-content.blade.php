@@ -24,7 +24,7 @@
 {{-- ========================================
      OPERATIONS SECTION
      ======================================== --}}
-@if(auth()->user()->can('view_sales') || auth()->user()->can('view_budgets') || auth()->user()->can('view_production'))
+@if(auth()->user()->can('view_sales') || auth()->user()->can('view_budgets'))
     <div class="pt-4 text-xs font-semibold text-gray-500 uppercase tracking-widest px-4 mb-2 whitespace-nowrap overflow-hidden transition-all duration-300"
          :class="sidebarCollapsed ? 'opacity-0 h-0 mb-0' : 'opacity-100 h-auto'">
         Operaciones
@@ -40,12 +40,6 @@
 @can('view_budgets')
     <x-sidebar-link :href="route('app.budgets.history')" :active="request()->routeIs('app.budgets.*')" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>'>
         Presupuestos
-    </x-sidebar-link>
-@endcan
-
-@can('view_production')
-    <x-sidebar-link :href="route('app.production.index')" :active="request()->routeIs('app.production.*')" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>'>
-        Produccion
     </x-sidebar-link>
 @endcan
 

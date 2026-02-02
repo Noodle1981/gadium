@@ -94,11 +94,11 @@
                                     Eliminar Definitivamente
                                 </button>
                             @else
-                                <a href="{{ route('users.edit', $user) }}" class="text-primary hover:text-primary-700 mr-3">
+                                <a href="{{ route('app.users.edit', $user) }}" class="text-primary hover:text-primary-700 mr-3">
                                     Editar
                                 </a>
                                 @if(!$user->hasRole('Super Admin'))
-                                    <form action="{{ route('users.destroy', $user) }}" method="POST" class="inline" onsubmit="return confirm('¿Está seguro de revocar el acceso a este usuario? Esta acción es inmediata.');">
+                                    <form action="{{ route('app.users.destroy', $user) }}" method="POST" class="inline" onsubmit="return confirm('¿Está seguro de revocar el acceso a este usuario? Esta acción es inmediata.');">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300">

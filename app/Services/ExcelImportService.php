@@ -178,8 +178,12 @@ class ExcelImportService
             $required = ['Moneda', 'CC', 'Año', 'Empresa', 'Descripción', 'Materiales presupuestados', 'Materiales comprados'];
 
         } elseif ($type === 'board_detail') {
-            // Board Detail format
-            $required = ['Año', 'Proyecto Numero', 'Cliente', 'Descripción Proyecto', 'Columnas', 'Gabinetes', 'Potencia', 'Pot/Control', 'Control', 'Intervención', 'Documento corrección de Fallas'];
+            // Board Detail format - 'Descripción Proyecto' puede llamarse también 'Proyecto2'
+            $required = ['Año', 'Proyecto Numero', 'Cliente', 'Columnas', 'Gabinetes', 'Potencia', 'Pot/Control', 'Control', 'Intervención', 'Documento corrección de Fallas'];
+            // Verificar que exista al menos una de las dos opciones para descripción
+            if (!in_array('Descripción Proyecto', $headers) && !in_array('Proyecto2', $headers)) {
+                throw new Exception("Cabecera faltante: 'Descripción Proyecto' o 'Proyecto2'.\nCabeceras encontradas en el archivo: [" . implode(', ', $headers) . "]");
+            }
         } elseif ($type === 'automation_project') {
             // Automation Project format
             $required = ['Proyecto', 'Cliente', 'FAT', 'PEM'];
@@ -687,7 +691,8 @@ class ExcelImportService
                 $ano = (int)($row['Año'] ?? 0);
                 $proyectoNumero = trim($row['Proyecto Numero'] ?? '');
                 $cliente = trim($row['Cliente'] ?? '');
-                $descripcion = trim($row['Descripción Proyecto'] ?? '');
+                // Soportar 'Descripción Proyecto' o 'Proyecto2' como nombre de columna
+                $descripcion = trim($row['Descripción Proyecto'] ?? $row['Proyecto2'] ?? '');
 
                 $hash = \App\Models\BoardDetail::generateHash($ano, $proyectoNumero, $cliente, $descripcion);
 

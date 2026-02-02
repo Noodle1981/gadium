@@ -23,7 +23,7 @@ class RoleManagementTest extends TestCase
     {
         $superAdmin = User::where('email', 'admin@gaudium.com')->first();
 
-        $response = $this->actingAs($superAdmin)->get('/admin/roles');
+        $response = $this->actingAs($superAdmin)->get('/app/roles');
 
         $response->assertStatus(200);
     }
@@ -32,7 +32,7 @@ class RoleManagementTest extends TestCase
     {
         $superAdmin = User::where('email', 'admin@gaudium.com')->first();
 
-        $response = $this->actingAs($superAdmin)->post('/admin/roles', [
+        $response = $this->actingAs($superAdmin)->post('/app/roles', [
             'name' => 'Operario',
         ]);
 
@@ -47,11 +47,11 @@ class RoleManagementTest extends TestCase
         $superAdmin = User::where('email', 'admin@gaudium.com')->first();
         $role = Role::where('name', 'Viewer')->first();
 
-        $response = $this->actingAs($superAdmin)->post("/admin/roles/{$role->id}/permissions", [
+        $response = $this->actingAs($superAdmin)->post("/app/roles/{$role->id}/permissions", [
             'permissions' => ['view_users', 'view_sales'],
         ]);
 
-        $response->assertRedirect(route('roles.index'));
+        $response->assertRedirect(route('app.roles.index'));
         $this->assertTrue($role->hasPermissionTo('view_users'));
     }
 
@@ -60,9 +60,9 @@ class RoleManagementTest extends TestCase
         $superAdmin = User::where('email', 'admin@gaudium.com')->first();
         $superAdminRole = Role::where('name', 'Super Admin')->first();
 
-        $response = $this->actingAs($superAdmin)->delete("/admin/roles/{$superAdminRole->id}");
+        $response = $this->actingAs($superAdmin)->delete("/app/roles/{$superAdminRole->id}");
 
-        $response->assertRedirect(route('roles.index'));
+        $response->assertRedirect(route('app.roles.index'));
         $this->assertDatabaseHas('roles', [
             'name' => 'Super Admin',
         ]);
@@ -72,7 +72,7 @@ class RoleManagementTest extends TestCase
     {
         $admin = User::where('email', 'administrador@gaudium.com')->first();
 
-        $response = $this->actingAs($admin)->get('/admin/roles');
+        $response = $this->actingAs($admin)->get('/app/roles');
 
         $response->assertStatus(403);
     }

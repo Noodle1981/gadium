@@ -92,7 +92,7 @@ new class extends Component {
         ]);
 
         session()->flash('success', 'Proyecto creado exitosamente.');
-        return $this->redirect(route('automation_projects.historial.importacion'), navigate: true);
+        return $this->redirect(route('app.automation.index'), navigate: true);
     }
 }; ?>
 
@@ -117,7 +117,7 @@ new class extends Component {
         <div class="bg-white overflow-hidden shadow-xl sm:rounded-lg p-6">
             <!-- CTA Importación Masiva -->
             <div class="mb-8 flex justify-end">
-                <a href="{{ route('automation_projects.import') }}" 
+                <a href="{{ route('app.automation.import') }}" 
                    class="inline-flex items-center px-4 py-2 bg-orange-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-orange-700 focus:bg-orange-700 active:bg-orange-900 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 transition ease-in-out duration-150 shadow-md">
                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"></path>
@@ -130,7 +130,7 @@ new class extends Component {
             <!-- Proyecto ID -->
             <div>
                 <label for="proyecto_id" class="block text-sm font-medium text-gray-700">ID del Proyecto *</label>
-                <input type="text" wire:model="proyecto_id" id="proyecto_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                <input type="text" wire:model="proyecto_id" id="proyecto_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm">
                 @error('proyecto_id') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
             </div>
 
@@ -144,7 +144,7 @@ new class extends Component {
                             wire:model.live.debounce.300ms="cliente" 
                             id="cliente" 
                             placeholder="Buscar Cliente..."
-                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm {{ $selectedClientId ? 'bg-green-50 border-green-300 text-green-800' : '' }}"
+                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm {{ $selectedClientId ? 'bg-green-50 border-green-300 text-green-800' : '' }}"
                         >
                         
                         <!-- Badge: Cliente Existente -->
@@ -195,14 +195,14 @@ new class extends Component {
             <!-- Descripción del Proyecto -->
             <div>
                 <label for="proyecto_descripcion" class="block text-sm font-medium text-gray-700">Descripción del Proyecto *</label>
-                <textarea wire:model="proyecto_descripcion" id="proyecto_descripcion" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"></textarea>
+                <textarea wire:model="proyecto_descripcion" id="proyecto_descripcion" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm"></textarea>
                 @error('proyecto_descripcion') <span class="text-red-600 text-sm">{{ $message }}</span> @enderror
             </div>
 
             <!-- FAT -->
             <div>
                 <label for="fat" class="block text-sm font-medium text-gray-700">FAT *</label>
-                <select wire:model="fat" id="fat" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                <select wire:model="fat" id="fat" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm">
                     <option value="NO">NO</option>
                     <option value="SI">SI</option>
                 </select>
@@ -212,7 +212,7 @@ new class extends Component {
             <!-- PEM -->
             <div>
                 <label for="pem" class="block text-sm font-medium text-gray-700">PEM *</label>
-                <select wire:model="pem" id="pem" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                <select wire:model="pem" id="pem" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm">
                     <option value="NO">NO</option>
                     <option value="SI">SI</option>
                 </select>
@@ -221,10 +221,10 @@ new class extends Component {
 
             <!-- Buttons -->
             <div class="flex justify-end space-x-3">
-                <a href="{{ route('automation_projects.historial.importacion') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none" wire:navigate>
+                <a href="{{ route('app.automation.index') }}" class="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none" wire:navigate>
                     Cancelar
                 </a>
-                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none">
+                <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-orange-600 hover:bg-orange-700 focus:outline-none">
                     Guardar Proyecto
                 </button>
             </div>
