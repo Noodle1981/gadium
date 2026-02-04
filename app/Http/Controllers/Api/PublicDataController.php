@@ -151,7 +151,11 @@ class PublicDataController extends Controller
     /**
      * Get all purchases data
      *
-     * @queryParam ano int Filter by year
+     * @queryParam ano int Filter by specific year
+     * @queryParam ano_desde int Filter from year
+     * @queryParam ano_hasta int Filter to year
+     * @queryParam fecha_desde date Filter from created date (Y-m-d)
+     * @queryParam fecha_hasta date Filter to created date (Y-m-d)
      * @queryParam empresa string Filter by company (partial match)
      * @queryParam cc string Filter by cost center code (partial match)
      */
@@ -171,6 +175,22 @@ class PublicDataController extends Controller
             $query->where('ano', $request->ano);
         }
 
+        if ($request->filled('ano_desde')) {
+            $query->where('ano', '>=', $request->ano_desde);
+        }
+
+        if ($request->filled('ano_hasta')) {
+            $query->where('ano', '<=', $request->ano_hasta);
+        }
+
+        if ($request->filled('fecha_desde')) {
+            $query->whereDate('created_at', '>=', $request->fecha_desde);
+        }
+
+        if ($request->filled('fecha_hasta')) {
+            $query->whereDate('created_at', '<=', $request->fecha_hasta);
+        }
+
         if ($request->filled('empresa')) {
             $query->where('empresa', 'like', '%' . $request->empresa . '%');
         }
@@ -188,7 +208,11 @@ class PublicDataController extends Controller
     /**
      * Get all boards data
      *
-     * @queryParam ano int Filter by year
+     * @queryParam ano int Filter by specific year
+     * @queryParam ano_desde int Filter from year
+     * @queryParam ano_hasta int Filter to year
+     * @queryParam fecha_desde date Filter from created date (Y-m-d)
+     * @queryParam fecha_hasta date Filter to created date (Y-m-d)
      * @queryParam cliente string Filter by client (partial match)
      * @queryParam proyecto_numero string Filter by project number (partial match)
      */
@@ -205,6 +229,22 @@ class PublicDataController extends Controller
 
         if ($request->filled('ano')) {
             $query->where('ano', $request->ano);
+        }
+
+        if ($request->filled('ano_desde')) {
+            $query->where('ano', '>=', $request->ano_desde);
+        }
+
+        if ($request->filled('ano_hasta')) {
+            $query->where('ano', '<=', $request->ano_hasta);
+        }
+
+        if ($request->filled('fecha_desde')) {
+            $query->whereDate('created_at', '>=', $request->fecha_desde);
+        }
+
+        if ($request->filled('fecha_hasta')) {
+            $query->whereDate('created_at', '<=', $request->fecha_hasta);
         }
 
         if ($request->filled('cliente')) {
@@ -224,6 +264,8 @@ class PublicDataController extends Controller
     /**
      * Get all automation projects data
      *
+     * @queryParam fecha_desde date Filter from created date (Y-m-d)
+     * @queryParam fecha_hasta date Filter to created date (Y-m-d)
      * @queryParam cliente string Filter by client (partial match)
      * @queryParam proyecto_id string Filter by project ID (partial match)
      */
@@ -236,6 +278,14 @@ class PublicDataController extends Controller
                 'created_at', 'updated_at'
             ])
             ->orderBy('created_at', 'desc');
+
+        if ($request->filled('fecha_desde')) {
+            $query->whereDate('created_at', '>=', $request->fecha_desde);
+        }
+
+        if ($request->filled('fecha_hasta')) {
+            $query->whereDate('created_at', '<=', $request->fecha_hasta);
+        }
 
         if ($request->filled('cliente')) {
             $query->where('cliente', 'like', '%' . $request->cliente . '%');

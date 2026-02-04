@@ -267,6 +267,7 @@ Route::middleware(['auth', 'verified'])->prefix('app')->group(function () {
 
     Route::prefix('catalogs')->middleware(['can:view_dashboards'])->group(function () {
         Volt::route('cost-centers', 'pages.manager.catalogs.cost-centers.index')->name('app.catalogs.cost-centers');
+        Volt::route('cost-centers/{id}', 'pages.manager.catalogs.cost-centers.show')->name('app.catalogs.cost-centers.show');
     });
 });
 

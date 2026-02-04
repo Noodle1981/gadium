@@ -303,6 +303,7 @@ new class extends Component {
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $cc->name }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $cc->description ?? '-' }}</td>
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <a href="{{ route('app.catalogs.cost-centers.show', $cc->id) }}" class="text-blue-600 hover:text-blue-900 mr-3">Ver</a>
                                     <button wire:click="edit({{ $cc->id }})" class="text-emerald-600 hover:text-emerald-900 mr-3">Editar</button>
                                     <button wire:click="delete({{ $cc->id }})" class="text-red-400 hover:text-red-600" onclick="confirm('¿Seguro?') || event.stopImmediatePropagation()">Eliminar</button>
                                 </td>

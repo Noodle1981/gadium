@@ -27,28 +27,79 @@ Route::middleware('auth:sanctum')->group(function () {
 | Base URL: /api/v1/public
 |
 | Available endpoints:
-| - GET /sales              - List all sales (paginated)
+| - GET /sales              - List all sales
 | - GET /sales/{id}         - Get a single sale
-| - GET /budgets            - List all budgets (paginated)
+| - GET /budgets            - List all budgets
 | - GET /budgets/{id}       - Get a single budget
-| - GET /hours              - List all hour details (paginated)
+| - GET /hours              - List all hour details
 | - GET /hours/{id}         - Get a single hour detail
-| - GET /purchases          - List all purchases (paginated)
+| - GET /purchases          - List all purchases
 | - GET /purchases/{id}     - Get a single purchase
-| - GET /boards             - List all board details (paginated)
+| - GET /boards             - List all board details
 | - GET /boards/{id}        - Get a single board detail
-| - GET /automation-projects - List all automation projects (paginated)
+| - GET /automation-projects - List all automation projects
 | - GET /automation-projects/{id} - Get a single automation project
-| - GET /client-satisfaction - List all client satisfaction responses (paginated)
+| - GET /client-satisfaction - List all client satisfaction responses
 | - GET /client-satisfaction/{id} - Get a single client satisfaction response
-| - GET /staff-satisfaction  - List all staff satisfaction responses (paginated)
+| - GET /staff-satisfaction  - List all staff satisfaction responses
 | - GET /staff-satisfaction/{id} - Get a single staff satisfaction response
 |
-| Common query parameters:
-| - per_page: Number of records per page (default: 100, max: 1000)
-| - page: Page number
-| - fecha_desde: Filter from date (Y-m-d)
-| - fecha_hasta: Filter to date (Y-m-d)
+| ======================================
+| QUERY PARAMETERS FOR DATE FILTERING
+| ======================================
+|
+| Most endpoints support filtering by date range:
+|
+| For models with 'fecha' field (sales, budgets, hours, staff/client satisfaction):
+|   - fecha_desde: Filter from date (Y-m-d format, e.g., 2024-01-01)
+|   - fecha_hasta: Filter to date (Y-m-d format, e.g., 2024-12-31)
+|
+| For models with 'ano' field only (purchases, boards):
+|   - ano: Filter by specific year (e.g., 2024)
+|   - ano_desde: Filter from year (e.g., 2022)
+|   - ano_hasta: Filter to year (e.g., 2024)
+|   - fecha_desde: Filter from created_at date (Y-m-d)
+|   - fecha_hasta: Filter to created_at date (Y-m-d)
+|
+| For automation-projects (no date field, uses created_at):
+|   - fecha_desde: Filter from created_at date (Y-m-d)
+|   - fecha_hasta: Filter to created_at date (Y-m-d)
+|
+| ======================================
+| ADDITIONAL FILTERS BY ENDPOINT
+| ======================================
+|
+| /sales:
+|   - cliente: Filter by client name (partial match)
+|
+| /budgets:
+|   - cliente: Filter by client name (partial match)
+|   - estado: Filter by status
+|
+| /hours:
+|   - personal: Filter by employee name (partial match)
+|   - proyecto: Filter by project (partial match)
+|   - ano: Filter by year
+|   - mes: Filter by month
+|
+| /purchases:
+|   - empresa: Filter by company (partial match)
+|   - cc: Filter by cost center (partial match)
+|
+| /boards:
+|   - cliente: Filter by client (partial match)
+|   - proyecto_numero: Filter by project number (partial match)
+|
+| /automation-projects:
+|   - cliente: Filter by client (partial match)
+|   - proyecto_id: Filter by project ID (partial match)
+|
+| /client-satisfaction:
+|   - cliente: Filter by client name (partial match)
+|   - proyecto: Filter by project (partial match)
+|
+| /staff-satisfaction:
+|   - personal: Filter by employee name (partial match)
 |
 */
 Route::prefix('v1/public')->group(function () {
