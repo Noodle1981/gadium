@@ -15,6 +15,24 @@ class MetricsController extends Controller
     ) {}
 
     /**
+     * Apply date range filter compatible with SQLite and MySQL.
+     * Uses where >= fecha_inicio and where < (fecha_fin + 1 day)
+     * to correctly handle dates stored with or without time component.
+     */
+    private function applyDateFilter($query, string $column, Request $request, string $fromParam = 'fecha_inicio', string $toParam = 'fecha_fin')
+    {
+        if ($request->filled($fromParam)) {
+            $query->where($column, '>=', $request->input($fromParam));
+        }
+
+        if ($request->filled($toParam)) {
+            $endDate = \Carbon\Carbon::parse($request->input($toParam))->addDay()->format('Y-m-d');
+            $query->where($column, '<', $endDate);
+        }
+
+        return $query;
+    }
+    /**
      * Endpoint: GET /api/v1/metrics/sales-concentration
      * Retorna análisis de Pareto (80/20) para Grafana.
      */

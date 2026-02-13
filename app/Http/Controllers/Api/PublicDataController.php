@@ -16,10 +16,29 @@ use App\Models\StaffSatisfactionResponse;
 class PublicDataController extends Controller
 {
     /**
+     * Apply date range filter compatible with SQLite and MySQL.
+     * Uses where >= fecha_inicio and where < (fecha_fin + 1 day)
+     * to correctly handle dates stored with or without time component.
+     */
+    private function applyDateFilter($query, string $column, Request $request, string $fromParam = 'fecha_inicio', string $toParam = 'fecha_fin')
+    {
+        if ($request->filled($fromParam)) {
+            $query->where($column, '>=', $request->input($fromParam));
+        }
+
+        if ($request->filled($toParam)) {
+            $endDate = \Carbon\Carbon::parse($request->input($toParam))->addDay()->format('Y-m-d');
+            $query->where($column, '<', $endDate);
+        }
+
+        return $query;
+    }
+
+    /**
      * Get all sales data
      *
-     * @queryParam fecha_desde date Filter from date (Y-m-d)
-     * @queryParam fecha_hasta date Filter to date (Y-m-d)
+     * @queryParam fecha_inicio date Filter from date (Y-m-d)
+     * @queryParam fecha_fin date Filter to date (Y-m-d)
      * @queryParam cliente string Filter by client name (partial match)
      */
     public function sales(Request $request)
@@ -34,13 +53,7 @@ class PublicDataController extends Controller
             ])
             ->orderBy('fecha', 'desc');
 
-        if ($request->filled('fecha_desde')) {
-            $query->whereDate('fecha', '>=', $request->fecha_desde);
-        }
-
-        if ($request->filled('fecha_hasta')) {
-            $query->whereDate('fecha', '<=', $request->fecha_hasta);
-        }
+        $this->applyDateFilter($query, 'fecha', $request);
 
         if ($request->filled('cliente')) {
             $query->where('cliente_nombre', 'like', '%' . $request->cliente . '%');
@@ -55,8 +68,8 @@ class PublicDataController extends Controller
     /**
      * Get all budgets data
      *
-     * @queryParam fecha_desde date Filter from date (Y-m-d)
-     * @queryParam fecha_hasta date Filter to date (Y-m-d)
+     * @queryParam fecha_inicio date Filter from date (Y-m-d)
+     * @queryParam fecha_fin date Filter to date (Y-m-d)
      * @queryParam cliente string Filter by client name (partial match)
      * @queryParam estado string Filter by status
      */
@@ -73,13 +86,7 @@ class PublicDataController extends Controller
             ])
             ->orderBy('fecha', 'desc');
 
-        if ($request->filled('fecha_desde')) {
-            $query->whereDate('fecha', '>=', $request->fecha_desde);
-        }
-
-        if ($request->filled('fecha_hasta')) {
-            $query->whereDate('fecha', '<=', $request->fecha_hasta);
-        }
+        $this->applyDateFilter($query, 'fecha', $request);
 
         if ($request->filled('cliente')) {
             $query->where('cliente_nombre', 'like', '%' . $request->cliente . '%');
@@ -98,8 +105,8 @@ class PublicDataController extends Controller
     /**
      * Get all hours data
      *
-     * @queryParam fecha_desde date Filter from date (Y-m-d)
-     * @queryParam fecha_hasta date Filter to date (Y-m-d)
+     * @queryParam fecha_inicio date Filter from date (Y-m-d)
+     * @queryParam fecha_fin date Filter to date (Y-m-d)
      * @queryParam personal string Filter by employee name (partial match)
      * @queryParam proyecto string Filter by project name (partial match)
      * @queryParam ano int Filter by year
@@ -118,13 +125,7 @@ class PublicDataController extends Controller
             ])
             ->orderBy('fecha', 'desc');
 
-        if ($request->filled('fecha_desde')) {
-            $query->whereDate('fecha', '>=', $request->fecha_desde);
-        }
-
-        if ($request->filled('fecha_hasta')) {
-            $query->whereDate('fecha', '<=', $request->fecha_hasta);
-        }
+        $this->applyDateFilter($query, 'fecha', $request);
 
         if ($request->filled('personal')) {
             $query->where('personal', 'like', '%' . $request->personal . '%');
@@ -154,8 +155,8 @@ class PublicDataController extends Controller
      * @queryParam ano int Filter by specific year
      * @queryParam ano_desde int Filter from year
      * @queryParam ano_hasta int Filter to year
-     * @queryParam fecha_desde date Filter from created date (Y-m-d)
-     * @queryParam fecha_hasta date Filter to created date (Y-m-d)
+     * @queryParam fecha_inicio date Filter from created date (Y-m-d)
+     * @queryParam fecha_fin date Filter to created date (Y-m-d)
      * @queryParam empresa string Filter by company (partial match)
      * @queryParam cc string Filter by cost center code (partial match)
      */
@@ -183,13 +184,7 @@ class PublicDataController extends Controller
             $query->where('ano', '<=', $request->ano_hasta);
         }
 
-        if ($request->filled('fecha_desde')) {
-            $query->whereDate('created_at', '>=', $request->fecha_desde);
-        }
-
-        if ($request->filled('fecha_hasta')) {
-            $query->whereDate('created_at', '<=', $request->fecha_hasta);
-        }
+        $this->applyDateFilter($query, 'created_at', $request);
 
         if ($request->filled('empresa')) {
             $query->where('empresa', 'like', '%' . $request->empresa . '%');
@@ -211,8 +206,8 @@ class PublicDataController extends Controller
      * @queryParam ano int Filter by specific year
      * @queryParam ano_desde int Filter from year
      * @queryParam ano_hasta int Filter to year
-     * @queryParam fecha_desde date Filter from created date (Y-m-d)
-     * @queryParam fecha_hasta date Filter to created date (Y-m-d)
+     * @queryParam fecha_inicio date Filter from created date (Y-m-d)
+     * @queryParam fecha_fin date Filter to created date (Y-m-d)
      * @queryParam cliente string Filter by client (partial match)
      * @queryParam proyecto_numero string Filter by project number (partial match)
      */
@@ -239,13 +234,7 @@ class PublicDataController extends Controller
             $query->where('ano', '<=', $request->ano_hasta);
         }
 
-        if ($request->filled('fecha_desde')) {
-            $query->whereDate('created_at', '>=', $request->fecha_desde);
-        }
-
-        if ($request->filled('fecha_hasta')) {
-            $query->whereDate('created_at', '<=', $request->fecha_hasta);
-        }
+        $this->applyDateFilter($query, 'created_at', $request);
 
         if ($request->filled('cliente')) {
             $query->where('cliente', 'like', '%' . $request->cliente . '%');
@@ -264,8 +253,8 @@ class PublicDataController extends Controller
     /**
      * Get all automation projects data
      *
-     * @queryParam fecha_desde date Filter from created date (Y-m-d)
-     * @queryParam fecha_hasta date Filter to created date (Y-m-d)
+     * @queryParam fecha_inicio date Filter from created date (Y-m-d)
+     * @queryParam fecha_fin date Filter to created date (Y-m-d)
      * @queryParam cliente string Filter by client (partial match)
      * @queryParam proyecto_id string Filter by project ID (partial match)
      */
@@ -279,13 +268,7 @@ class PublicDataController extends Controller
             ])
             ->orderBy('created_at', 'desc');
 
-        if ($request->filled('fecha_desde')) {
-            $query->whereDate('created_at', '>=', $request->fecha_desde);
-        }
-
-        if ($request->filled('fecha_hasta')) {
-            $query->whereDate('created_at', '<=', $request->fecha_hasta);
-        }
+        $this->applyDateFilter($query, 'created_at', $request);
 
         if ($request->filled('cliente')) {
             $query->where('cliente', 'like', '%' . $request->cliente . '%');
@@ -304,8 +287,8 @@ class PublicDataController extends Controller
     /**
      * Get all client satisfaction responses
      *
-     * @queryParam fecha_desde date Filter from date (Y-m-d)
-     * @queryParam fecha_hasta date Filter to date (Y-m-d)
+     * @queryParam fecha_inicio date Filter from date (Y-m-d)
+     * @queryParam fecha_fin date Filter to date (Y-m-d)
      * @queryParam cliente string Filter by client name (partial match)
      * @queryParam proyecto string Filter by project (partial match)
      */
@@ -319,13 +302,7 @@ class PublicDataController extends Controller
             ])
             ->orderBy('fecha', 'desc');
 
-        if ($request->filled('fecha_desde')) {
-            $query->whereDate('fecha', '>=', $request->fecha_desde);
-        }
-
-        if ($request->filled('fecha_hasta')) {
-            $query->whereDate('fecha', '<=', $request->fecha_hasta);
-        }
+        $this->applyDateFilter($query, 'fecha', $request);
 
         if ($request->filled('cliente')) {
             $query->where('cliente_nombre', 'like', '%' . $request->cliente . '%');
@@ -344,8 +321,8 @@ class PublicDataController extends Controller
     /**
      * Get all staff satisfaction responses
      *
-     * @queryParam fecha_desde date Filter from date (Y-m-d)
-     * @queryParam fecha_hasta date Filter to date (Y-m-d)
+     * @queryParam fecha_inicio date Filter from date (Y-m-d)
+     * @queryParam fecha_fin date Filter to date (Y-m-d)
      * @queryParam personal string Filter by employee name (partial match)
      */
     public function staffSatisfaction(Request $request)
@@ -360,13 +337,7 @@ class PublicDataController extends Controller
             ])
             ->orderBy('fecha', 'desc');
 
-        if ($request->filled('fecha_desde')) {
-            $query->whereDate('fecha', '>=', $request->fecha_desde);
-        }
-
-        if ($request->filled('fecha_hasta')) {
-            $query->whereDate('fecha', '<=', $request->fecha_hasta);
-        }
+        $this->applyDateFilter($query, 'fecha', $request);
 
         if ($request->filled('personal')) {
             $query->where('personal', 'like', '%' . $request->personal . '%');
@@ -497,23 +468,17 @@ class PublicDataController extends Controller
     /**
      * Get sales totals grouped by client with percentages
      *
-     * @queryParam fecha_desde date Filter from date (Y-m-d)
-     * @queryParam fecha_hasta date Filter to date (Y-m-d)
+     * @queryParam fecha_inicio date Filter from date (Y-m-d)
+     * @queryParam fecha_fin date Filter to date (Y-m-d)
      */
     public function salesByClient(Request $request)
     {
         $query = Sale::query();
 
-        if ($request->filled('fecha_desde')) {
-            $query->whereDate('fecha', '>=', $request->fecha_desde);
-        }
-
-        if ($request->filled('fecha_hasta')) {
-            $query->whereDate('fecha', '<=', $request->fecha_hasta);
-        }
+        $this->applyDateFilter($query, 'fecha', $request);
 
         $salesByClient = $query
-            ->selectRaw('cliente_nombre, SUM(tot_s_imp) as total')
+            ->selectRaw('cliente_nombre, SUM(monto) as total')
             ->groupBy('cliente_nombre')
             ->orderByDesc('total')
             ->get();
@@ -540,23 +505,17 @@ class PublicDataController extends Controller
     /**
      * Get percentage of sales from top 20% clients (Pareto analysis)
      *
-     * @queryParam fecha_desde date Filter from date (Y-m-d)
-     * @queryParam fecha_hasta date Filter to date (Y-m-d)
+     * @queryParam fecha_inicio date Filter from date (Y-m-d)
+     * @queryParam fecha_fin date Filter to date (Y-m-d)
      */
     public function salesTop20Clients(Request $request)
     {
         $query = Sale::query();
 
-        if ($request->filled('fecha_desde')) {
-            $query->whereDate('fecha', '>=', $request->fecha_desde);
-        }
-
-        if ($request->filled('fecha_hasta')) {
-            $query->whereDate('fecha', '<=', $request->fecha_hasta);
-        }
+        $this->applyDateFilter($query, 'fecha', $request);
 
         $salesByClient = $query
-            ->selectRaw('cliente_nombre, SUM(tot_s_imp) as total')
+            ->selectRaw('cliente_nombre, SUM(monto) as total')
             ->groupBy('cliente_nombre')
             ->orderByDesc('total')
             ->get();
@@ -603,20 +562,14 @@ class PublicDataController extends Controller
     /**
      * Get percentage of approved budgets
      *
-     * @queryParam fecha_desde date Filter from date (Y-m-d)
-     * @queryParam fecha_hasta date Filter to date (Y-m-d)
+     * @queryParam fecha_inicio date Filter from date (Y-m-d)
+     * @queryParam fecha_fin date Filter to date (Y-m-d)
      */
     public function budgetsApprovedPercentage(Request $request)
     {
         $query = Budget::query();
 
-        if ($request->filled('fecha_desde')) {
-            $query->whereDate('fecha', '>=', $request->fecha_desde);
-        }
-
-        if ($request->filled('fecha_hasta')) {
-            $query->whereDate('fecha', '<=', $request->fecha_hasta);
-        }
+        $this->applyDateFilter($query, 'fecha', $request);
 
         $totalBudgets = (clone $query)->count();
         $approvedBudgets = (clone $query)->where('estado', 'Aprobado')->count();
@@ -637,8 +590,8 @@ class PublicDataController extends Controller
      * Get deadline deviations for budgets
      * Compares estimated (fecha_estimada_culminacion - fecha_oc) vs actual (fecha_culminacion_real - fecha_oc)
      *
-     * @queryParam fecha_desde date Filter from date (Y-m-d)
-     * @queryParam fecha_hasta date Filter to date (Y-m-d)
+     * @queryParam fecha_inicio date Filter from date (Y-m-d)
+     * @queryParam fecha_fin date Filter to date (Y-m-d)
      */
     public function budgetsDeadlineDeviations(Request $request)
     {
@@ -647,13 +600,7 @@ class PublicDataController extends Controller
             ->whereNotNull('fecha_estimada_culminacion')
             ->whereNotNull('fecha_culminacion_real');
 
-        if ($request->filled('fecha_desde')) {
-            $query->whereDate('fecha', '>=', $request->fecha_desde);
-        }
-
-        if ($request->filled('fecha_hasta')) {
-            $query->whereDate('fecha', '<=', $request->fecha_hasta);
-        }
+        $this->applyDateFilter($query, 'fecha', $request);
 
         $budgets = $query->get();
 
@@ -703,20 +650,14 @@ class PublicDataController extends Controller
     /**
      * Get total weighted hours from budgets
      *
-     * @queryParam fecha_desde date Filter from date (Y-m-d)
-     * @queryParam fecha_hasta date Filter to date (Y-m-d)
+     * @queryParam fecha_inicio date Filter from date (Y-m-d)
+     * @queryParam fecha_fin date Filter to date (Y-m-d)
      */
     public function budgetsTotalWeightedHours(Request $request)
     {
         $query = Budget::query();
 
-        if ($request->filled('fecha_desde')) {
-            $query->whereDate('fecha', '>=', $request->fecha_desde);
-        }
-
-        if ($request->filled('fecha_hasta')) {
-            $query->whereDate('fecha', '<=', $request->fecha_hasta);
-        }
+        $this->applyDateFilter($query, 'fecha', $request);
 
         $totalHours = $query->sum('horas_ponderadas');
 
@@ -731,8 +672,8 @@ class PublicDataController extends Controller
     /**
      * Get percentage of weighted hours for projects with numeric value < 1001
      *
-     * @queryParam fecha_desde date Filter from date (Y-m-d)
-     * @queryParam fecha_hasta date Filter to date (Y-m-d)
+     * @queryParam fecha_inicio date Filter from date (Y-m-d)
+     * @queryParam fecha_fin date Filter to date (Y-m-d)
      * @queryParam ano int Filter by year
      * @queryParam mes int Filter by month
      */
@@ -740,13 +681,7 @@ class PublicDataController extends Controller
     {
         $query = HourDetail::query();
 
-        if ($request->filled('fecha_desde')) {
-            $query->whereDate('fecha', '>=', $request->fecha_desde);
-        }
-
-        if ($request->filled('fecha_hasta')) {
-            $query->whereDate('fecha', '<=', $request->fecha_hasta);
-        }
+        $this->applyDateFilter($query, 'fecha', $request);
 
         if ($request->filled('ano')) {
             $query->where('ano', $request->ano);
@@ -782,8 +717,8 @@ class PublicDataController extends Controller
     /**
      * Get total weighted hours for project 606
      *
-     * @queryParam fecha_desde date Filter from date (Y-m-d)
-     * @queryParam fecha_hasta date Filter to date (Y-m-d)
+     * @queryParam fecha_inicio date Filter from date (Y-m-d)
+     * @queryParam fecha_fin date Filter to date (Y-m-d)
      * @queryParam ano int Filter by year
      * @queryParam mes int Filter by month
      */
@@ -791,13 +726,7 @@ class PublicDataController extends Controller
     {
         $query = HourDetail::query()->where('proyecto', '606');
 
-        if ($request->filled('fecha_desde')) {
-            $query->whereDate('fecha', '>=', $request->fecha_desde);
-        }
-
-        if ($request->filled('fecha_hasta')) {
-            $query->whereDate('fecha', '<=', $request->fecha_hasta);
-        }
+        $this->applyDateFilter($query, 'fecha', $request);
 
         if ($request->filled('ano')) {
             $query->where('ano', $request->ano);
@@ -820,20 +749,14 @@ class PublicDataController extends Controller
     /**
      * Get budget count grouped by status
      *
-     * @queryParam fecha_desde date Filter from date (Y-m-d)
-     * @queryParam fecha_hasta date Filter to date (Y-m-d)
+     * @queryParam fecha_inicio date Filter from date (Y-m-d)
+     * @queryParam fecha_fin date Filter to date (Y-m-d)
      */
     public function budgetsByStatus(Request $request)
     {
         $query = Budget::query();
 
-        if ($request->filled('fecha_desde')) {
-            $query->whereDate('fecha', '>=', $request->fecha_desde);
-        }
-
-        if ($request->filled('fecha_hasta')) {
-            $query->whereDate('fecha', '<=', $request->fecha_hasta);
-        }
+        $this->applyDateFilter($query, 'fecha', $request);
 
         $budgetsByStatus = $query
             ->selectRaw('COALESCE(estado, "Sin estado") as estado, COUNT(*) as cantidad')
@@ -856,6 +779,74 @@ class PublicDataController extends Controller
             'data' => [
                 'estados' => $result,
                 'total' => $total,
+            ],
+        ]);
+    }
+
+    /**
+     * Get processed staff satisfaction metrics.
+     * Returns an average satisfaction score (0-100) for each of the 4 questions
+     * and a general average across all questions.
+     *
+     * Scale: mal=0, normal=50, bien=100
+     *
+     * @queryParam fecha_inicio date Filter from date (Y-m-d)
+     * @queryParam fecha_fin date Filter to date (Y-m-d)
+     */
+    public function staffSatisfactionMetrics(Request $request)
+    {
+        $query = StaffSatisfactionResponse::query();
+
+        $this->applyDateFilter($query, 'fecha', $request);
+
+        $responses = $query->select([
+            'p1_mal', 'p1_normal', 'p1_bien',
+            'p2_mal', 'p2_normal', 'p2_bien',
+            'p3_mal', 'p3_normal', 'p3_bien',
+            'p4_mal', 'p4_normal', 'p4_bien',
+        ])->get();
+
+        $total = $responses->count();
+
+        if ($total === 0) {
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'total_respuestas' => 0,
+                    'pregunta_1' => 0,
+                    'pregunta_2' => 0,
+                    'pregunta_3' => 0,
+                    'pregunta_4' => 0,
+                    'promedio_general' => 0,
+                ],
+            ]);
+        }
+
+        $scores = [0, 0, 0, 0];
+
+        foreach ($responses as $r) {
+            for ($i = 1; $i <= 4; $i++) {
+                if ($r->{"p{$i}_bien"}) {
+                    $scores[$i - 1] += 100;
+                } elseif ($r->{"p{$i}_normal"}) {
+                    $scores[$i - 1] += 50;
+                }
+                // mal = 0, no se suma nada
+            }
+        }
+
+        $avgScores = array_map(fn($s) => round($s / $total, 2), $scores);
+        $promedioGeneral = round(array_sum($avgScores) / 4, 2);
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'total_respuestas' => $total,
+                'pregunta_1' => $avgScores[0],
+                'pregunta_2' => $avgScores[1],
+                'pregunta_3' => $avgScores[2],
+                'pregunta_4' => $avgScores[3],
+                'promedio_general' => $promedioGeneral,
             ],
         ]);
     }

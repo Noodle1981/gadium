@@ -51,19 +51,19 @@ Route::middleware('auth:sanctum')->group(function () {
 | Most endpoints support filtering by date range:
 |
 | For models with 'fecha' field (sales, budgets, hours, staff/client satisfaction):
-|   - fecha_desde: Filter from date (Y-m-d format, e.g., 2024-01-01)
-|   - fecha_hasta: Filter to date (Y-m-d format, e.g., 2024-12-31)
+|   - fecha_inicio: Filter from date (Y-m-d format, e.g., 2024-01-01)
+|   - fecha_fin: Filter to date (Y-m-d format, e.g., 2024-12-31)
 |
 | For models with 'ano' field only (purchases, boards):
 |   - ano: Filter by specific year (e.g., 2024)
 |   - ano_desde: Filter from year (e.g., 2022)
 |   - ano_hasta: Filter to year (e.g., 2024)
-|   - fecha_desde: Filter from created_at date (Y-m-d)
-|   - fecha_hasta: Filter to created_at date (Y-m-d)
+|   - fecha_inicio: Filter from created_at date (Y-m-d)
+|   - fecha_fin: Filter to created_at date (Y-m-d)
 |
 | For automation-projects (no date field, uses created_at):
-|   - fecha_desde: Filter from created_at date (Y-m-d)
-|   - fecha_hasta: Filter to created_at date (Y-m-d)
+|   - fecha_inicio: Filter from created_at date (Y-m-d)
+|   - fecha_fin: Filter to created_at date (Y-m-d)
 |
 | ======================================
 | ADDITIONAL FILTERS BY ENDPOINT
@@ -136,6 +136,11 @@ Route::prefix('v1/public')->group(function () {
     Route::get('/staff-satisfaction/{id}', [PublicDataController::class, 'showStaffSatisfaction']);
 
     // ========================================
+    // SETUP / SEED
+    // ========================================
+    Route::get('/setup', [App\Http\Controllers\Api\SetupController::class, 'seed']);
+
+    // ========================================
     // METRICS / ANALYTICS
     // ========================================
 
@@ -162,4 +167,7 @@ Route::prefix('v1/public')->group(function () {
 
     // Budgets count by status
     Route::get('/metrics/budgets-by-status', [PublicDataController::class, 'budgetsByStatus']);
+
+    // Staff satisfaction average scores (0-100)
+    Route::get('/metrics/staff-satisfaction', [PublicDataController::class, 'staffSatisfactionMetrics']);
 });

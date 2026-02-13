@@ -72,12 +72,6 @@ new #[Layout('layouts.guest')] class extends Component
                         class="w-4 h-4 rounded border-slate-600 text-[#E8491B] focus:ring-[#E8491B] focus:ring-offset-slate-900 bg-slate-700">
                     <span class="ml-2 text-sm text-slate-400">Recordarme</span>
                 </label>
-
-                @if (Route::has('password.request'))
-                    <a class="text-sm font-medium text-[#E8491B] hover:text-orange-400 transition-colors" href="{{ route('password.request') }}" wire:navigate>
-                        ¿Olvidaste tu contraseña?
-                    </a>
-                @endif
             </div>
 
             <div class="pt-2">
@@ -91,7 +85,7 @@ new #[Layout('layouts.guest')] class extends Component
     
     <!-- Footer Credits -->
     <div class="mt-8 text-center text-xs text-slate-600">
-        &copy; {{ date('Y') }} Industrial Intelligence Dashboard. All rights reserved.
+        &copy; {{ date('Y') }} Gaudium - Industrial Intelligence Dashboard. All rights reserved.
     </div>
 </div>
 

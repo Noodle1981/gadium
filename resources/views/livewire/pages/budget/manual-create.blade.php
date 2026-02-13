@@ -420,10 +420,11 @@ new class extends Component {
                                     <label class="block text-xs font-medium text-gray-500 uppercase">Estado</label>
                                     <select wire:model="estado" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-orange-500 focus:ring-orange-500 sm:text-sm">
                                         <option value="">Seleccione...</option>
-                                        <option value="En proceso">En proceso</option>
-                                        <option value="Finalizado">Finalizado</option>
+                                        <option value="Aprobado">Aprobado</option>
                                         <option value="Cancelado">Cancelado</option>
+                                        <option value="Informativo">Informativo</option>
                                         <option value="Pendiente">Pendiente</option>
+                                        <option value="Perdido">Perdido</option>
                                     </select>
                                 </div>
                             </div>

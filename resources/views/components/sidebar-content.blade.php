@@ -102,12 +102,14 @@
 {{-- ========================================
      CONFIGURATION SECTION
      ======================================== --}}
-@if(auth()->user()->can('view_users') || auth()->user()->can('view_roles') || auth()->user()->can('view_hr') || auth()->user()->can('view_dashboards'))
-    <div class="pt-4 text-xs font-semibold text-gray-500 uppercase tracking-widest px-4 mb-2 whitespace-nowrap overflow-hidden transition-all duration-300"
-         :class="sidebarCollapsed ? 'opacity-0 h-0 mb-0' : 'opacity-100 h-auto'">
-        Configuracion
-    </div>
-@endif
+<div class="pt-4 text-xs font-semibold text-gray-500 uppercase tracking-widest px-4 mb-2 whitespace-nowrap overflow-hidden transition-all duration-300"
+     :class="sidebarCollapsed ? 'opacity-0 h-0 mb-0' : 'opacity-100 h-auto'">
+    Configuracion
+</div>
+
+<x-sidebar-link :href="route('app.profile')" :active="request()->routeIs('app.profile')" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>'>
+        Mi Cuenta
+    </x-sidebar-link>
 
 @can('view_users')
     <x-sidebar-link :href="route('app.users.index')" :active="request()->routeIs('app.users.*')" icon='<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 15.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>'>

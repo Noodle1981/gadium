@@ -10,7 +10,11 @@
       "Bash(\"C:\\\\Users\\\\carlo\\\\AppData\\\\Local\\\\Programs\\\\Herd\\\\bin\\\\php.bat\" artisan route:clear)",
       "Bash(\"C:\\\\Users\\\\carlo\\\\AppData\\\\Local\\\\Programs\\\\Herd\\\\bin\\\\php.bat\" artisan view:clear)",
       "Bash(python:*)",
-      "Bash(php -r:*)"
+      "Bash(php -r:*)",
+      "Bash(cmd /c \"php artisan db:seed --class=PermissionSeeder && php artisan db:seed --class=RoleSeeder\")",
+      "Bash(cmd /c \"php artisan permission:cache-reset && php artisan cache:clear\")",
+      "Bash(cmd /c \"php artisan route:clear && php artisan view:clear && php artisan cache:clear\")",
+      "Bash(cmd /c \"php artisan route:clear\")"
     ]
   }
 }

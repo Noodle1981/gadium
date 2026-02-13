@@ -161,9 +161,15 @@ new class extends Component {
                                     <td class="px-3 py-3 text-gray-500 hidden md:table-cell truncate max-w-xs" title="{{ $budget->nombre_proyecto }}">{{ $budget->nombre_proyecto ?? '-' }}</td>
                                     <td class="px-3 py-3 text-center">
                                         <span class="px-2 py-1 inline-flex text-[10px] leading-4 font-bold rounded-full uppercase tracking-wide
-                                            {{ $budget->estado === 'Finalizado' ? 'bg-green-100 text-green-800' : 
-                                               ($budget->estado === 'Cancelado' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800') }}">
-                                            {{ $budget->estado ?? 'Pendiente' }}
+                                            {{ match ($budget->estado) {
+                                                'Aprobado'    => 'bg-green-100 text-green-800',
+                                                'Cancelado'   => 'bg-red-100 text-red-800',
+                                                'Informativo' => 'bg-blue-100 text-blue-800',
+                                                'Pendiente'   => 'bg-yellow-100 text-yellow-800',
+                                                'Perdido'     => 'bg-gray-100 text-gray-800',
+                                                default       => 'bg-gray-100 text-gray-800', // Color por defecto si no coincide ninguno
+                                            } }}">
+                                            {{ $budget->estado }}
                                         </span>
                                     </td>
                                     <td class="px-3 py-3 text-center whitespace-nowrap">

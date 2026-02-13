@@ -21,7 +21,7 @@ Route::post('/setup-password', [PasswordSetupController::class, 'store'])
 // no por nombres de rol. Esto elimina duplicación y simplifica el mantenimiento.
 // ============================================================================
 
-Route::middleware(['auth', 'verified'])->prefix('app')->group(function () {
+Route::middleware(['auth'])->prefix('app')->group(function () {
 
     // ========================================
     // DASHBOARD Y PERFIL

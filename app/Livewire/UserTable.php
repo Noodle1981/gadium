@@ -30,9 +30,14 @@ class UserTable extends Component
     public function render()
     {
         $users = User::query()
+            ->whereDoesntHave('roles', function ($q) {
+                $q->where('name', 'Super Admin');
+            })
             ->when($this->search, function ($query) {
-                $query->where('name', 'like', '%' . $this->search . '%')
-                    ->orWhere('email', 'like', '%' . $this->search . '%');
+                $query->where(function ($q) {
+                    $q->where('name', 'like', '%' . $this->search . '%')
+                        ->orWhere('email', 'like', '%' . $this->search . '%');
+                });
             })
             ->when($this->roleFilter, function ($query) {
                 $query->whereHas('roles', function ($q) {
@@ -46,7 +51,7 @@ class UserTable extends Component
             ->latest()
             ->paginate($this->perPage);
 
-        $roles = \Spatie\Permission\Models\Role::all();
+        $roles = \Spatie\Permission\Models\Role::where('name', '!=', 'Super Admin')->get();
 
         return view('livewire.user-table', [
             'users' => $users,
