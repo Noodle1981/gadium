@@ -102,7 +102,7 @@ Route::middleware('auth:sanctum')->group(function () {
 |   - personal: Filter by employee name (partial match)
 |
 */
-Route::prefix('v1/public')->group(function () {
+Route::prefix('v1/public')->middleware('api.key')->group(function () {
     // Sales
     Route::get('/sales', [PublicDataController::class, 'sales']);
     Route::get('/sales/{id}', [PublicDataController::class, 'showSale']);

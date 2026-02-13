@@ -14,7 +14,8 @@
       "Bash(cmd /c \"php artisan db:seed --class=PermissionSeeder && php artisan db:seed --class=RoleSeeder\")",
       "Bash(cmd /c \"php artisan permission:cache-reset && php artisan cache:clear\")",
       "Bash(cmd /c \"php artisan route:clear && php artisan view:clear && php artisan cache:clear\")",
-      "Bash(cmd /c \"php artisan route:clear\")"
+      "Bash(cmd /c \"php artisan route:clear\")",
+      "Bash(cmd /c \"php artisan route:clear && php artisan config:clear && php artisan cache:clear\")"
     ]
   }
 }

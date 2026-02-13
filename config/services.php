@@ -35,4 +35,8 @@ return [
         ],
     ],
 
+    'grafana' => [
+        'api_key' => env('GRAFANA_API_KEY'),
+    ],
+
 ];
